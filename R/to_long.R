@@ -9,7 +9,7 @@
 #' @return data frame where each row corresponds to an observation for a single 
 #' day
 #' @import tidyverse
-toLong <- function(data, keep_cols = 1, date_sep = "_") {
+to_long <- function(data, keep_cols = 1, date_sep = "_") {
   # Store names of columns to retain in output
   keep_col_names <- colnames(data)[keep_cols]
   

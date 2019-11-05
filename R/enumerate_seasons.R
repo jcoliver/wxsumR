@@ -9,7 +9,7 @@
 #' 
 #' @return data frame with new columns, "season" and "season_year"
 #' @import tidyverse
-enumerateSeasons <- function(data, start_month, end_month, day = 15) {
+enumerate_seasons <- function(data, start_month, end_month, day = 15) {
   # TODO: any defensive checks for months and day?
   # Extract year, month, day
   

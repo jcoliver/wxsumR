@@ -4,7 +4,7 @@
 # 2019-11-04
 
 ################################################################################
-source(file = "R/toLong.R")
+source(file = "R/to_long.R")
 
 library(tidyverse)
 df <- read.csv(file = "data/tiny-input.csv")
