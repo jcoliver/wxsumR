@@ -1,5 +1,26 @@
 # Conversion notes
 
+## 2019-11-06
+Some columns have invalid dates, e.g. (3rd and 4th columns invalid dates)
+  rf_19830227 rf_19830228 rf_19830229 rf_19830230 rf_19830301
+1           0          10           0           0           0
+2           0          10           0           0           0
+3           0          10           0           0           0
+4           0          10           0           0           0
+
+Looks like each year has values for:
+29 February (only an issue for common years)
+30 February
+31 April
+31 June
+But not values for:
+31 September
+31 November
+
+`to_long` sets these as `NA` values. For now, just exclude before 
+`enumerate_seasons` is called
+
+## 2019-11-04
 Data coming in are wide, where:
 
 + Each row is a location

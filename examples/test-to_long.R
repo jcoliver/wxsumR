@@ -8,4 +8,7 @@ source(file = "R/to_long.R")
 
 library(tidyverse)
 df <- read.csv(file = "data/tiny-input.csv")
-long_df <- toLong(data = df)
+long_df <- to_long(data = df)
+
+df <- read.csv(file = "data/small-input.csv")
+long_df <- to_long(data = df)
