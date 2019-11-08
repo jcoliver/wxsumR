@@ -32,5 +32,10 @@ to_long <- function(data, keep_cols = 1, date_sep = "_") {
     # Drop the year, month, day columns
     select(keep_col_names, date, value)
 
+  # Warn users if any date funniness happens
+  if (any(is.na(long_data$date))) {
+    warning("Some columns could not be parsed into dates; this can occur if text parsing results in impossible dates, such as 30 February 1983")
+  }
+  
   return(long_data)
 }

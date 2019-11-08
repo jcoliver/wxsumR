@@ -10,7 +10,7 @@ source(file = "R/enumerate_seasons.R")
 
 library(tidyverse)
 library(lubridate)
-df <- read.csv(file = "data/small-input.csv")
+df <- read.csv(file = "data/input-small.csv")
 long_df <- to_long(data = df)
 # Exclude NA dates
 long_df <- long_df[!is.na(long_df$date), ]
@@ -44,25 +44,12 @@ if (current_season_end < current_season_start) {
   current_season_end <- current_season_end + years(x = 1)
 }
 
-# TODO: Might be a more efficient way of doing this, based on starting year and 
-# ending year:
-# Season will be -((minimum year - 1) - (season year))
-# i.e. if oldest year is 1983, that's -((1983 - 1) - 1983), or 
-# -(1982 - 1983) = 1 for 1983; Assumes that if we start with 1983 data, there 
-# WILL be a season, which many not be a valid assumption. i.e. if data start 
-# at September, and season is March - July, this doesn't work.
-
-#' start by finding youngest year and oldest year
-#' For months completely within the 
-
 # Column that will ultimately hold the vector enumerating seasons
 long_df$season_year <- NA
-# season_year <- integer(length = nrow(long_df))
+
 # Logical for easier processing of conditionals
 in_season <- FALSE
-# TODO: Flaw in logic somewhere.
-# Dates are not continuous. Sampling stops on August 31 and resumes on January 1
-# of subsequent year
+# TODO: Flaw in logic somewhere?
 for(i in 1:nrow(long_df)) {
   # Extract the date of current row
   current_date <- long_df$date[i]
@@ -72,24 +59,6 @@ for(i in 1:nrow(long_df)) {
   #    in_season is true
   #    If not, and the in_season variable is set to TRUE, flip in_season to 
   #    FALSE and increment current_season and current_season_year
-  
-  # Debugging code; identified issue with non-existent dates, e.g. 1983-02-30
-  tryCatch({
-    if (current_date >= current_season_start &&
-        current_date <= current_season_end) {
-      # if stuff here
-    }
-    }, warning = function(w) {
-      message("Warning in loop")
-    }, error = function(e) {
-      message("Error encountered in conditional")
-      message(paste0("current_date = ", current_date))
-      message(paste0("current_season_start = ", current_season_start))
-      message(paste0("current_season_end = ", current_season_end))
-    }, finally = {
-      # Cleanup, if necessary
-    })
-  
   if (current_date >= current_season_start &&
       current_date <= current_season_end) {
     long_df$season_year[i] <- current_season_year

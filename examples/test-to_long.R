@@ -7,8 +7,11 @@
 source(file = "R/to_long.R")
 
 library(tidyverse)
-df <- read.csv(file = "data/tiny-input.csv")
+df <- read.csv(file = "data/input-tiny.csv")
 long_df <- to_long(data = df)
 
-df <- read.csv(file = "data/small-input.csv")
+df <- read.csv(file = "data/input-small.csv")
 long_df <- to_long(data = df)
+
+df <- read.csv(file = "data/input-messy.csv")
+long_df <- to_long(data = df) # Should throw warning

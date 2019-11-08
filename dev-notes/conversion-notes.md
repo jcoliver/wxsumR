@@ -1,7 +1,12 @@
 # Conversion notes
 
+## 2019-11-07
+Use NPSY4 data files for testing. They don't have the idiosyncracies as in the
+ihs4p data.
+
 ## 2019-11-06
-Some columns have invalid dates, e.g. (3rd and 4th columns invalid dates)
+In the ihs4p_x0_rf1_daily.csv data, some columns have invalid dates, e.g. (3rd 
+and 4th columns invalid dates):
   rf_19830227 rf_19830228 rf_19830229 rf_19830230 rf_19830301
 1           0          10           0           0           0
 2           0          10           0           0           0
@@ -19,6 +24,8 @@ But not values for:
 
 `to_long` sets these as `NA` values. For now, just exclude before 
 `enumerate_seasons` is called
+
+Also, each year only has data from 01 January to 31 August
 
 ## 2019-11-04
 Data coming in are wide, where:
