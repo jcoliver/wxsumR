@@ -3,3 +3,4 @@
 .RData
 .Ruserdata
 *.Rproj
+data/NPSY4_x[2-9]*.csv
