@@ -39,6 +39,7 @@ summarize_rainfall <- function(inputfile, start_month, end_month, day = 15,
   #    % days with >= 1mm
   #    longest consecutive period in season with < 1mm
   
+  # TODO: group_by location, too?
   rain_summary <- rain_long %>%
     group_by(season_year) %>%
     summarize(mean_season = mean(x = value, na.rm = na.rm),
@@ -49,4 +50,6 @@ summarize_rainfall <- function(inputfile, start_month, end_month, day = 15,
               norain = sum(x = value < 1, na.rm = na.rm),
               raindays = sum(x = value >= 1, na.rm = na.rm),
               raindays_percent = sum(x = value >= 1, na.rm = na.rm)/n())
+  
+  return(rain_summary)
 }
