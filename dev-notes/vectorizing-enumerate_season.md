@@ -11,8 +11,8 @@ defined by 15 November 1983 - 15 February 1984, the value for `season_year` will
 be 1983.
 
 ```
-ids <- factor(c("Site 1", "Site 1", "Site 1", "Site 2", "Site 2", "Site 2"))
-dates <- c("1983-11-30", "1984-1-30", "1984-03-30", "1983-11-30", "1984-1-30", "1984-03-30")
+ids <- factor(c("Site 1", "Site 1", "Site 1", "Site 1", "Site 1", "Site 1"))
+dates <- c("1983-11-30", "1984-1-30", "1984-03-30", "1984-11-30", "1985-1-30", "1985-03-30")
 dates <- as.Date(dates)
 values <- c(1, 1, 4, 3, 6, 9)
 test_long <- data.frame(y4_hhid = ids,
@@ -26,11 +26,10 @@ day is 15
 
 OBSY is year of the observation
 
-Case 1
+## Case 1
 start_month is 11
 end_month is 02
 day is 15
-Value in date column
 1983-11-30     # In season
 + greater than OBSY-11-15
 + greater than OBSY-02-15
@@ -43,11 +42,10 @@ Value in date column
 + less than OBSY-11-15
 + greater than OBSY-02-15
 
-Case 2
+## Case 2
 start_month is 02
 end_month is 11
 day is 15
-Value in date column
 1983-11-30     # Out of season
 + greater than OBSY-11-15
 + greater than OBSY-02-15
