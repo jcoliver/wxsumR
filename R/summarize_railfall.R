@@ -24,6 +24,9 @@ summarize_rainfall <- function(inputfile, start_month, end_month, day = 15,
   # Use to_long to convert to long format and parse column names into dates
   rain_long <- to_long(data = rain)
 
+  # Exclude NA dates
+  rain_long <- rain_long[!is.na(rain_long$date), ]
+
   # Enumerate seasons
   rain_long <- enumerate_seasons(data = rain_long,
                                  start_month = start_month,
@@ -31,6 +34,7 @@ summarize_rainfall <- function(inputfile, start_month, end_month, day = 15,
                                  day = day)
 
   # Assume first column has site id
+  id_column_name <- colnames(rain_long)[1]
 
 
   # Do summary calculations for each season
@@ -46,7 +50,7 @@ summarize_rainfall <- function(inputfile, start_month, end_month, day = 15,
 
   # TODO: group_by location, too?
   rain_summary <- rain_long %>%
-    group_by(season_year) %>%
+    group_by(season_year, !!as.name(id_column_name)) %>%
     summarize(mean_season = mean(x = value, na.rm = na.rm),
               median_season = median(x = value, na.rm = na.rm),
               sd_season = sd(x = value, na.rm = na.rm),
