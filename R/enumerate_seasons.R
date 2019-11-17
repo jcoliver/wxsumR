@@ -10,13 +10,11 @@
 #' @param end_month    numeric ending month defining season (inclusive)
 #' @param day          numeric day of month defining season (inclusive);
 #' defaults to 15
-#' @param use_loop     use loop instead of vectorized algorithm
 #'
 #' @return data frame with new columns, "season" and "season_year"
 #' @import tidyverse
 #' @import lubridate
-enumerate_seasons <- function(data, start_month, end_month, day = 15,
-                              use_loop = FALSE) {
+enumerate_seasons <- function(data, start_month, end_month, day = 15) {
   if (start_month < 1 | start_month > 12) {
     stop(paste0("Invalid start_month (", start_month, ") passed to enumerate_seasons. Must be integer between 1 and 12"))
   }
@@ -27,53 +25,10 @@ enumerate_seasons <- function(data, start_month, end_month, day = 15,
     stop(paste0("Invalid day (", day, ") passed to enumerate_seasons. Must be integer between 1 and 31"))
   }
 
-  # Make sure data ordered by date
-  data <- data[order(data$date), ]
-
-  if (use_loop) {
-    # Can drop months that are outside of the season, but need to check to see
-    # if season includes new year
-    includes_ny <- start_month > end_month
-
-    # Logic for dropping rows depends on whether or not new year is in season
-    if (includes_ny) {
-      data <- data[month(data$date) >= start_month |
-                     month(data$date) <= end_month, ]
-    } else {
-      data <- data[month(data$date) >= start_month &
-                     month(data$date) <= end_month, ]
-    }
-
-    data$season_year <- NA
-    for(i in 1:nrow(data)) {
-
-      # Extract the date of current row
-      current_date <- data$date[i]
-      current_year <- year(current_date)
-
-      start_date_OBSY <- as.Date(paste0(current_year, "-",
-                                        start_month, "-", day))
-      end_date_OBSY <- as.Date(paste0(current_year, "-",
-                                      end_month, "-", day))
-
-      if (start_month > end_month) {
-        if (current_date >= start_date_OBSY & current_date >= end_date_OBSY) {
-          data$season_year[i] <- current_year
-        } else if (current_date < start_date_OBSY & current_date < end_date_OBSY) {
-          data$season_year[i] <- current_year - 1
-        }
-      } else {
-        if (current_date >= start_date_OBSY & current_date <= end_date_OBSY) {
-          data$season_year[i] <- current_year
-        }
-      }
-    }
-  } else { # use vectorized approach instead
-    data$season_year <- season_year(x = data$date,
-                                    start_month = start_month,
-                                    end_month = end_month,
-                                    day = day)
-  }
+  data$season_year <- season_year(x = data$date,
+                                  start_month = start_month,
+                                  end_month = end_month,
+                                  day = day)
 
   data <- na.omit(data)
   return(data)

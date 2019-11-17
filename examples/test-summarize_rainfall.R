@@ -30,7 +30,7 @@ rain_summary <- summarize_rainfall(inputfile = infile,
                    day = day,
                    outputfile = outfile)
 test_end <- Sys.time()
-if (round(x = mean(rain_summary$sd_season), digits = 3) == 6.816) {
+if (round(x = mean(rain_summary$sd_season), digits = 3) == 6.304) {
   message("Test ", test_num, " PASS")
 } else {
   message("Test ", test_num, " FAIL")

@@ -37,18 +37,16 @@ summarize_rainfall <- function(inputfile, start_month, end_month, day = 15,
   id_column_name <- colnames(rain_long)[1]
 
 
-  # Do summary calculations for each season
-  #    mean
-  #    median
-  #    sd
-  #    total
-  #    skew: (mean - median)/sd
-  #    days with < 1mm
-  #    days with >= 1mm
-  #    % days with >= 1mm
-  #    longest consecutive period in season with < 1mm
+  # Still need:
+  #   longest consecutive period in season with < 1mm    dry_'year'
+  #   the long-term averages for
+  #     total_season,
+  #     norain,
+  #     raindays,
+  #     raindays_percent
+  # Then use these to generate variables that measure each seasons deviation
+  # from the long-term average and the deviation measured as a z-score.
 
-  # TODO: group_by location, too?
   rain_summary <- rain_long %>%
     group_by(season_year, !!as.name(id_column_name)) %>%
     summarize(mean_season = mean(x = value, na.rm = na.rm),
