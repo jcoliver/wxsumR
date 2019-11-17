@@ -106,3 +106,32 @@ enumerate_seasons <- function(data, start_month, end_month, day = 15) {
   data <- na.omit(data)
   return(data)
 }
+
+#' Value for season year for observation
+#'
+#' @param x   vector of Date data
+#' @param start_month  numeric starting month defining season (inclusive)
+#' @param end_month    numeric ending month defining season (inclusive)
+#' @param day          numeric day of month defining season (inclusive);
+#' defaults to 15
+#'
+#' @return  integer vector of season year to which observation corresponds to
+season_year <- function(x, start_month, end_month, day = 15) {
+  sy <- NA # Will hold return value
+  obs_year <- year(x)
+  # Logic for extracting season year depends on whether or not season includes
+  # the new year
+  if (start_month > end_month) {
+    # Season INCLUDES the new year
+    # If season includes new year AND the date is 31 December
+
+  } else {
+    # Season EXCLUDES the new year
+    start_date <- as.Date(paste0(obs_year), "-", start_month, "-", day)
+    end_date <- as.Date(paste0(obs_year), "-", end_month, "-", day)
+    if (x >= start_date & x <= end_date) {
+      sy <- obs_year
+    }
+  }
+  return(sy)
+}
