@@ -20,10 +20,41 @@ test_long <- data.frame(y4_hhid = ids,
                         value = values)
 ```
 
-  y4_hhid       date value
-1  Site 1 1983-11-30     1   # In season
-2  Site 1 1984-01-30     1   # In season
-3  Site 1 1984-03-30     4   # Out of season
-4  Site 2 1983-11-30     3   # In season
-5  Site 2 1984-01-30     6   # In season
-6  Site 2 1984-03-30     9   # Out of season
+start_month is 11
+end_month is 02
+day is 15
+
+OBSY is year of the observation
+
+Case 1
+start_month is 11
+end_month is 02
+day is 15
+Value in date column
+1983-11-30     # In season
++ greater than OBSY-11-15
++ greater than OBSY-02-15
++ season_year is OBSY
+1984-01-30     # In season
++ less than OBSY-11-15
++ less than OBSY-02-15
++ season_year is OBSY - 1
+1984-03-30     # Out of season
++ less than OBSY-11-15
++ greater than OBSY-02-15
+
+Case 2
+start_month is 02
+end_month is 11
+day is 15
+Value in date column
+1983-11-30     # Out of season
++ greater than OBSY-11-15
++ greater than OBSY-02-15
+1984-01-30     # Out of season
++ less than OBSY-11-15
++ less than OBSY-02-15
+1984-03-30     # In season
++ less than OBSY-11-15
++ greater than OBSY-02-15
++ season_year is OBSY
