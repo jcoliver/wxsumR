@@ -5,6 +5,9 @@
 
 # TODO: Add parameter for site id (could assume column 1)
 
+# TODO: Still need to calculate dry column, which is longest stretch of
+# consecutive no rain days within a season
+
 #' Provides rainfall summary statistics
 #'
 #' @param inputfile    path to csv file with daily rainfall measurement
@@ -36,7 +39,8 @@ summarize_rainfall <- function(inputfile, start_month, end_month, day = 15,
   # Assume first column has site id
   id_column_name <- colnames(rain_long)[1]
 
-  # Start with calculating basic statistics
+  # Start with calculating basic statistics, including the longest number of
+  # consecutive days without rain in the period
   rain_summary <- rain_long %>%
     group_by(season_year, !!as.name(id_column_name)) %>%
     summarize(mean_season = mean(x = value, na.rm = na.rm),
@@ -46,7 +50,8 @@ summarize_rainfall <- function(inputfile, start_month, end_month, day = 15,
               skew_season = (mean(x = value, na.rm = na.rm) - median(x = value, na.rm = na.rm))/sd(x = value, na.rm = na.rm),
               norain = sum(x = value < 1, na.rm = na.rm),
               raindays = sum(x = value >= 1, na.rm = na.rm),
-              raindays_percent = sum(x = value >= 1, na.rm = na.rm)/n())
+              raindays_percent = sum(x = value >= 1, na.rm = na.rm)/n(),
+              dry = driest_interval(x = value))
 
   # Add long-term values mean and standard-deviation values
   rain_summary <- ungroup(rain_summary) %>%
@@ -71,4 +76,29 @@ summarize_rainfall <- function(inputfile, start_month, end_month, day = 15,
       dev_raindays_percent = raindays_percent - mean_period_raindays_percent)
 
   return(rain_summary)
+}
+
+#' Longest stretch of consecutive dry days
+#'
+#' @param x           numeric vector of rainfall measurements
+#' @param threshold   minimum amount of rainfall to count as non-dry day
+#'
+#' @return numeric vector of length 1 with the longest consecutive stretch of
+#' days that have rainfall below \code{threshold}
+driest_interval <- function(x, threshold = 1) {
+  # A string that is a concatenation of 0s and 1s, where 0s are days where
+  # rainfall is below threshold and 1s are days where rain is above threshold
+  rain_string <- paste0(as.integer(x >= threshold), collapse = "")
+
+  # Split the string into a vector using 1 as delimiter; results in vector that
+  # has empty character strings (previously had values of 1) and strings of
+  # some number of consecutive 0s
+  rain_string_split <- unlist(strsplit(x = rain_string,
+                                split = "1"))
+  # Count the longest string of 0s
+  longest <- max(nchar(rain_string_split))
+
+  # I don't know who developed this approach for the original STATA
+  # implementation, but it kinda blew me away.
+  return(longest)
 }
