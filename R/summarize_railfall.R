@@ -5,9 +5,6 @@
 
 # TODO: Add parameter for site id (could assume column 1)
 
-# TODO: Still need to calculate dry column, which is longest stretch of
-# consecutive no rain days within a season
-
 #' Provides rainfall summary statistics
 #'
 #' @param inputfile    path to csv file with daily rainfall measurement
