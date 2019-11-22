@@ -8,16 +8,19 @@
 #' Provides rainfall summary statistics
 #'
 #' @param inputfile    path to csv file with daily rainfall measurement
-#' @param outputfile   path to output file
 #' @param start_month  numeric starting month defining season (inclusive)
 #' @param end_month    numeric ending month defining season (inclusive)
 #' @param day          numeric day of month defining season (inclusive);
+#' @param rain_cutoff  numeric minimum value for daily rainfall to be counted as
+#' a rain day
+#' @param outputfile   path to output file
 #'
 #' @return NULL if outputfile is given, if outputfile is NULL, returns data
 #' frame with rainfall summary statistics
 #' @import tidyverse
 summarize_rainfall <- function(inputfile, start_month, end_month, day = 15,
-                               outputfile = "results_rain.csv", na.rm = TRUE) {
+                               rain_cutoff = 1, outputfile = "results_rain.csv",
+                               na.rm = TRUE) {
   # Read in the data
   rain <- read.csv(file = inputfile)
 
@@ -45,10 +48,12 @@ summarize_rainfall <- function(inputfile, start_month, end_month, day = 15,
               sd_season = sd(x = value, na.rm = na.rm),
               total_season = sum(x = value, na.rm = na.rm),
               skew_season = (mean(x = value, na.rm = na.rm) - median(x = value, na.rm = na.rm))/sd(x = value, na.rm = na.rm),
-              norain = sum(x = value < 1, na.rm = na.rm),
-              raindays = sum(x = value >= 1, na.rm = na.rm),
-              raindays_percent = sum(x = value >= 1, na.rm = na.rm)/n(),
-              dry = driest_interval(x = value))
+              norain = sum(x = value < rain_cutoff, na.rm = na.rm),
+              raindays = sum(x = value >= rain_cutoff, na.rm = na.rm),
+              raindays_percent = sum(x = value >= rain_cutoff, na.rm = na.rm)/n(),
+              dry = dry_interval(x = value, rain_cutoff = rain_cutoff, period = "mid"),
+              dry_start = dry_interval(x = value, rain_cutoff = rain_cutoff, period = "start"),
+              dry_end = dry_interval(x = value, rain_cutoff = rain_cutoff, period = "end"))
 
   # Add long-term values mean and standard-deviation values
   rain_summary <- ungroup(rain_summary) %>%
@@ -78,24 +83,56 @@ summarize_rainfall <- function(inputfile, start_month, end_month, day = 15,
 #' Longest stretch of consecutive dry days
 #'
 #' @param x           numeric vector of rainfall measurements
-#' @param threshold   minimum amount of rainfall to count as non-dry day
+#' @param rain_cutoff minimum amount of rainfall to count as non-dry day
+#' @param period      period to measure longest dry spell; see \code{return}
 #'
-#' @return numeric vector of length 1 with the longest consecutive stretch of
-#' days that have rainfall below \code{threshold}
-driest_interval <- function(x, threshold = 1) {
+#' @return numeric vector of length 1 with the number of days that have rainfall
+#' less than \code{rain_cutoff}; value returned is determined by value of
+#' \code{period}:
+#' \describe{
+#'   \item{start}{number of consecutive days at beginning of season with less
+#'   than \code{rain_cutoff} of measured rain; if first day of season had
+#'   rainfall greater than or equal to \code{rain_cutoff}, the returned value
+#'   will be zero}
+#'   \item{mid}{longest stretch of days with less than \code{rain_cutoff}
+#'   contained within the period; if rainfall was less than \code{rain_cutoff}
+#'   for every day in defined season, the returned value will be zero}
+#'   \item{end}{number of consecutive days at end of season with less
+#'   than \code{rain_cutoff} of measured rain; if last day of season had
+#'   rainfall greater than or equal to \code{rain_cutoff}, the returned value
+#'   will be zero}
+#' }
+#'
+#' @import stringr
+dry_interval <- function(x, rain_cutoff = 1, period = c("start", "mid", "end")) {
   # A string that is a concatenation of 0s and 1s, where 0s are days where
-  # rainfall is below threshold and 1s are days where rain is above threshold
-  rain_string <- paste0(as.integer(x >= threshold), collapse = "")
+  # rainfall is below rain_cutoff and 1s are days where rain is above
+  # rain_cutoff
+  rain_string <- paste0(as.integer(x >= rain_cutoff), collapse = "")
 
   # Split the string into a vector using 1 as delimiter; results in vector that
   # has empty character strings (previously had values of 1) and strings of
-  # some number of consecutive 0s
-  rain_string_split <- unlist(strsplit(x = rain_string,
-                                split = "1"))
-  # Count the longest string of 0s
-  longest <- max(nchar(rain_string_split))
-
+  # some number of consecutive 0s. Using stringr::str_split instead of
+  # base::strsplit due to latter's undesired treatment of matches in final
+  # position of string.
   # I don't know who developed this approach for the original STATA
   # implementation, but it kinda blew me away.
+  rain_string_split <- unlist(stringr::str_split(string = rain_string,
+                                pattern = "1"))
+
+  longest <- 0
+  if (period == "start") {
+    longest <- nchar(rain_string_split)[1]
+  } else if (period == "mid") {
+    # If entire season was rain or non-rain, or if the season was characterized
+    # by a single stretch of rain followed by consecutive non-rain days (or
+    # vice-versa) should return 0
+    if (length(rain_string_split) > 2) {
+      longest <- max(nchar(rain_string_split[-c(1, length(rain_string_split))]))
+    }
+  } else if (period == "end") {
+    longest <- nchar(rain_string_split)[length(rain_string_split)]
+  }
+
   return(longest)
 }

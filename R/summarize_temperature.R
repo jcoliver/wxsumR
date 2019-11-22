@@ -16,9 +16,9 @@
 #' @return NULL if outputfile is given, if outputfile is NULL, returns data
 #' frame with temperature summary statistics
 #' @import tidyverse
-summarize_rainfall <- function(inputfile, start_month, end_month, day = 15,
-                               growbase_low = 10, growbase_high = 20,
-                               outputfile = "results_temp.csv", na.rm = TRUE) {
+summarize_temperature <- function(inputfile, start_month, end_month, day = 15,
+                                  growbase_low = 10, growbase_high = 20,
+                                  outputfile = "results_temp.csv", na.rm = TRUE) {
   # Read in the data
   temperature <- read.csv(file = inputfile)
 
