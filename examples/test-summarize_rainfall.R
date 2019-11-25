@@ -13,7 +13,7 @@ source(file = "R/summarize_railfall.R")
 library(tidyverse)
 library(lubridate)
 
-infile <- "data/input-small.csv"
+infile <- "data/input-rain-small.csv"
 outfile <- NULL
 
 # Test 1, season includes new year
@@ -41,7 +41,7 @@ message(paste0("Test ", test_num, " time: ", test_time, " minutes"))
 
 # Test 2, season excludes new year
 test_num <- 2
-message(paste0("Running test ", test_num, " of enumerate_seasons"))
+message(paste0("Running test ", test_num, " of summarize_rainfall"))
 start_month <- 02
 end_month <- 11
 day <- 15

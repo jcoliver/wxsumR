@@ -1,4 +1,4 @@
-# Test summarize_rainfall function
+# Test dry_interval function
 # Jeff Oliver
 # jcoliver@email.arizona.edu
 # 2019-11-17
@@ -10,7 +10,7 @@ source(file = "R/summarize_railfall.R")
 
 # Test 1, season includes starting, middle, and ending dry stretches
 test_num <- 1
-message(paste0("Running test ", test_num, " of summarize_rainfall"))
+message(paste0("Running test ", test_num, " of dry_interval"))
 rain <- c(0, 2, 2, 0, 0, 2, 0, 2, 0, 0, 0)
 
 test_start <- Sys.time()
@@ -29,7 +29,7 @@ message(paste0("Test ", test_num, " time: ", test_time, " minutes"))
 
 # Test 2, season starts with a rain day
 test_num <- 2
-message(paste0("Running test ", test_num, " of enumerate_seasons"))
+message(paste0("Running test ", test_num, " of dry_interval"))
 rain <- c(2, 2, 2, 0, 0, 2, 0, 2, 0, 0, 0)
 
 test_start <- Sys.time()
@@ -48,7 +48,7 @@ message(paste0("Test ", test_num, " time: ", test_time, " minutes"))
 
 # Test 3, season ends with a rain day
 test_num <- 3
-message(paste0("Running test ", test_num, " of enumerate_seasons"))
+message(paste0("Running test ", test_num, " of dry_interval"))
 rain <- c(0, 2, 2, 0, 0, 2, 2, 0, 0, 0, 2)
 
 test_start <- Sys.time()
@@ -67,7 +67,7 @@ message(paste0("Test ", test_num, " time: ", test_time, " minutes"))
 
 # Test 4, season starts and ends with dry days, but only rain in between
 test_num <- 4
-message(paste0("Running test ", test_num, " of enumerate_seasons"))
+message(paste0("Running test ", test_num, " of dry_interval"))
 rain <- c(0, 2, 2, 2, 2, 2, 2, 0, 0, 0, 0)
 
 test_start <- Sys.time()
@@ -86,7 +86,7 @@ message(paste0("Test ", test_num, " time: ", test_time, " minutes"))
 
 # Test 5, season starts with dry days, but only rain afterwards
 test_num <- 5
-message(paste0("Running test ", test_num, " of enumerate_seasons"))
+message(paste0("Running test ", test_num, " of dry_interval"))
 rain <- c(0, 0, 0, 2, 2, 2, 2, 2, 2, 2, 2)
 
 test_start <- Sys.time()
@@ -105,7 +105,7 @@ message(paste0("Test ", test_num, " time: ", test_time, " minutes"))
 
 # Test 6, entire season is dry except for last day
 test_num <- 6
-message(paste0("Running test ", test_num, " of enumerate_seasons"))
+message(paste0("Running test ", test_num, " of dry_interval"))
 rain <- c(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2)
 
 test_start <- Sys.time()
@@ -124,7 +124,7 @@ message(paste0("Test ", test_num, " time: ", test_time, " minutes"))
 
 # Test 7, season ends with dry days, but only rain beforehand
 test_num <- 7
-message(paste0("Running test ", test_num, " of enumerate_seasons"))
+message(paste0("Running test ", test_num, " of dry_interval"))
 rain <- c(2, 2, 2, 2, 2, 2, 2, 2, 2, 0, 0)
 
 test_start <- Sys.time()
@@ -143,7 +143,7 @@ message(paste0("Test ", test_num, " time: ", test_time, " minutes"))
 
 # Test 8, entire season is dry except for first day
 test_num <- 8
-message(paste0("Running test ", test_num, " of enumerate_seasons"))
+message(paste0("Running test ", test_num, " of dry_interval"))
 rain <- c(2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0)
 
 test_start <- Sys.time()

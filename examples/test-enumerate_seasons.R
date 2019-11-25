@@ -11,7 +11,7 @@ source(file = "R/enumerate_seasons.R")
 
 library(tidyverse)
 library(lubridate)
-df <- read.csv(file = "data/input-small.csv")
+df <- read.csv(file = "data/input-rain-small.csv")
 long_df <- to_long(data = df)
 # Exclude NA dates
 long_df <- long_df[!is.na(long_df$date), ]
