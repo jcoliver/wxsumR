@@ -66,7 +66,7 @@ season_year <- function(x, start_month, end_month, day = 15) {
     # If x occurs before both start and end for the year of observation, it is
     # in season and its season_year is the year *prior* to the year of the
     # observation
-    sy[x < start_OBSY & x < end_OBSY] <- obs_year[x < start_OBSY & x < end_OBSY] - 1
+    sy[x < start_OBSY & x <= end_OBSY] <- obs_year[x < start_OBSY & x <= end_OBSY] - 1
   } else {
     # Season EXCLUDES the new year
 

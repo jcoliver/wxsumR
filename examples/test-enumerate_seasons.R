@@ -29,7 +29,7 @@ enumerated_df <- enumerate_seasons(data = long_df,
                                    end_month = end_month,
                                    day = day)
 test_end <- Sys.time()
-if (all(table(enumerated_df$season_year) == c(4500, 9200, 9200, 9200, 9200, 9200))) {
+if (all(table(enumerated_df$season_year) == c(4600, 9300, 9300, 9300, 9300, 9300))) {
   message("Test ", test_num, " PASS")
 } else {
   message("Test ", test_num, " FAIL")
