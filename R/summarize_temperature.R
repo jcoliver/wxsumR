@@ -11,12 +11,16 @@
 #' @param outputfile   path to output file
 #' @param start_month  numeric starting month defining season (inclusive)
 #' @param end_month    numeric ending month defining season (inclusive)
-#' @param day          numeric day of month defining season (inclusive);
+#' @param start_day    numeric day of starting month defining season
+#' (inclusive); defaults to 15
+#' @param end_day      numeric day of ending month defining season (inclusive);
+#' defaults to \code{start_day}
 #'
 #' @return NULL if outputfile is given, if outputfile is NULL, returns data
 #' frame with temperature summary statistics
 #' @import tidyverse
-summarize_temperature <- function(inputfile, start_month, end_month, day = 15,
+summarize_temperature <- function(inputfile, start_month, end_month,
+                                  start_day = 15, end_day = start_day,
                                   growbase_low = 10, growbase_high = 20,
                                   outputfile = "results_temp.csv", na.rm = TRUE) {
   # Read in the data
@@ -32,7 +36,8 @@ summarize_temperature <- function(inputfile, start_month, end_month, day = 15,
   temperature_long <- enumerate_seasons(data = temperature_long,
                                  start_month = start_month,
                                  end_month = end_month,
-                                 day = day)
+                                 start_day = start_day,
+                                 end_day = end_day)
 
   # Assume first column has site id
   id_column_name <- colnames(temperature_long)[1]

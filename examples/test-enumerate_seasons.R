@@ -27,7 +27,7 @@ test_start <- Sys.time()
 enumerated_df <- enumerate_seasons(data = long_df,
                                    start_month = start_month,
                                    end_month = end_month,
-                                   day = day)
+                                   start_day = day)
 test_end <- Sys.time()
 if (all(table(enumerated_df$season_year) == c(4600, 9300, 9300, 9300, 9300, 9300))) {
   message("Test ", test_num, " PASS")
@@ -49,7 +49,7 @@ test_start <- Sys.time()
 enumerated_df <- enumerate_seasons(data = long_df,
                                    start_month = start_month,
                                    end_month = end_month,
-                                   day = day)
+                                   start_day = day)
 test_end <- Sys.time()
 if (all(table(enumerated_df$season_year) == c(27400, 27500, 27400, 27400, 27400, 12800))) {
   message("Test ", test_num, " PASS")

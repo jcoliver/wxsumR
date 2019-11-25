@@ -10,7 +10,10 @@
 #' @param inputfile    path to csv file with daily rainfall measurement
 #' @param start_month  numeric starting month defining season (inclusive)
 #' @param end_month    numeric ending month defining season (inclusive)
-#' @param day          numeric day of month defining season (inclusive);
+#' @param start_day    numeric day of starting month defining season
+#' (inclusive); defaults to 15
+#' @param end_day      numeric day of ending month defining season (inclusive);
+#' defaults to \code{start_day}
 #' @param rain_cutoff  numeric minimum value for daily rainfall to be counted as
 #' a rain day
 #' @param outputfile   path to output file
@@ -18,7 +21,8 @@
 #' @return NULL if outputfile is given, if outputfile is NULL, returns data
 #' frame with rainfall summary statistics
 #' @import tidyverse
-summarize_rainfall <- function(inputfile, start_month, end_month, day = 15,
+summarize_rainfall <- function(inputfile, start_month, end_month,
+                               start_day = 15, end_day = start_day,
                                rain_cutoff = 1, outputfile = "results_rain.csv",
                                na.rm = TRUE) {
   # Read in the data
@@ -34,7 +38,8 @@ summarize_rainfall <- function(inputfile, start_month, end_month, day = 15,
   rain_long <- enumerate_seasons(data = rain_long,
                                  start_month = start_month,
                                  end_month = end_month,
-                                 day = day)
+                                 start_day = start_day,
+                                 end_day = end_day)
 
   # Assume first column has site id
   id_column_name <- colnames(rain_long)[1]

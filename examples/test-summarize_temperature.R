@@ -3,8 +3,6 @@
 # jcoliver@email.arizona.edu
 # 2019-11-18
 
-# TODO: INCOMPLETE. Pasted from test-summarize_temperature.R
-
 rm(list = ls())
 
 ################################################################################
@@ -25,14 +23,15 @@ test_num <- 1
 message(paste0("Running test ", test_num, " of summarize_temperature"))
 start_month <- 11
 end_month <- 02
-day <- 15
+start_day <- 15
+end_day <- 25
 
 # Test the summarize_temperature function by performing one of the calculations
 # (mean_season) on original data. Need to do some wrangling on these test data
 # to perform the calculations
 # Create vector of the column names we want for 1983 season data
-end_date <- as.Date(paste0("1984-", end_month, "-", day))
-current_date <- as.Date(paste0("1983-", start_month, "-", day))
+end_date <- as.Date(paste0("1984-", end_month, "-", end_day))
+current_date <- as.Date(paste0("1983-", start_month, "-", start_day))
 test_col_names <- character(as.numeric(end_date - current_date))
 counter <- 1
 while (current_date <= end_date) {
@@ -49,7 +48,8 @@ test_start <- Sys.time()
 temperature_summary <- summarize_temperature(inputfile = infile,
                                              start_month = start_month,
                                              end_month = end_month,
-                                             day = day,
+                                             start_day = start_day,
+                                             end_day = end_day,
                                              outputfile = outfile)
 test_end <- Sys.time()
 if (all(season_means == temperature_summary$mean_season[temperature_summary$season_year == 1983])) {
@@ -66,11 +66,12 @@ test_num <- 2
 message(paste0("Running test ", test_num, " of summarize_temperature"))
 start_month <- 02
 end_month <- 11
-day <- 15
+start_day <- 15
+end_day <- 25
 
 # Create vector of the column names we want for 1983 season data
-end_date <- as.Date(paste0("1983-", end_month, "-", day))
-current_date <- as.Date(paste0("1983-", start_month, "-", day))
+end_date <- as.Date(paste0("1983-", end_month, "-", end_day))
+current_date <- as.Date(paste0("1983-", start_month, "-", start_day))
 test_col_names <- character(as.numeric(end_date - current_date))
 counter <- 1
 while (current_date <= end_date) {
@@ -87,7 +88,8 @@ test_start <- Sys.time()
 temperature_summary <- summarize_temperature(inputfile = infile,
                                              start_month = start_month,
                                              end_month = end_month,
-                                             day = day,
+                                             start_day = start_day,
+                                             end_day = end_day,
                                              outputfile = outfile)
 test_end <- Sys.time()
 if (all(season_means == temperature_summary$mean_season[temperature_summary$season_year == 1983])) {

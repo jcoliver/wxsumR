@@ -1,5 +1,5 @@
 # TODO: Could do a little more by checking for June 31, February 30?
-# TODO: what about adding flexibility so day can be start_day and end_day
+
 # TODO: Do checks to ensure date column is present in data
 
 #' Enumerates seasons in data frame
@@ -8,27 +8,34 @@
 #' of \code{toLong}
 #' @param start_month  numeric starting month defining season (inclusive)
 #' @param end_month    numeric ending month defining season (inclusive)
-#' @param day          numeric day of month defining season (inclusive);
-#' defaults to 15
+#' @param start_day    numeric day of starting month defining season
+#' (inclusive); defaults to 15
+#' @param end_day      numeric day of ending month defining season (inclusive);
+#' defaults to \code{start_day}
 #'
 #' @return data frame with new columns, "season" and "season_year"
 #' @import tidyverse
 #' @import lubridate
-enumerate_seasons <- function(data, start_month, end_month, day = 15) {
+enumerate_seasons <- function(data, start_month, end_month, start_day = 15,
+                              end_day = start_day) {
   if (start_month < 1 | start_month > 12) {
     stop(paste0("Invalid start_month (", start_month, ") passed to enumerate_seasons. Must be integer between 1 and 12"))
   }
   if (end_month < 1 | end_month > 12) {
     stop(paste0("Invalid end_month (", end_month, ") passed to enumerate_seasons. Must be integer between 1 and 12"))
   }
-  if (day < 1 | day > 31) {
-    stop(paste0("Invalid day (", day, ") passed to enumerate_seasons. Must be integer between 1 and 31"))
+  if (start_day < 1 | start_day > 31) {
+    stop(paste0("Invalid start day (", start_day, ") passed to enumerate_seasons. Must be integer between 1 and 31"))
+  }
+  if (end_day < 1 | end_day > 31) {
+    stop(paste0("Invalid end day (", end_day, ") passed to enumerate_seasons. Must be integer between 1 and 31"))
   }
 
   data$season_year <- season_year(x = data$date,
                                   start_month = start_month,
                                   end_month = end_month,
-                                  day = day)
+                                  start_day = start_day,
+                                  end_day = end_day)
 
   data <- na.omit(data)
   return(data)
@@ -39,11 +46,14 @@ enumerate_seasons <- function(data, start_month, end_month, day = 15) {
 #' @param x            vector of Date data
 #' @param start_month  numeric starting month defining season (inclusive)
 #' @param end_month    numeric ending month defining season (inclusive)
-#' @param day          numeric day of month defining season (inclusive);
-#' defaults to 15
+#' @param start_day    numeric day of starting month defining season
+#' (inclusive); defaults to 15
+#' @param end_day      numeric day of ending month defining season (inclusive);
+#' defaults to \code{start_day}
 #'
 #' @return  integer vector of season year to which observation corresponds to
-season_year <- function(x, start_month, end_month, day = 15) {
+season_year <- function(x, start_month, end_month, start_day = 15,
+                        end_day = start_day) {
   # Will hold return value
   sy <- rep(NA, length(x))
 
@@ -51,8 +61,8 @@ season_year <- function(x, start_month, end_month, day = 15) {
   obs_year <- year(x)
 
   # Starting and ending dates based on x's year
-  start_OBSY <- as.Date(paste0(obs_year, "-", start_month, "-", day))
-  end_OBSY <- as.Date(paste0(obs_year, "-", end_month, "-", day))
+  start_OBSY <- as.Date(paste0(obs_year, "-", start_month, "-", start_day))
+  end_OBSY <- as.Date(paste0(obs_year, "-", end_month, "-", end_day))
 
   # Logic for extracting season year depends on whether or not season includes
   # the new year
