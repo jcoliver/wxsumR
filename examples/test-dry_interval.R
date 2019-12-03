@@ -6,7 +6,7 @@
 rm(list = ls())
 
 ################################################################################
-source(file = "R/summarize_railfall.R")
+source(file = "R/summarize_rainfall.R")
 
 # Test 1, season includes starting, middle, and ending dry stretches
 test_num <- 1

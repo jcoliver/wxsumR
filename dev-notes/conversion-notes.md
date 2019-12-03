@@ -1,5 +1,9 @@
 # Conversion notes
 
+## 2019-12-02
+Move large files out of folder under version control. i.e. moved to 
+../large-data-files
+
 ## 2019-11-07
 Use NPSY4 data files for testing. They don't have the idiosyncracies as in the
 ihs4p data.

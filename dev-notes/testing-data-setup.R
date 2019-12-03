@@ -7,7 +7,7 @@ rm(list = ls())
 
 ################################################################################
 # RAIN
-large_data <- read.csv(file = "data/NPSY4_x1_rf1_daily.csv")
+large_data <- read.csv(file = "../large-data-files/NPSY4_x1_rf1_daily.csv")
 
 # Small data, 100 x 2000
 write.csv(x = large_data[1:100, 1:2000], file = "data/input-rain-small.csv", row.names = FALSE)

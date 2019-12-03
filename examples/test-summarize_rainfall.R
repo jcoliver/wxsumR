@@ -8,7 +8,7 @@ rm(list = ls())
 ################################################################################
 source(file = "R/to_long.R")
 source(file = "R/enumerate_seasons.R")
-source(file = "R/summarize_railfall.R")
+source(file = "R/summarize_rainfall.R")
 
 library(tidyverse)
 library(lubridate)

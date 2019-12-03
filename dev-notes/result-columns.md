@@ -29,3 +29,15 @@ dev_norain_by_year
 mean_period_raindays_percent
 sd_period_raindays_percent
 dev_raindays_percent_by_year
+
+There are eight columns that don't look like they have calculations per year, but rather are based on all values for a single location. These columns won't need to be converted back into a wide format, but there might be some challenges in letting them be...
+
+mean_period_norain
+mean_period_raindays
+mean_period_raindays_percent
+mean_period_total_season
+sd_period_norain
+sd_period_raindays
+sd_period_raindays_percent
+sd_period_total_season
+
