@@ -11,8 +11,6 @@
 # takes on values c(20, 40, 60, 80, 100) AND there is no underscore separating
 # this quintile from the year. **NOTE** there should be a separator. Code thusly
 
-# TODO: Add wide format output option
-
 #' Provides temperature summary statistics
 #'
 #' @param inputfile    path to csv file with daily temperature measurement
@@ -23,15 +21,14 @@
 #' (inclusive); defaults to 15
 #' @param end_day      numeric day of ending month defining season (inclusive);
 #' defaults to \code{start_day}
-#' @param outputfile   path to output file
 #' @param na.rm        logical passed to summary statistic functions indicating 
 #' treatment of \code{NA} values
 #' @param wide         logical indicating whether or not to output as wide-
 #' formatted data
 #'
-#' @return NULL if outputfile is given, if outputfile is NULL, returns data
-#' frame with temperature summary statistics
+#' @return data frame with temperature summary statistics
 #' 
+#' @seealso \code{\link{summarize_rainfall}} 
 #' @export
 #' @import tidyverse
 summarize_temperature <- function(inputfile, start_month, end_month,
@@ -83,5 +80,14 @@ summarize_temperature <- function(inputfile, start_month, end_month,
     mutate(dev_gdd = gdd - mean_gdd,
            z_gdd = (gdd - mean_gdd)/sd_gdd)
 
+  if (wide) {
+    # Long-term columns won't be separated out into separate columns for each 
+    # year
+    long_term_cols <- c("mean_gdd", "sd_gdd")
+    temperature_summary <- wide_summary(x = temperature_summary, 
+                                 id_col = id_column_name, 
+                                 long_term_cols = long_term_cols)
+  }
+  
   return(temperature_summary)
 }

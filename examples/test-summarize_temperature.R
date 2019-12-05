@@ -50,7 +50,7 @@ temperature_summary <- summarize_temperature(inputfile = infile,
                                              end_month = end_month,
                                              start_day = start_day,
                                              end_day = end_day,
-                                             outputfile = outfile)
+                                             wide = FALSE)
 test_end <- Sys.time()
 if (all(season_means == temperature_summary$mean_season[temperature_summary$season_year == 1983])) {
   message("Test ", test_num, " PASS")
@@ -90,7 +90,7 @@ temperature_summary <- summarize_temperature(inputfile = infile,
                                              end_month = end_month,
                                              start_day = start_day,
                                              end_day = end_day,
-                                             outputfile = outfile)
+                                             wide = FALSE)
 test_end <- Sys.time()
 if (all(season_means == temperature_summary$mean_season[temperature_summary$season_year == 1983])) {
   message("Test ", test_num, " PASS")
