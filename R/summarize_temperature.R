@@ -5,6 +5,14 @@
 
 # TODO: Add parameter for site id (could assume column 1)
 
+# TODO: Add quintile bin calculations: calculate temperature bins as the 
+# percentage of days that fall in each temperature quintile during the season. 
+# It then generates the variables tempbin`quintile’`year', where "quintile" 
+# takes on values c(20, 40, 60, 80, 100) AND there is no underscore separating
+# this quintile from the year. **NOTE** there should be a separator. Code thusly
+
+# TODO: Add wide format output option
+
 #' Provides temperature summary statistics
 #'
 #' @param inputfile    path to csv file with daily temperature measurement
@@ -15,14 +23,22 @@
 #' (inclusive); defaults to 15
 #' @param end_day      numeric day of ending month defining season (inclusive);
 #' defaults to \code{start_day}
+#' @param outputfile   path to output file
+#' @param na.rm        logical passed to summary statistic functions indicating 
+#' treatment of \code{NA} values
+#' @param wide         logical indicating whether or not to output as wide-
+#' formatted data
 #'
 #' @return NULL if outputfile is given, if outputfile is NULL, returns data
 #' frame with temperature summary statistics
+#' 
+#' @export
 #' @import tidyverse
 summarize_temperature <- function(inputfile, start_month, end_month,
                                   start_day = 15, end_day = start_day,
                                   growbase_low = 10, growbase_high = 20,
-                                  outputfile = "results_temp.csv", na.rm = TRUE) {
+                                  outputfile = "results_temp.csv", na.rm = TRUE,
+                                  wide = TRUE) {
   # Read in the data
   temperature <- read.csv(file = inputfile)
 

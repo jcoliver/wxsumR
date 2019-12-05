@@ -2,11 +2,14 @@ Package: weathercommand
 Type: Package
 Title: Summary Statistics for Weather Data
 Version: 0.1.0
-Author: Jeffrey C. Oliver, Jeffrey Michler
+Authors@R: as.person(c(
+    "Jeffrey C. Oliver <jcoliver@email.arizona.edu> [aut, cre]",
+    "Jeffrey D. Michler <jdmichler@email.arizona.edu> [aut]"
+    ))
 Maintainer: Jeffrey C. Oliver <jcoliver@email.arizona.edu>
 Description: More about what it does (maybe more than one line)
     Use four spaces when indenting paragraphs within the Description.
-License: What license is it under?
+License: MIT
 Encoding: UTF-8
 LazyData: true
-Imports: tidyverse, lubridate
+Imports: tidyverse, lubridate, stringr

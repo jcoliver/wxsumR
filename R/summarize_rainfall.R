@@ -17,14 +17,20 @@
 #' @param rain_cutoff  numeric minimum value for daily rainfall to be counted as
 #' a rain day
 #' @param outputfile   path to output file
+#' @param na.rm        logical passed to summary statistic functions indicating 
+#' treatment of \code{NA} values
+#' @param wide         logical indicating whether or not to output as wide-
+#' formatted data
 #'
 #' @return NULL if outputfile is given, if outputfile is NULL, returns data
 #' frame with rainfall summary statistics
+#' 
+#' @export
 #' @import tidyverse
 summarize_rainfall <- function(inputfile, start_month, end_month,
                                start_day = 15, end_day = start_day,
                                rain_cutoff = 1, outputfile = "results_rain.csv",
-                               na.rm = TRUE) {
+                               na.rm = TRUE, wide = TRUE) {
   # Read in the data
   rain <- read.csv(file = inputfile)
 
@@ -68,7 +74,7 @@ summarize_rainfall <- function(inputfile, start_month, end_month,
            mean_period_norain = mean(x = norain),
            sd_period_norain = sd(x = norain),
            mean_period_raindays = mean(x = raindays),
-           sd_period_raindais = sd(x = raindays),
+           sd_period_raindays = sd(x = raindays),
            mean_period_raindays_percent = mean(x = raindays_percent),
            sd_period_raindays_percent = sd(x = raindays_percent))
 
@@ -82,6 +88,18 @@ summarize_rainfall <- function(inputfile, start_month, end_month,
       dev_norain = norain - mean_period_norain,
       dev_raindays_percent = raindays_percent - mean_period_raindays_percent)
 
+  if (wide) {
+    # Long-term columns won't be separated out into separate columns for each 
+    # year
+    long_term_cols <- c("mean_period_total_season", "sd_period_total_season", 
+                        "mean_period_norain", "sd_period_norain", 
+                        "mean_period_raindays", "sd_period_raindays", 
+                        "mean_period_raindays_percent", "sd_period_raindays_percent")
+    rain_summary <- wide_summary(x = rain_summary, 
+                                 id_col = id_column_name, 
+                                 long_term_cols = long_term_cols)
+  }
+  
   return(rain_summary)
 }
 
