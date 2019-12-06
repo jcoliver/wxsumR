@@ -21,7 +21,7 @@
 #'   will be zero}
 #' }
 #'
-#' @import stringr
+#' @importFrom stringr str_split
 dry_interval <- function(x, rain_cutoff = 1, period = c("start", "mid", "end")) {
   # A string that is a concatenation of 0s and 1s, where 0s are days where
   # rainfall is below rain_cutoff and 1s are days where rain is above

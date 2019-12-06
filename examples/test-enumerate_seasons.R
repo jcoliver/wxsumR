@@ -6,11 +6,10 @@
 rm(list = ls())
 
 ################################################################################
+library(weathercommand)
 source(file = "R/to_long.R")
 source(file = "R/enumerate_seasons.R")
 
-library(tidyverse)
-library(lubridate)
 df <- read.csv(file = "data/input-rain-small.csv")
 long_df <- to_long(data = df)
 # Exclude NA dates

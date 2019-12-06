@@ -9,15 +9,16 @@
 #' @return wide-formatted data, where summary statistics for individual years 
 #' are in separate columns
 #' 
-#' @import tidyverse
+#' @import tidyr
+#' @import dplyr
 wide_summary <- function(x, id_col, year_col = "year", long_term_cols = "") {
   # Start by converting to long format
   x_long <- x %>%
-    pivot_longer(-c(id_cols, year_col, long_term_cols))
+    tidyr::pivot_longer(-c(id_cols, year_col, long_term_cols))
   
   # Convert annual stats to wide format, appending year to column name
   x_wide <- x_long %>%
-    pivot_wider(id_cols = id_cols, 
+    tidyr::pivot_wider(id_cols = id_cols, 
                 names_from = c(name, year_col), 
                 values_from = value, 
                 names_sep = "_")
@@ -26,8 +27,8 @@ wide_summary <- function(x, id_col, year_col = "year", long_term_cols = "") {
   # rows (an individual site _should_ have identical values across all years 
   # within each column listed in long_term_cols)
   long_term_stats <- x %>%
-    select(id_cols, long_term_cols) %>%
-    distinct()
+    dplyr::select(id_cols, long_term_cols) %>%
+    dplyr::distinct()
   
   # Merge long-formatted data with long-term stats
   merged_wide <- merge(x = x_wide, y = long_term_stats)

@@ -14,8 +14,6 @@
 #' defaults to \code{start_day}
 #'
 #' @return data frame with new columns, "season" and "season_year"
-#' @import tidyverse
-#' @import lubridate
 enumerate_seasons <- function(data, start_month, end_month, start_day = 15,
                               end_day = start_day) {
   if (start_month < 1 | start_month > 12) {
@@ -52,13 +50,15 @@ enumerate_seasons <- function(data, start_month, end_month, start_day = 15,
 #' defaults to \code{start_day}
 #'
 #' @return  integer vector of season year to which observation corresponds to
+#' 
+#' @importFrom lubridate year
 season_year <- function(x, start_month, end_month, start_day = 15,
                         end_day = start_day) {
   # Will hold return value
   sy <- rep(NA, length(x))
 
   # The year of observation in x
-  obs_year <- year(x)
+  obs_year <- lubridate::year(x)
 
   # Starting and ending dates based on x's year
   start_OBSY <- as.Date(paste0(obs_year, "-", start_month, "-", start_day))

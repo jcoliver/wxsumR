@@ -6,7 +6,9 @@
 rm(list = ls())
 
 ################################################################################
-source(file = "R/summarize_rainfall.R")
+# Because dry_interval is not exported, it isn't available for use outside of 
+# the weathercommand package
+source(file = "R/dry_interval.R")
 
 # Test 1, season includes starting, middle, and ending dry stretches
 test_num <- 1

@@ -13,15 +13,18 @@
 
 #' Provides temperature summary statistics
 #'
-#' @param inputfile    path to csv file with daily temperature measurement
-#' @param outputfile   path to output file
-#' @param start_month  numeric starting month defining season (inclusive)
-#' @param end_month    numeric ending month defining season (inclusive)
-#' @param start_day    numeric day of starting month defining season
-#' (inclusive); defaults to 15
-#' @param end_day      numeric day of ending month defining season (inclusive);
+#' @param inputfile     path to csv file with daily temperature measurement
+#' @param start_month   numeric starting month defining season (inclusive)
+#' @param end_month     numeric ending month defining season (inclusive)
+#' @param start_day     numeric day of starting month defining season
+#' (inclusive)
+#' @param end_day       numeric day of ending month defining season (inclusive);
 #' defaults to \code{start_day}
-#' @param na.rm        logical passed to summary statistic functions indicating 
+#' @param growbase_low  numeric lower bound for calculating growing degree days
+#' (inclusive)
+#' @param growbase_high numeric upper bound for calculating growing degree days
+#' (inclusive)
+#' @param na.rm         logical passed to summary statistic functions indicating 
 #' treatment of \code{NA} values
 #' @param wide         logical indicating whether or not to output as wide-
 #' formatted data
@@ -30,12 +33,13 @@
 #' 
 #' @seealso \code{\link{summarize_rainfall}} 
 #' @export
-#' @import tidyverse
+#' @import dplyr
+#' @importFrom stats median na.omit sd
+#' @importFrom utils read.csv
 summarize_temperature <- function(inputfile, start_month, end_month,
                                   start_day = 15, end_day = start_day,
                                   growbase_low = 10, growbase_high = 20,
-                                  outputfile = "results_temp.csv", na.rm = TRUE,
-                                  wide = TRUE) {
+                                  na.rm = TRUE, wide = TRUE) {
   # Read in the data
   temperature <- read.csv(file = inputfile)
 
@@ -59,27 +63,27 @@ summarize_temperature <- function(inputfile, start_month, end_month,
   # for the season (Here defined as number of days in season that were within
   # the range defined by (growbase_low, growbase_high))
   temperature_summary <- temperature_long %>%
-    group_by(season_year, !!as.name(id_column_name)) %>%
-    summarize(mean_season = mean(x = value, na.rm = na.rm),
-              median_season = median(x = value, na.rm = na.rm),
-              sd_season = sd(x = value, na.rm = na.rm),
-              skew_season = (mean(x = value, na.rm = na.rm) - median(x = value, na.rm = na.rm))/sd(x = value, na.rm = na.rm),
-              max_season = max(value, na.rm = na.rm),
-              gdd = sum(value >= growbase_low & value <= growbase_high))
-
+    dplyr::group_by(season_year, !!as.name(id_column_name)) %>%
+    dplyr::summarize(mean_season = mean(x = value, na.rm = na.rm),
+                     median_season = median(x = value, na.rm = na.rm),
+                     sd_season = sd(x = value, na.rm = na.rm),
+                     skew_season = (mean(x = value, na.rm = na.rm) - median(x = value, na.rm = na.rm))/sd(x = value, na.rm = na.rm),
+                     max_season = max(value, na.rm = na.rm),
+                     gdd = sum(value >= growbase_low & value <= growbase_high))
+  
   # Calculate seasonal average and standard deviation for gdd
   temperature_summary <- ungroup(temperature_summary) %>%
-    group_by(!!as.name(id_column_name)) %>%
-    mutate(mean_gdd = mean(gdd),
-           sd_gdd = sd(gdd))
-
+    dplyr::group_by(!!as.name(id_column_name)) %>%
+    dplyr::mutate(mean_gdd = mean(gdd),
+                  sd_gdd = sd(gdd))
+  
   # Finally, calculate deviations from mean for each season, measured as
   # difference from the mean and as z-score
   temperature_summary <- ungroup(temperature_summary) %>%
-    group_by(season_year, !!as.name(id_column_name)) %>%
-    mutate(dev_gdd = gdd - mean_gdd,
-           z_gdd = (gdd - mean_gdd)/sd_gdd)
-
+    dplyr::group_by(season_year, !!as.name(id_column_name)) %>%
+    dplyr::mutate(dev_gdd = gdd - mean_gdd,
+                  z_gdd = (gdd - mean_gdd)/sd_gdd)
+  
   if (wide) {
     # Long-term columns won't be separated out into separate columns for each 
     # year
