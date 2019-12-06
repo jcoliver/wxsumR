@@ -11,14 +11,14 @@
 #' 
 #' @import tidyr
 #' @import dplyr
-wide_summary <- function(x, id_col, year_col = "year", long_term_cols = "") {
+wide_summary <- function(x, id_col, year_col = "season_year", long_term_cols = "") {
   # Start by converting to long format
   x_long <- x %>%
-    tidyr::pivot_longer(-c(id_cols, year_col, long_term_cols))
+    tidyr::pivot_longer(-c(id_col, year_col, long_term_cols))
   
   # Convert annual stats to wide format, appending year to column name
   x_wide <- x_long %>%
-    tidyr::pivot_wider(id_cols = id_cols, 
+    tidyr::pivot_wider(id_cols = id_col, 
                 names_from = c(name, year_col), 
                 values_from = value, 
                 names_sep = "_")
@@ -26,8 +26,8 @@ wide_summary <- function(x, id_col, year_col = "year", long_term_cols = "") {
   # Extract long-term statistics from original data, and restrict to unique
   # rows (an individual site _should_ have identical values across all years 
   # within each column listed in long_term_cols)
-  long_term_stats <- x %>%
-    dplyr::select(id_cols, long_term_cols) %>%
+  long_term_stats <- dplyr::ungroup(x) %>%
+    dplyr::select(id_col, long_term_cols) %>%
     dplyr::distinct()
   
   # Merge long-formatted data with long-term stats

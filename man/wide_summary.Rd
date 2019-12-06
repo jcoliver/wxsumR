@@ -4,7 +4,7 @@
 \alias{wide_summary}
 \title{Wide-formatted summary data}
 \usage{
-wide_summary(x, id_col, year_col = "year", long_term_cols = "")
+wide_summary(x, id_col, year_col = "season_year", long_term_cols = "")
 }
 \arguments{
 \item{x}{summary data in pseudo-wide format}

@@ -6,18 +6,14 @@
 rm(list = ls())
 
 ################################################################################
-source(file = "R/to_long.R")
-source(file = "R/enumerate_seasons.R")
-source(file = "R/summarize_rainfall.R")
-
-library(tidyverse)
-library(lubridate)
+library(weathercommand)
 
 infile <- "data/input-rain-small.csv"
 outfile <- NULL
 
 test_data <- read.csv(file = infile)
 
+########################################
 # Test 1, season includes new year
 test_num <- 1
 message(paste0("Running test ", test_num, " of summarize_rainfall"))
@@ -61,6 +57,7 @@ test_time <- difftime(time1 = test_end, time2 = test_start, units = "mins")
 test_time <- round(x = test_time, digits = 3)
 message(paste0("Test ", test_num, " time: ", test_time, " minutes"))
 
+########################################
 # Test 2, season excludes new year
 test_num <- 2
 message(paste0("Running test ", test_num, " of summarize_rainfall"))
@@ -101,6 +98,7 @@ test_time <- difftime(time1 = test_end, time2 = test_start, units = "mins")
 test_time <- round(x = test_time, digits = 3)
 message(paste0("Test ", test_num, " time: ", test_time, " minutes"))
 
+########################################
 # Test 3, season includes new year (same as test 1) but output wide format data
 test_num <- 3
 message(paste0("Running test ", test_num, " of summarize_rainfall"))
@@ -132,9 +130,10 @@ rain_summary <- summarize_rainfall(inputfile = infile,
                                    start_month = start_month,
                                    end_month = end_month,
                                    start_day = start_day,
-                                   end_day = end_day)
+                                   end_day = end_day,
+                                   wide = TRUE)
 test_end <- Sys.time()
-if (all(season_means == rain_summary$mean_season[rain_summary$season_year == 1983])) {
+if (all(season_means == rain_summary$mean_season_1983)) {
   message("Test ", test_num, " PASS")
 } else {
   message("Test ", test_num, " FAIL")

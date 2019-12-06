@@ -3,15 +3,15 @@
 # jcoliver@email.arizona.edu
 # 2019-11-04
 
+rm(list = ls())
 ################################################################################
-source(file = "R/to_long.R")
+library(weathercommand)
 
-library(tidyverse)
 df <- read.csv(file = "data/input-rain-tiny.csv")
-long_df <- to_long(data = df)
+long_df <- weathercommand:::to_long(data = df)
 
 df <- read.csv(file = "data/input-rain-small.csv")
-long_df <- to_long(data = df)
+long_df <- weathercommand:::to_long(data = df)
 
 df <- read.csv(file = "data/input-rain-messy.csv")
-long_df <- to_long(data = df) # Should throw warning
+long_df <- weathercommand:::to_long(data = df) # Should throw warning
