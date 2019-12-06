@@ -14,4 +14,5 @@ df <- read.csv(file = "data/input-rain-small.csv")
 long_df <- weathercommand:::to_long(data = df)
 
 df <- read.csv(file = "data/input-rain-messy.csv")
+message("to_long test passes if next line shows a warning:")
 long_df <- weathercommand:::to_long(data = df) # Should throw warning

@@ -99,6 +99,6 @@ summarize_rainfall <- function(inputfile, start_month, end_month,
                                  id_col = id_column_name, 
                                  long_term_cols = long_term_cols)
   }
-  
+  rain_summary <- as.data.frame(rain_summary)
   return(rain_summary)
 }

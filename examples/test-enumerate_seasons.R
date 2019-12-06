@@ -7,8 +7,6 @@ rm(list = ls())
 
 ################################################################################
 library(weathercommand)
-source(file = "R/to_long.R")
-source(file = "R/enumerate_seasons.R")
 
 df <- read.csv(file = "data/input-rain-small.csv")
 long_df <- weathercommand:::to_long(data = df)
@@ -23,10 +21,10 @@ start_month <- 11
 end_month <- 02
 day <- 15
 test_start <- Sys.time()
-enumerated_df <- enumerate_seasons(data = long_df,
-                                   start_month = start_month,
-                                   end_month = end_month,
-                                   start_day = day)
+enumerated_df <- weathercommand:::enumerate_seasons(data = long_df,
+                                                    start_month = start_month,
+                                                    end_month = end_month,
+                                                    start_day = day)
 test_end <- Sys.time()
 if (all(table(enumerated_df$season_year) == c(4600, 9300, 9300, 9300, 9300, 9300))) {
   message("Test ", test_num, " PASS")
@@ -45,10 +43,10 @@ start_month <- 02
 end_month <- 11
 day <- 15
 test_start <- Sys.time()
-enumerated_df <- enumerate_seasons(data = long_df,
-                                   start_month = start_month,
-                                   end_month = end_month,
-                                   start_day = day)
+enumerated_df <- weathercommand:::enumerate_seasons(data = long_df,
+                                                    start_month = start_month,
+                                                    end_month = end_month,
+                                                    start_day = day)
 test_end <- Sys.time()
 if (all(table(enumerated_df$season_year) == c(27400, 27500, 27400, 27400, 27400, 12800))) {
   message("Test ", test_num, " PASS")

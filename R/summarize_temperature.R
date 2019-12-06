@@ -9,7 +9,10 @@
 # percentage of days that fall in each temperature quintile during the season. 
 # It then generates the variables tempbin`quintile’`year', where "quintile" 
 # takes on values c(20, 40, 60, 80, 100) AND there is no underscore separating
-# this quintile from the year. **NOTE** there should be a separator. Code thusly
+# this quintile from the year. **NOTE** there should be a separator. Code 
+# thusly. Also, STATA implementation used `inrange`, which appears to be
+# inclusive on both sides of range (i.e. a <= x <= b). In this implementation,
+# upper bound is exclusive of ranges *except* for 100% quintile.
 
 #' Provides temperature summary statistics
 #'
@@ -69,17 +72,26 @@ summarize_temperature <- function(inputfile, start_month, end_month,
                      sd_season = sd(x = value, na.rm = na.rm),
                      skew_season = (mean(x = value, na.rm = na.rm) - median(x = value, na.rm = na.rm))/sd(x = value, na.rm = na.rm),
                      max_season = max(value, na.rm = na.rm),
-                     gdd = sum(value >= growbase_low & value <= growbase_high))
+                     gdd = sum(value >= growbase_low & value <= growbase_high),
+                     tempbin20 = sum(value < quantile(x = value, probs = seq(from = 0, to = 1, by = 0.2))[2]),
+                     tempbin40 = sum(value >= quantile(x = value, probs = seq(from = 0, to = 1, by = 0.2))[2] & 
+                                       value < quantile(x = value, probs = seq(from = 0, to = 1, by = 0.2))[3]),
+                     tempbin60 = sum(value >= quantile(x = value, probs = seq(from = 0, to = 1, by = 0.2))[3] &
+                                       value < quantile(x = value, probs = seq(from = 0, to = 1, by = 0.2))[4]),
+                     tempbin80 = sum(value >= quantile(x = value, probs = seq(from = 0, to = 1, by = 0.2))[4] &
+                                       value < quantile(x = value, probs = seq(from = 0, to = 1, by = 0.2))[5]),
+                     tempbin100 = sum(value >= quantile(x = value, probs = seq(from = 0, to = 1, by = 0.2))[5] &
+                                        value <= quantile(x = value, probs = seq(from = 0, to = 1, by = 0.2))[6]))
   
   # Calculate seasonal average and standard deviation for gdd
-  temperature_summary <- ungroup(temperature_summary) %>%
+  temperature_summary <- dplyr::ungroup(temperature_summary) %>%
     dplyr::group_by(!!as.name(id_column_name)) %>%
     dplyr::mutate(mean_gdd = mean(gdd),
                   sd_gdd = sd(gdd))
   
   # Finally, calculate deviations from mean for each season, measured as
   # difference from the mean and as z-score
-  temperature_summary <- ungroup(temperature_summary) %>%
+  temperature_summary <- dplyr::ungroup(temperature_summary) %>%
     dplyr::group_by(season_year, !!as.name(id_column_name)) %>%
     dplyr::mutate(dev_gdd = gdd - mean_gdd,
                   z_gdd = (gdd - mean_gdd)/sd_gdd)
@@ -92,6 +104,6 @@ summarize_temperature <- function(inputfile, start_month, end_month,
                                  id_col = id_column_name, 
                                  long_term_cols = long_term_cols)
   }
-  
+  temperature_summary <- as.data.frame(temperature_summary)
   return(temperature_summary)
 }
