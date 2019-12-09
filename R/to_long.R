@@ -20,7 +20,9 @@ to_long <- function(data, keep_cols = 1, date_sep = "_") {
   # TODO: Need to check for cases when keep_cols length !=1
   # TODO: What if there is not date separator?
   long_data <- data %>%
-    tidyr::pivot_longer(names_to = "col_name", values_to = "value", -keep_cols)
+    tidyr::pivot_longer(names_to = "col_name", 
+                        values_to = "value", 
+                        -keep_cols)
   
   # Parse key column into year, month, day
   long_data <- long_data %>%
