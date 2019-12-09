@@ -4,12 +4,12 @@
 \alias{summarize_temperature}
 \title{Provides temperature summary statistics}
 \usage{
-summarize_temperature(inputfile, start_month, end_month, start_day = 15,
-  end_day = start_day, growbase_low = 10, growbase_high = 20,
-  na.rm = TRUE, wide = TRUE)
+summarize_temperature(temperature, start_month, end_month,
+  start_day = 15, end_day = start_day, growbase_low = 10,
+  growbase_high = 20, na.rm = TRUE, wide = TRUE)
 }
 \arguments{
-\item{inputfile}{path to csv file with daily temperature measurement}
+\item{temperature}{data frame with daily temperature data for each site}
 
 \item{start_month}{numeric starting month defining season (inclusive)}
 

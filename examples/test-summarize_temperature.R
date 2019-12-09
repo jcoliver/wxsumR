@@ -41,7 +41,7 @@ while (current_date <= end_date) {
 season_means <- rowMeans(x = test_data[order(test_data$hhid), test_col_names])
 
 test_start <- Sys.time()
-temperature_summary <- summarize_temperature(inputfile = infile,
+temperature_summary <- summarize_temperature(temperature = test_data,
                                              start_month = start_month,
                                              end_month = end_month,
                                              start_day = start_day,
@@ -82,7 +82,7 @@ while (current_date <= end_date) {
 season_means <- rowMeans(x = test_data[order(test_data$hhid), test_col_names])
 
 test_start <- Sys.time()
-temperature_summary <- summarize_temperature(inputfile = infile,
+temperature_summary <- summarize_temperature(temperature = test_data,
                                              start_month = start_month,
                                              end_month = end_month,
                                              start_day = start_day,
@@ -126,7 +126,7 @@ while (current_date <= end_date) {
 season_means <- rowMeans(x = test_data[order(test_data$hhid), test_col_names])
 
 test_start <- Sys.time()
-temperature_summary <- summarize_temperature(inputfile = infile,
+temperature_summary <- summarize_temperature(temperature = test_data,
                                              start_month = start_month,
                                              end_month = end_month,
                                              start_day = start_day,

@@ -5,18 +5,9 @@
 
 # TODO: Add parameter for site id (could assume column 1)
 
-# TODO: Add quintile bin calculations: calculate temperature bins as the 
-# percentage of days that fall in each temperature quintile during the season. 
-# It then generates the variables tempbin`quintile’`year', where "quintile" 
-# takes on values c(20, 40, 60, 80, 100) AND there is no underscore separating
-# this quintile from the year. **NOTE** there should be a separator. Code 
-# thusly. Also, STATA implementation used `inrange`, which appears to be
-# inclusive on both sides of range (i.e. a <= x <= b). In this implementation,
-# upper bound is exclusive of ranges *except* for 100% quintile.
-
 #' Provides temperature summary statistics
 #'
-#' @param inputfile     path to csv file with daily temperature measurement
+#' @param temperature   data frame with daily temperature data for each site
 #' @param start_month   numeric starting month defining season (inclusive)
 #' @param end_month     numeric ending month defining season (inclusive)
 #' @param start_day     numeric day of starting month defining season
@@ -39,12 +30,12 @@
 #' @import dplyr
 #' @importFrom stats median na.omit sd
 #' @importFrom utils read.csv
-summarize_temperature <- function(inputfile, start_month, end_month,
+summarize_temperature <- function(temperature, start_month, end_month,
                                   start_day = 15, end_day = start_day,
                                   growbase_low = 10, growbase_high = 20,
                                   na.rm = TRUE, wide = TRUE) {
   # Read in the data
-  temperature <- read.csv(file = inputfile)
+  # temperature <- read.csv(file = inputfile)
 
   # Use to_long to convert to long format and parse column names into dates
   temperature_long <- to_long(data = temperature)

@@ -41,7 +41,7 @@ while (current_date <= end_date) {
 season_means <- rowMeans(x = test_data[order(test_data$y4_hhid), test_col_names])
 
 test_start <- Sys.time()
-rain_summary <- summarize_rainfall(inputfile = infile,
+rain_summary <- summarize_rainfall(rain = test_data,
                                    start_month = start_month,
                                    end_month = end_month,
                                    start_day = start_day,
@@ -82,7 +82,7 @@ while (current_date <= end_date) {
 season_means <- rowMeans(x = test_data[order(test_data$y4_hhid), test_col_names])
 
 test_start <- Sys.time()
-rain_summary <- summarize_rainfall(inputfile = infile,
+rain_summary <- summarize_rainfall(rain = test_data,
                                    start_month = start_month,
                                    end_month = end_month,
                                    start_day = start_day,
@@ -126,7 +126,7 @@ while (current_date <= end_date) {
 season_means <- rowMeans(x = test_data[order(test_data$y4_hhid), test_col_names])
 
 test_start <- Sys.time()
-rain_summary <- summarize_rainfall(inputfile = infile,
+rain_summary <- summarize_rainfall(rain = test_data,
                                    start_month = start_month,
                                    end_month = end_month,
                                    start_day = start_day,

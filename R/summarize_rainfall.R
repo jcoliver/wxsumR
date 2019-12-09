@@ -7,7 +7,7 @@
 
 #' Provides rainfall summary statistics
 #'
-#' @param inputfile    path to csv file with daily rainfall measurement
+#' @param rain         data frame with daily rainfall data for each site
 #' @param start_month  numeric starting month defining season (inclusive)
 #' @param end_month    numeric ending month defining season (inclusive)
 #' @param start_day    numeric day of starting month defining season
@@ -28,11 +28,11 @@
 #' @import dplyr
 #' @importFrom stats median na.omit sd
 #' @importFrom utils read.csv
-summarize_rainfall <- function(inputfile, start_month, end_month,
+summarize_rainfall <- function(rain, start_month, end_month,
                                start_day = 15, end_day = start_day,
                                rain_cutoff = 1, na.rm = TRUE, wide = TRUE) {
   # Read in the data
-  rain <- read.csv(file = inputfile)
+  # rain <- read.csv(file = inputfile)
 
   # Use to_long to convert to long format and parse column names into dates
   rain_long <- to_long(data = rain)
