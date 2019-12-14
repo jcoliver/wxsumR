@@ -4,8 +4,16 @@
 \alias{summarize_rainfall}
 \title{Provides rainfall summary statistics}
 \usage{
-summarize_rainfall(rain, start_month, end_month, start_day = 15,
-  end_day = start_day, rain_cutoff = 1, na.rm = TRUE, wide = TRUE)
+summarize_rainfall(
+  rain,
+  start_month,
+  end_month,
+  start_day = 15,
+  end_day = start_day,
+  rain_cutoff = 1,
+  na.rm = TRUE,
+  wide = TRUE
+)
 }
 \arguments{
 \item{rain}{data frame with daily rainfall data for each site}

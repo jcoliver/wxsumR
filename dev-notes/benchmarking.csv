@@ -1,0 +1,5 @@
+"infile","to_long","enum_season","summ_rain","calc_1","calc_2","calc_3","to_wide","total_time"
+"data/input-rain-small.csv",0.895,1.612,0.529,0.238,0.009,0.02,0.262,3.036
+"data/input-rain-medium.csv",8.207,15.325,4.031,1.944,0.086,0.061,1.939,27.563
+"data/input-rain-medium-wider.csv",4.109,7.612,1.958,0.935,0.027,0.031,0.965,13.679
+"data/input-rain-large.csv",40.759,75.975,18.11,9.225,0.105,0.253,8.526,134.845

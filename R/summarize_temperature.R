@@ -18,21 +18,21 @@
 #' (inclusive)
 #' @param growbase_high numeric upper bound for calculating growing degree days
 #' (inclusive)
-#' @param na.rm         logical passed to summary statistic functions indicating 
+#' @param na.rm         logical passed to summary statistic functions indicating
 #' treatment of \code{NA} values
 #' @param wide         logical indicating whether or not to output as wide-
 #' formatted data
 #'
 #' @return data frame with temperature summary statistics
-#' 
-#' @seealso \code{\link{summarize_rainfall}} 
+#'
+#' @seealso \code{\link{summarize_rainfall}}
 #' @export
 #' @import dplyr
 #' @importFrom stats median na.omit sd
 #' @importFrom utils read.csv
 summarize_temperature <- function(temperature, start_month, end_month,
                                   start_day = 15, end_day = start_day,
-                                  growbase_low = 10, growbase_high = 20,
+                                  growbase_low = 10, growbase_high = 30,
                                   na.rm = TRUE, wide = TRUE) {
   # Read in the data
   # temperature <- read.csv(file = inputfile)
@@ -65,7 +65,7 @@ summarize_temperature <- function(temperature, start_month, end_month,
                      max_season = max(value, na.rm = na.rm),
                      gdd = sum(value >= growbase_low & value <= growbase_high),
                      tempbin20 = sum(value < quantile(x = value, probs = seq(from = 0, to = 1, by = 0.2))[2]),
-                     tempbin40 = sum(value >= quantile(x = value, probs = seq(from = 0, to = 1, by = 0.2))[2] & 
+                     tempbin40 = sum(value >= quantile(x = value, probs = seq(from = 0, to = 1, by = 0.2))[2] &
                                        value < quantile(x = value, probs = seq(from = 0, to = 1, by = 0.2))[3]),
                      tempbin60 = sum(value >= quantile(x = value, probs = seq(from = 0, to = 1, by = 0.2))[3] &
                                        value < quantile(x = value, probs = seq(from = 0, to = 1, by = 0.2))[4]),
@@ -73,26 +73,26 @@ summarize_temperature <- function(temperature, start_month, end_month,
                                        value < quantile(x = value, probs = seq(from = 0, to = 1, by = 0.2))[5]),
                      tempbin100 = sum(value >= quantile(x = value, probs = seq(from = 0, to = 1, by = 0.2))[5] &
                                         value <= quantile(x = value, probs = seq(from = 0, to = 1, by = 0.2))[6]))
-  
+
   # Calculate seasonal average and standard deviation for gdd
   temperature_summary <- dplyr::ungroup(temperature_summary) %>%
     dplyr::group_by(!!as.name(id_column_name)) %>%
     dplyr::mutate(mean_gdd = mean(gdd),
                   sd_gdd = sd(gdd))
-  
+
   # Finally, calculate deviations from mean for each season, measured as
   # difference from the mean and as z-score
   temperature_summary <- dplyr::ungroup(temperature_summary) %>%
     dplyr::group_by(season_year, !!as.name(id_column_name)) %>%
     dplyr::mutate(dev_gdd = gdd - mean_gdd,
                   z_gdd = (gdd - mean_gdd)/sd_gdd)
-  
+
   if (wide) {
-    # Long-term columns won't be separated out into separate columns for each 
+    # Long-term columns won't be separated out into separate columns for each
     # year
     long_term_cols <- c("mean_gdd", "sd_gdd")
-    temperature_summary <- wide_summary(x = temperature_summary, 
-                                 id_col = id_column_name, 
+    temperature_summary <- wide_summary(x = temperature_summary,
+                                 id_col = id_column_name,
                                  long_term_cols = long_term_cols)
   }
   temperature_summary <- as.data.frame(temperature_summary)
