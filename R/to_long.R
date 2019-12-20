@@ -12,8 +12,7 @@
 #' @import tidyr
 #' @import dplyr
 #' @importFrom magrittr %>%
-to_long <- function(data, keep_cols = 1, date_sep = "_",
-                    tidy_date = FALSE, tidy_paste = FALSE) {
+to_long <- function(data, keep_cols = 1, date_sep = "_") {
   # Store names of columns to retain in output
   keep_col_names <- colnames(data)[keep_cols]
   
@@ -26,57 +25,18 @@ to_long <- function(data, keep_cols = 1, date_sep = "_",
                         -keep_cols)
   
   # Parse key column into year, month, day
-  
-  # Original implementation:
-  # long_data <- long_data %>%
-  #   # Start by creating a new column called "date"
-  #   tidyr::separate(col = col_name, into = c(NA, "date"), sep = date_sep) %>%
-  #   # Parse out the separate parts of the date
-  #   dplyr::mutate(year = substr(x = date, start = 1, stop = 4),
-  #                 month = substr(x = date, start = 5, stop = 6),
-  #                 day = substr(x = date, start = 7, stop = 8)) %>%
-  #   # Make a single column for Date
-  #   dplyr::mutate(date = as.Date(paste0(year, "-", month, "-", day))) %>%
-  #   # Drop the year, month, day columns
-  #   dplyr::select(keep_col_names, date, value)
-
-########################################
-# Begin benchmark testing code
   long_data <- long_data %>%
     # Start by creating a new column called "date"
     tidyr::separate(col = col_name, into = c(NA, "date"), sep = date_sep) %>%
     # Parse out the separate parts of the date
     dplyr::mutate(year = substr(x = date, start = 1, stop = 4),
                   month = substr(x = date, start = 5, stop = 6),
-                  day = substr(x = date, start = 7, stop = 8))
-  
-  # Make a single column for Date, depending on method for benchmarking
-  if (tidy_date) {
-      if (tidy_paste) {
-        # Use lubridate::as_date and stringr::str_c
-        long_data <- long_data %>%
-          dplyr::mutate(date = lubridate::as_date(stringr::str_c(year, "-", month, "-", day)))
-      } else {
-        # Use lubridate::as_date and paste0
-        long_data <- long_data %>%
-          dplyr::mutate(date = lubridate::as_date(paste0(year, "-", month, "-", day)))
-      }
-    } else if(tidy_paste) {
-      # Use as.Date and stringr::str_c      
-      long_data <- long_data %>%
-        dplyr::mutate(date = as.Date(stringr::str_c(year, "-", month, "-", day)))
-    } else {
-      # Use as.Date and paste0 (original implementation)
-      long_data <- long_data %>%
-        dplyr::mutate(date = as.Date(paste0(year, "-", month, "-", day)))
-    } 
-      
+                  day = substr(x = date, start = 7, stop = 8)) %>%
+    # Make a single column for Date
+    dplyr::mutate(date = lubridate::as_date(stringr::str_c(year, "-", month, "-", day))) %>%
     # Drop the year, month, day columns
-    long_data <- long_data %>% dplyr::select(keep_col_names, date, value)
-    
-# End benchmark testing code
-########################################
-    
+    dplyr::select(keep_col_names, date, value)
+
   # Warn users if any date funniness happens
   if (any(is.na(long_data$date))) {
     warning("Some columns could not be parsed into dates; this can occur if text parsing results in impossible dates, such as 30 February 1983")
