@@ -12,6 +12,8 @@
 #' @import tidyr
 #' @import dplyr
 #' @importFrom magrittr %>%
+#' @importFrom stringr str_c
+#' @importFrom lubridate as_date
 to_long <- function(data, keep_cols = 1, date_sep = "_") {
   # Store names of columns to retain in output
   keep_col_names <- colnames(data)[keep_cols]

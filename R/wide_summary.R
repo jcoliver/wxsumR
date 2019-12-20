@@ -30,8 +30,14 @@ wide_summary <- function(x, id_col, year_col = "season_year", long_term_cols = "
     dplyr::select(id_col, long_term_cols) %>%
     dplyr::distinct()
   
-  # Merge long-formatted data with long-term stats
-  merged_wide <- merge(x = x_wide, y = long_term_stats)
+  # Identify shared columns to avoid messaging from dplyr::full_join
+  merge_cols <- dplyr::intersect(x = colnames(x = x_wide), 
+                                 y = colnames(long_term_stats))
   
+  # Merge long-formatted data with long-term stats
+  merged_wide <- dplyr::full_join(x = x_wide,
+                                  y = long_term_stats,
+                                  by = merge_cols)
+
   return(merged_wide)
 }

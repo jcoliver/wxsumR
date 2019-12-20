@@ -13,7 +13,7 @@
 # parallelization
 # With large data, RAM increases at to_long, releasing a little bit back at the
 # end, increases again with enumerate_seasons, giving a little back at the end,
-# then takes a little more end performing summary calculations of
+# then takes a little more when performing summary calculations of
 # enumerate_rainfall; RAM is *not* given back, even when large data objects are
 # removed from memory via `rm`. Only when R was restarted was the RAM
 # released. ***MEMORY LEAK***
@@ -164,12 +164,4 @@ for (infile in input_files) {
 
   # Get rid of larger data objects
   rm(data_summary, long_data, orig_data)
-  # message("Process complete. Reported times:")
-  # message(paste0("to_long: ", long_end - long_start))
-  # message(paste0("enumerate_seasons: ", enum_end - enum_start))
-  # message(paste0("summarize_rainfall total time: ", summ_end - summ_start))
-  # message(paste0("\tFirst set of calculations: ", summ_second - summ_first))
-  # message(paste0("\tSecond set of calculations: ", summ_third - summ_second))
-  # message(paste0("\tThird set of calculations: ", summ_fourth - summ_third))
-  # message(paste0("\tConversion to wide (if applicable): ", summ_fifth - summ_fourth))
 }

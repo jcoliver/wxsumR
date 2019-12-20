@@ -21,12 +21,12 @@
 #'   will be zero}
 #' }
 #'
-#' @importFrom stringr str_split
+#' @importFrom stringr str_split str_c
 dry_interval <- function(x, rain_cutoff = 1, period = c("start", "mid", "end")) {
   # A string that is a concatenation of 0s and 1s, where 0s are days where
   # rainfall is below rain_cutoff and 1s are days where rain is above
   # rain_cutoff
-  rain_string <- paste0(as.integer(x >= rain_cutoff), collapse = "")
+  rain_string <- stringr::str_c(as.integer(x >= rain_cutoff), collapse = "")
   
   # Split the string into a vector using 1 as delimiter; results in vector that
   # has empty character strings (previously had values of 1) and strings of

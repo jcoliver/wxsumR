@@ -1,7 +1,6 @@
 # TODO: Given the wrapper nature of this function, would be good to add some
 # defensive programming here
-# File exists
-# No February 29, or at least a warning
+# + No February 29, or at least a warning
 
 # TODO: Add parameter for site id (could assume column 1)
 
@@ -26,19 +25,19 @@
 #' @seealso \code{\link{summarize_temperature}} 
 #' @export
 #' @import dplyr
+#' @importFrom tidyr drop_na
 #' @importFrom stats median na.omit sd
 #' @importFrom utils read.csv
 summarize_rainfall <- function(rain, start_month, end_month,
                                start_day = 15, end_day = start_day,
                                rain_cutoff = 1, na.rm = TRUE, wide = TRUE) {
-  # Read in the data
-  # rain <- read.csv(file = inputfile)
 
   # Use to_long to convert to long format and parse column names into dates
   rain_long <- to_long(data = rain)
 
   # Exclude NA dates
-  rain_long <- rain_long[!is.na(rain_long$date), ]
+  rain_long <- rain_long %>%
+    tidyr::drop_na(date)
 
   # Enumerate seasons
   rain_long <- enumerate_seasons(data = rain_long,

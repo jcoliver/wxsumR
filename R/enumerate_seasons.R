@@ -14,6 +14,8 @@
 #' defaults to \code{start_day}
 #'
 #' @return data frame with new columns, "season" and "season_year"
+#' 
+#' @importFrom tidyr drop_na
 enumerate_seasons <- function(data, start_month, end_month, start_day = 15,
                               end_day = start_day) {
   if (start_month < 1 | start_month > 12) {
@@ -35,7 +37,7 @@ enumerate_seasons <- function(data, start_month, end_month, start_day = 15,
                                   start_day = start_day,
                                   end_day = end_day)
 
-  data <- na.omit(data)
+  data <- tidyr::drop_na(data)
   return(data)
 }
 
@@ -51,7 +53,8 @@ enumerate_seasons <- function(data, start_month, end_month, start_day = 15,
 #'
 #' @return  integer vector of season year to which observation corresponds to
 #' 
-#' @importFrom lubridate year
+#' @importFrom lubridate year as_date
+#' @importFrom stringr str_c
 season_year <- function(x, start_month, end_month, start_day = 15,
                         end_day = start_day) {
   # Will hold return value
@@ -61,8 +64,8 @@ season_year <- function(x, start_month, end_month, start_day = 15,
   obs_year <- lubridate::year(x)
 
   # Starting and ending dates based on x's year
-  start_OBSY <- as.Date(paste0(obs_year, "-", start_month, "-", start_day))
-  end_OBSY <- as.Date(paste0(obs_year, "-", end_month, "-", end_day))
+  start_OBSY <- lubridate::as_date(stringr::str_c(obs_year, "-", start_month, "-", start_day))
+  end_OBSY <- lubridate::as_date(stringr::str_c(obs_year, "-", end_month, "-", end_day))
 
   # Logic for extracting season year depends on whether or not season includes
   # the new year

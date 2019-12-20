@@ -28,20 +28,20 @@
 #' @seealso \code{\link{summarize_rainfall}}
 #' @export
 #' @import dplyr
+#' @importFrom tidyr drop_na
 #' @importFrom stats median na.omit sd
 #' @importFrom utils read.csv
 summarize_temperature <- function(temperature, start_month, end_month,
                                   start_day = 15, end_day = start_day,
                                   growbase_low = 10, growbase_high = 30,
                                   na.rm = TRUE, wide = TRUE) {
-  # Read in the data
-  # temperature <- read.csv(file = inputfile)
 
   # Use to_long to convert to long format and parse column names into dates
   temperature_long <- to_long(data = temperature)
 
   # Exclude NA dates
-  temperature_long <- temperature_long[!is.na(temperature_long$date), ]
+  temperature_long <- temperature_long %>%
+    tidyr::drop_na(date)
 
   # Enumerate seasons
   temperature_long <- enumerate_seasons(data = temperature_long,
