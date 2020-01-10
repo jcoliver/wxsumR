@@ -1,4 +1,4 @@
-# Benchmarking components of enumerate_rainfall for big data solution
+# Benchmarking components of summarize_rainfall for big data solution
 # Jeffrey C. Oliver
 # jcoliver@email.arizona.edu
 # 2019-12-13

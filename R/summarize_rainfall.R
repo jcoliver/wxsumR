@@ -48,7 +48,7 @@ summarize_rainfall <- function(rain, start_month, end_month,
 
   # Assume first column has site id
   id_column_name <- colnames(rain_long)[1]
-
+  
   # Start with calculating basic statistics, including the longest number of
   # consecutive days without rain in the period
   rain_summary <- rain_long %>%

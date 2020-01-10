@@ -12,7 +12,8 @@ rm(list = ls())
 library(weathercommand)
 library(parallel)
 
-infile <- "data/input-rain-small.csv"
+# infile <- "data/input-rain-small.csv"
+infile <- "data/input-rain-medium.csv"
 outfile <- NULL
 
 test_data <- read.csv(file = infile)
@@ -25,7 +26,19 @@ end_day <- 25
 # Try just using lapply
 # Have to make this a list of one-row data frames before sending to lapply
 # TODO: Look at dplyr::group_split, too
-test_list <- split(x = test_data, f = seq(nrow(test_data)))
+test_list <- split(x = test_data, f = seq(nrow(test_data)), drop = TRUE)
+# test_list <- test_data %>%
+#   dplyr::group_by(y4_hhid) %>%
+#   dplyr::group_split()
+# With medium sized data, this is throwing the warning 
+# Factor `y4_hhid` contains implicit NA, consider using `forcats::fct_explicit_na`
+# It is being thrown in the first set of summary calculations in 
+# summarize_rainfall, probably at this line:
+# dplyr::group_by(season_year, !!as.name(id_column_name)) %>%
+
+# Attempt to fix by dropping unused levels in summarize_rainfall via 
+# rain_long[, id_column_name] <- droplevels(x = rain_long[, id_column_name])
+# Did not solve this problem
 lapply_summary <- lapply(X = test_list,
                          FUN = summarize_rainfall,
                          start_month = start_month,
@@ -33,7 +46,6 @@ lapply_summary <- lapply(X = test_list,
                          start_day = start_day,
                          end_day = end_day,
                          wide = FALSE)
-# rain_summary <- unsplit(value = lapply_summary, f = seq(length(lapply_summary)))
 rain_summary <- dplyr::bind_rows(lapply_summary)
 
 # Set up the cluster for parallel processing
@@ -45,7 +57,7 @@ clusterEvalQ(clust, library(weathercommand))
 
 # Apply to each row
 par_start <- Sys.time()
-test_list <- split(x = test_data, f = seq(nrow(test_data)))
+test_list <- split(x = test_data, f = seq(nrow(test_data)), drop = TRUE)
 par_summary <- parLapply(cl = clust,
                          X = test_list,
                          fun = summarize_rainfall,
