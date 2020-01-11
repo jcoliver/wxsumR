@@ -61,9 +61,9 @@ summarize_rainfall <- function(rain, start_month, end_month,
                      norain = sum(x = value < rain_cutoff, na.rm = na.rm),
                      raindays = sum(x = value >= rain_cutoff, na.rm = na.rm),
                      raindays_percent = sum(x = value >= rain_cutoff, na.rm = na.rm)/dplyr::n(),
-                     dry = dry_interval(x = value, rain_cutoff = rain_cutoff, period = "mid"),
-                     dry_start = dry_interval(x = value, rain_cutoff = rain_cutoff, period = "start"),
-                     dry_end = dry_interval(x = value, rain_cutoff = rain_cutoff, period = "end"))
+                     dry = dry_interval(x = value, rain_cutoff = rain_cutoff, period = "mid", na.rm = na.rm),
+                     dry_start = dry_interval(x = value, rain_cutoff = rain_cutoff, period = "start", na.rm = na.rm),
+                     dry_end = dry_interval(x = value, rain_cutoff = rain_cutoff, period = "end", na.rm = na.rm))
   
   # Add long-term values mean and standard-deviation values
   rain_summary <- dplyr::ungroup(rain_summary) %>%

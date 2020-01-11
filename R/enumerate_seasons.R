@@ -37,7 +37,8 @@ enumerate_seasons <- function(data, start_month, end_month, start_day = 15,
                                   start_day = start_day,
                                   end_day = end_day)
 
-  data <- tidyr::drop_na(data)
+  # data <- tidyr::drop_na(data)
+  data <- tidyr::drop_na(data = data, season_year)
   return(data)
 }
 
