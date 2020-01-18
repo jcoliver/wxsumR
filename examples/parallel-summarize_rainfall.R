@@ -7,8 +7,13 @@ rm(list = ls())
 
 ################################################################################
 # Remember https://www.r-bloggers.com/how-to-go-parallel-in-r-basics-tips/
-# With small data set, parallel takes longer (0.8 vs. 2.4 seconds). See what 
-# happens with larger data set
+# With small data set, parallel takes longer (0.8 vs. 2.4 seconds).
+# With medium data set, parallel still takes longer (10.7 vs. 22.8 seconds); a 
+# substantial part of this is setting up the cluster and breaking the data into 
+# a list object (9.9 seconds), but even just the parallel execution of 
+# summarize_rainfall takes 12.8 seconds. Consider a dplyr analog to split.
+# Also test with large data. If original implementation works and still outpaces
+# parallel approach, probably not worth it to parallelize
 library(weathercommand)
 library(parallel)
 
@@ -174,7 +179,35 @@ rain_summary <- rain_long %>%
 
 # Close, but in this case, the value of dry returned is 0 (for every year). It 
 # should be NA
+# UPDATE: Works as expected, after adding intial check to dry_interval for 
+# vector of all NA values
 
+# Try on row of _good_ data to make sure it works
+rain_long <- weathercommand:::to_long(data = test_data[213, ])
+
+# Exclude NA dates
+library(magrittr)
+rain_long <- rain_long %>%
+  tidyr::drop_na(date) # works fine, too. All rows still there
+
+# Enumerate seasons <- This drops all rows because each row has an NA value
+rain_long <- weathercommand:::enumerate_seasons(data = rain_long,
+                                                start_month = start_month,
+                                                end_month = end_month,
+                                                start_day = start_day,
+                                                end_day = end_day)
+
+# Assume first column has site id
+id_column_name <- colnames(rain_long)[1]
+
+# Start with calculating basic statistics, including the longest number of
+# consecutive days without rain in the period
+na.rm <- TRUE
+rain_cutoff <- 1.5
+rain_summary <- rain_long %>%
+  dplyr::group_by(season_year, !!as.name(id_column_name)) %>%
+  dplyr::summarize(mean_season = mean(x = value, na.rm = na.rm),
+                   dry = weathercommand:::dry_interval(x = value, rain_cutoff = rain_cutoff, period = "mid", na.rm = na.rm))
 
 
 ########################################
@@ -188,6 +221,7 @@ clusterEvalQ(clust, library(weathercommand))
 # Apply to each row
 par_start <- Sys.time()
 test_list <- split(x = test_data, f = seq(nrow(test_data)), drop = TRUE)
+par_sum_start <- Sys.time()
 par_summary <- parLapply(cl = clust,
                          X = test_list,
                          fun = summarize_rainfall,
@@ -196,6 +230,7 @@ par_summary <- parLapply(cl = clust,
                          start_day = start_day,
                          end_day = end_day,
                          wide = FALSE)
+par_sum_end <- Sys.time()
 stopCluster(cl = clust)
 rain_summary <- dplyr::bind_rows(par_summary)
 par_end <- Sys.time()
@@ -216,3 +251,8 @@ message(paste0("Original implementation time: ", orig_time, " seconds"))
 par_time <- difftime(time1 = par_end, time2 = par_start, units = "secs")
 par_time <- round(x = par_time, digits = 3)
 message(paste0("Parallel implementation time: ", par_time, " seconds"))
+
+par_sum_time <- difftime(time1 = par_sum_end, time2 = par_sum_start, units = "secs")
+par_sum_time <- round(x = par_sum_time, digits = 3)
+message(paste0("Time for parLapply call: ", par_sum_time, " seconds"))
+message(paste0("Additional parallel processing time (incl. split call): ", (par_time - par_sum_time), " seconds"))

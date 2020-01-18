@@ -32,6 +32,11 @@ dry_interval <- function(x, rain_cutoff = 1, period = c("start", "mid", "end"),
   # Vector of 0s and 1s, where 0s are days where rainfall is below rain_cutoff 
   # and 1s are days where rain is above rain_cutoff
   rain_binary <- as.integer(x >= rain_cutoff)
+  
+  # If all values are NA, return NA
+  if (all(is.na(rain_binary))) {
+    return(NA)
+  }
 
   # For the purposes of this calculation, if na.rm is TRUE, we need to 
   # eliminate NA values from the rain_binary vector, but we cannot simply drop 
