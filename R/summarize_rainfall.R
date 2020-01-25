@@ -19,6 +19,8 @@
 #' treatment of \code{NA} values
 #' @param wide         logical indicating whether or not to output as wide-
 #' formatted data
+#' @param cleanup      logical for doing garbage collection; largely for 
+#' developmental purposes
 #'
 #' @return data frame with rainfall summary statistics
 #'
@@ -30,11 +32,17 @@
 #' @importFrom utils read.csv
 summarize_rainfall <- function(rain, start_month, end_month,
                                start_day = 15, end_day = start_day,
-                               rain_cutoff = 1, na.rm = TRUE, wide = TRUE) {
+                               rain_cutoff = 1, na.rm = TRUE, wide = TRUE,
+                               cleanup = FALSE) {
 
   # Use to_long to convert to long format and parse column names into dates
   rain_long <- to_long(data = rain)
 
+  if (cleanup) {
+    rm(rain)
+    gc()
+  }
+  
   # Exclude NA dates
   rain_long <- rain_long %>%
     tidyr::drop_na(date)
@@ -46,6 +54,10 @@ summarize_rainfall <- function(rain, start_month, end_month,
                                  start_day = start_day,
                                  end_day = end_day)
 
+  if (cleanup) {
+    gc()
+  }
+  
   # Assume first column has site id
   id_column_name <- colnames(rain_long)[1]
   
@@ -64,6 +76,11 @@ summarize_rainfall <- function(rain, start_month, end_month,
                      dry = dry_interval(x = value, rain_cutoff = rain_cutoff, period = "mid", na.rm = na.rm),
                      dry_start = dry_interval(x = value, rain_cutoff = rain_cutoff, period = "start", na.rm = na.rm),
                      dry_end = dry_interval(x = value, rain_cutoff = rain_cutoff, period = "end", na.rm = na.rm))
+  
+  if (cleanup) {
+    rm(rain_long)
+    gc()
+  }
   
   # Add long-term values mean and standard-deviation values
   rain_summary <- dplyr::ungroup(rain_summary) %>%
@@ -99,5 +116,12 @@ summarize_rainfall <- function(rain, start_month, end_month,
                                  long_term_cols = long_term_cols)
   }
   rain_summary <- as.data.frame(rain_summary)
+  
+  if (cleanup) {
+    rm(id_column_name, start_month, end_month, 
+       start_day, end_day, rain_cutoff, na.rm, wide)
+    gc()
+  }
+  
   return(rain_summary)
 }
