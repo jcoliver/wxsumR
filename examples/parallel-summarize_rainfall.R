@@ -12,7 +12,7 @@ rm(list = ls())
 # substantial part of this is setting up the cluster and breaking the data into 
 # a list object (9.9 seconds), but even just the parallel execution of 
 # summarize_rainfall takes 12.8 seconds. Consider a dplyr analog to split.
-# With large data set, the parallel approach takes longer (203 vs. 62 seconds);
+# With large data set, the parallel approach takes longer (62 vs. 203 seconds);
 # even just the parLapply execution takes a substantial amount of time (153) 
 # seconds.
 
@@ -35,6 +35,7 @@ rm(list = ls())
 
 library(weathercommand)
 library(parallel)
+library(profmem)
 
 # infile <- "data/input-rain-small.csv"
 infile <- "data/input-rain-medium.csv"
@@ -105,3 +106,4 @@ par_sum_time <- round(x = par_sum_time, digits = 3)
 message(paste0("Time for parLapply call: ", par_sum_time, " seconds"))
 message(paste0("Additional parallel processing time (incl. split call): ", 
                round(par_time - par_sum_time, digits = 3), " seconds"))
+
