@@ -19,8 +19,10 @@
 #' treatment of \code{NA} values
 #' @param wide         logical indicating whether or not to output as wide-
 #' formatted data
+#' @param return_df    logical indicating whether to return a data frame 
+#' (default) or tibble
 #'
-#' @return data frame with rainfall summary statistics
+#' @return tibble with rainfall summary statistics
 #'
 #' @seealso \code{\link{summarize_temperature}} 
 #' @export
@@ -98,7 +100,6 @@ summarize_rainfall <- function(rain, start_month, end_month,
                                  id_col = id_column_name, 
                                  long_term_cols = long_term_cols)
   }
-  rain_summary <- as.data.frame(rain_summary)
   
   return(rain_summary)
 }

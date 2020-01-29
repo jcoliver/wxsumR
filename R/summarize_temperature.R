@@ -23,7 +23,7 @@
 #' @param wide         logical indicating whether or not to output as wide-
 #' formatted data
 #'
-#' @return data frame with temperature summary statistics
+#' @return tibble with temperature summary statistics
 #'
 #' @seealso \code{\link{summarize_rainfall}}
 #' @export
@@ -95,6 +95,6 @@ summarize_temperature <- function(temperature, start_month, end_month,
                                  id_col = id_column_name,
                                  long_term_cols = long_term_cols)
   }
-  temperature_summary <- as.data.frame(temperature_summary)
+
   return(temperature_summary)
 }
