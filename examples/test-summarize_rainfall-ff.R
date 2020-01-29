@@ -1,14 +1,14 @@
 # Attempt to use ff package so as to preserve some RAM
 # Jeff Oliver
 # jcoliver@email.arizona.edu
-# 2020-01-08
+# 2020-01-28
 
 rm(list = ls())
 
 ################################################################################
 # Attempt to use ff package, which references data on disk instead of loading 
 # into RAM. Just using ff with original data read probably won't change much,
-# but perhaps it's a start
+# but perhaps it's a start. Nope. All sorts of crashy-crash.
 
 library(weathercommand)
 library(ff)
@@ -17,7 +17,7 @@ library(ff)
 infile <- "data/input-rain-medium.csv"
 # infile <- "data/input-rain-large.csv"
 
-test_data <- read.csv(file = infile)
+test_data <- ff::read.csv.ffdf(file = infile)
 
 start_month <- 11
 end_month <- 02
