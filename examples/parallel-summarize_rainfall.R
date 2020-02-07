@@ -21,6 +21,11 @@ rm(list = ls())
 # Data    original   rbr-||  smart-||
 # small      2.8       3.2      1.6
 # medium    32.3      41.4     19.5
+# (finally!). On 8-core desktop:
+# Data    original   rbr-||  smart-||
+# small      1.3       1.8      0.4
+# medium     9.9      13.2      2.9
+# large     47.5     151.9     16.3
 
 # There is still a MASSIVE memory leak. After running this with the large data
 # and clearing the environment with rm(list = ls()), the rsession was still
@@ -36,8 +41,8 @@ library(parallel)
 library(tidyverse)
 
 # infile <- "data/input-rain-small.csv"
-infile <- "data/input-rain-medium.csv"
-# infile <- "data/input-rain-large.csv"
+# infile <- "data/input-rain-medium.csv"
+infile <- "data/input-rain-large.csv"
 
 test_data <- read.csv(file = infile)
 
@@ -56,6 +61,11 @@ rain_summary <- summarize_rainfall(rain = test_data,
                                    end_day = end_day,
                                    wide = FALSE)
 orig_end <- Sys.time()
+
+# Time reporting
+orig_time <- difftime(time1 = orig_end, time2 = orig_start, units = "secs")
+orig_time <- round(x = orig_time, digits = 3)
+message(paste0("Original implementation time: ", orig_time, " seconds"))
 
 ########################################
 # Cluster approach for parallel
@@ -88,6 +98,11 @@ stopCluster(cl = clust)
 rain_summary <- dplyr::bind_rows(par_summary)
 
 rbr_par_end <- Sys.time()
+
+# Time reporting
+rbr_par_time <- difftime(time1 = rbr_par_end, time2 = rbr_par_start, units = "secs")
+rbr_par_time <- round(x = rbr_par_time, digits = 3)
+message(paste0("Row-by-row || implementation time: ", rbr_par_time, " seconds"))
 
 ####################
 # Parallel with list of length num_cores
@@ -123,6 +138,11 @@ rain_summary <- dplyr::bind_rows(par_summary)
 
 smart_par_end <- Sys.time()
 
+# Time reporting
+smart_par_time <- difftime(time1 = smart_par_end, time2 = smart_par_start, units = "secs")
+smart_par_time <- round(x = smart_par_time, digits = 3)
+message(paste0("'Smart' || implementation time: ", smart_par_time, " seconds"))
+
 ####################
 # Previous implementation
 # Have to make this a list of one-row data frames before sending to lapply
@@ -145,24 +165,3 @@ smart_par_end <- Sys.time()
 # stopCluster(cl = clust)
 # rain_summary <- dplyr::bind_rows(par_summary)
 # par_end <- Sys.time()
-
-########################################
-# Time reporting
-orig_time <- difftime(time1 = orig_end, time2 = orig_start, units = "secs")
-orig_time <- round(x = orig_time, digits = 3)
-message(paste0("Original implementation time: ", orig_time, " seconds"))
-
-rbr_par_time <- difftime(time1 = rbr_par_end, time2 = rbr_par_start, units = "secs")
-rbr_par_time <- round(x = rbr_par_time, digits = 3)
-message(paste0("Row-by-row || implementation time: ", rbr_par_time, " seconds"))
-
-smart_par_time <- difftime(time1 = smart_par_end, time2 = smart_par_start, units = "secs")
-smart_par_time <- round(x = smart_par_time, digits = 3)
-message(paste0("'Smart' || implementation time: ", smart_par_time, " seconds"))
-
-# par_sum_time <- difftime(time1 = par_sum_end, time2 = par_sum_start, units = "secs")
-# par_sum_time <- round(x = par_sum_time, digits = 3)
-# message(paste0("Time for parLapply call: ", par_sum_time, " seconds"))
-# message(paste0("Additional parallel processing time (incl. split call): ",
-#                round(par_time - par_sum_time, digits = 3), " seconds"))
-
