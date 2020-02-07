@@ -21,21 +21,12 @@ rm(list = ls())
 # holding onto 3.4 GB of RAM. A call to gc() freed up a little bit (0.4 GB), but 
 # still not enough.
 
-# Try the .ls.objects function at https://stackoverflow.com/questions/1358003/tricks-to-manage-the-available-memory-in-an-r-session
-# to see if there is something hanging around. Especially after an rm() call. 
-
-# See also https://cran.r-project.org/web/packages/profmem/vignettes/profmem.html
-# for using profmem
-
-# Also in the thread of the above SO topic is this quote: 
-#   "If you really want to avoid the leaks, you should avoid creating any big 
-#   objects in the global environment. What I usually do is to have a function 
-#   that does the job and returns NULL — all data is read and manipulated in 
-#   this function or others that it calls."
+# UPDATE: more likely memory fragmentation than an actual leak. Little to be 
+# done about this. Consider smarter parallelization using data.table instead 
+# of dplyr
 
 library(weathercommand)
 library(parallel)
-library(profmem)
 
 # infile <- "data/input-rain-small.csv"
 infile <- "data/input-rain-medium.csv"
@@ -58,6 +49,13 @@ clusterEvalQ(clust, library(weathercommand))
 
 # Apply to each row
 par_start <- Sys.time()
+
+# Attempt with better parallelization. Instead of spliting into single-row 
+# data frames, split into num_cores data frames. Need to start by creating an 
+# indicator by which to split (can work with split or dplyr::group_split)
+# IN DEVELOPMENT
+# group_var <- rep(x = 1:num_cores, each = floor(15/num_cores))[1:15]
+group_var <- sort(rep(x = 1:num_cores, length = nrow(test_data)))
 
 # Have to make this a list of one-row data frames before sending to lapply
 # test_list <- split(x = test_data, f = seq(nrow(test_data)), drop = TRUE)
