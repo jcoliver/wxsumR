@@ -5,17 +5,11 @@
 
 rm(list = ls())
 
+# TODO: Make sure split_var isn't causing any problems with calculations, as it 
+# persists through the group_split function...
+
 ################################################################################
 # Remember https://www.r-bloggers.com/how-to-go-parallel-in-r-basics-tips/
-# With small data set, parallel takes longer (0.8 vs. 2.4 seconds).
-# With medium data set, parallel still takes longer (10.7 vs. 22.8 seconds); a
-# substantial part of this is setting up the cluster and breaking the data into
-# a list object (9.9 seconds), but even just the parallel execution of
-# summarize_rainfall takes 12.8 seconds. Consider a dplyr analog to split.
-# With large data set, the parallel approach takes longer (62 vs. 203 seconds);
-# even just the parLapply execution takes a substantial amount of time (153)
-# seconds.
-
 # Doing this with better parallelization, we see the advantage of parallel
 # (finally!). On 4-core laptop:
 # Data    original   rbr-||  smart-||
@@ -27,22 +21,13 @@ rm(list = ls())
 # medium     9.9      13.2      2.9
 # large     47.5     151.9     16.3
 
-# There is still a MASSIVE memory leak. After running this with the large data
-# and clearing the environment with rm(list = ls()), the rsession was still
-# holding onto 3.4 GB of RAM. A call to gc() freed up a little bit (0.4 GB), but
-# still not enough.
-
-# UPDATE: more likely memory fragmentation than an actual leak. Little to be
-# done about this. Consider smarter parallelization and using data.table instead
-# of dplyr
-
 library(weathercommand)
 library(parallel)
 library(tidyverse)
 
-# infile <- "data/input-rain-small.csv"
+infile <- "data/input-rain-small.csv"
 # infile <- "data/input-rain-medium.csv"
-infile <- "data/input-rain-large.csv"
+# infile <- "data/input-rain-large.csv"
 
 test_data <- read.csv(file = infile)
 
@@ -118,6 +103,7 @@ smart_par_start <- Sys.time()
 # indicator by which to split (can work with split or dplyr::group_split)
 split_var <- sort(rep(x = 1:num_cores, length = nrow(test_data)))
 test_data$split_var <- split_var[1:nrow(test_data)]
+
 # test_list <- split(x = test_data, f = test_data$split_var, drop = TRUE)
 test_list <-  test_data %>%
   dplyr::group_by(split_var) %>%
