@@ -5,26 +5,20 @@
 
 rm(list = ls())
 
-# TODO: medium sized data throws
-# Error in quantile.default(x = value, probs = seq(from = 0, to = 1, by = 0.2)) : 
-#   missing values and NaN's not allowed if 'na.rm' is FALSE
-# likely due to an entire row of NA values when quantile gets called by 
-# summarize_temperature
-
 ################################################################################
 # On 8-core desktop:
 # Data    original   rbr-||  smart-||
-# small      1.5       1.5      0.5
-# medium    14.2      15.2      4.0
-# large      0.0     000.0     00.0
+# small      1.4       1.5      0.5
+# medium    13.1      14.3      3.7
+# large     60.2     138.6     42.8
 
 library(weathercommand)
 library(parallel)
 library(tidyverse)
 
 # infile <- "data/input-temperature-small.csv"
-infile <- "data/input-temperature-medium.csv"
-# infile <- "data/input-temperature-large.csv"
+# infile <- "data/input-temperature-medium.csv"
+infile <- "data/input-temperature-large.csv"
 
 test_data <- read.csv(file = infile)
 
@@ -91,6 +85,7 @@ message(paste0("Row-by-row || implementation time: ", rbr_par_time, " seconds"))
 
 ####################
 # Parallel with list of length num_cores
+num_cores <- detectCores() - 1
 clust <- makeCluster(num_cores)
 
 # Need to explicitly make weathercommand available on each node
