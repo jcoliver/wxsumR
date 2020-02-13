@@ -1,29 +1,30 @@
-# Attempt to parallize rain summary
+# Attempt to parallize temperature summary
 # Jeff Oliver
 # jcoliver@email.arizona.edu
-# 2020-01-08
+# 2020-02-12
 
 rm(list = ls())
 
+# TODO: medium sized data throws
+# Error in quantile.default(x = value, probs = seq(from = 0, to = 1, by = 0.2)) : 
+#   missing values and NaN's not allowed if 'na.rm' is FALSE
+# likely due to an entire row of NA values when quantile gets called by 
+# summarize_temperature
+
 ################################################################################
-# Doing this with better parallelization, we see the advantage of parallel
-# (finally!). On 4-core laptop:
-# Data    original   rbr-||  smart-||
-# small      2.8       3.2      1.6
-# medium    32.3      41.4     19.5
 # On 8-core desktop:
 # Data    original   rbr-||  smart-||
-# small      1.3       1.8      0.4
-# medium     9.9      13.2      2.9
-# large     47.5     151.9     16.3
+# small      1.5       1.5      0.5
+# medium    14.2      15.2      4.0
+# large      0.0     000.0     00.0
 
 library(weathercommand)
 library(parallel)
 library(tidyverse)
 
-infile <- "data/input-rain-small.csv"
-# infile <- "data/input-rain-medium.csv"
-# infile <- "data/input-rain-large.csv"
+# infile <- "data/input-temperature-small.csv"
+infile <- "data/input-temperature-medium.csv"
+# infile <- "data/input-temperature-large.csv"
 
 test_data <- read.csv(file = infile)
 
@@ -35,12 +36,12 @@ end_day <- 25
 ########################################
 # Original, serial implementation
 orig_start <- Sys.time()
-rain_summary <- summarize_rainfall(rain = test_data,
-                                   start_month = start_month,
-                                   end_month = end_month,
-                                   start_day = start_day,
-                                   end_day = end_day,
-                                   wide = FALSE)
+temperature_summary <- summarize_temperature(temperature = test_data,
+                                             start_month = start_month,
+                                             end_month = end_month,
+                                             start_day = start_day,
+                                             end_day = end_day,
+                                             wide = FALSE)
 orig_end <- Sys.time()
 
 # Time reporting
@@ -60,12 +61,12 @@ rbr_par_start <- Sys.time()
 
 # Create a list, which is needed by parLapply
 test_list <- test_data %>%
-  dplyr::group_by(y4_hhid) %>%
+  dplyr::group_by(hhid) %>%
   dplyr::group_split()
 
 par_summary <- parLapply(cl = clust,
                          X = test_list,
-                         fun = summarize_rainfall,
+                         fun = summarize_temperature,
                          start_month = start_month,
                          end_month = end_month,
                          start_day = start_day,
@@ -73,13 +74,13 @@ par_summary <- parLapply(cl = clust,
                          wide = FALSE)
 
 stopCluster(cl = clust)
-# rain_summary <- unsplit(value = par_summary, f = seq(length(par_summary)))
-rain_summary_rbr_par <- dplyr::bind_rows(par_summary)
+# temperature_summary <- unsplit(value = par_summary, f = seq(length(par_summary)))
+temperature_summary_rbr_par <- dplyr::bind_rows(par_summary)
 
-# Need to re-order, first by year, then by y4_hhid to be consistent with serial
+# Need to re-order, first by year, then by hhid to be consistent with serial
 # output
-rain_summary_rbr_par <- rain_summary_rbr_par %>%
-  arrange(season_year, y4_hhid)
+temperature_summary_rbr_par <- temperature_summary_rbr_par %>%
+  arrange(season_year, hhid)
 
 rbr_par_end <- Sys.time()
 
@@ -110,7 +111,7 @@ test_list <-  test_data %>%
 
 par_summary <- parLapply(cl = clust,
                          X = test_list,
-                         fun = summarize_rainfall,
+                         fun = summarize_temperature,
                          start_month = start_month,
                          end_month = end_month,
                          start_day = start_day,
@@ -118,13 +119,13 @@ par_summary <- parLapply(cl = clust,
                          wide = FALSE)
 
 stopCluster(cl = clust)
-# rain_summary <- unsplit(value = par_summary, f = seq(length(par_summary)))
-rain_summary_smart_par <- dplyr::bind_rows(par_summary)
+# temperature_summary <- unsplit(value = par_summary, f = seq(length(par_summary)))
+temperature_summary_smart_par <- dplyr::bind_rows(par_summary)
 
-# Need to re-order, first by year, then by y4_hhid to be consistent with serial
+# Need to re-order, first by year, then by hhid to be consistent with serial
 # output
-rain_summary_smart_par <- rain_summary_smart_par %>%
-  arrange(season_year, y4_hhid)
+temperature_summary_smart_par <- temperature_summary_smart_par %>%
+  arrange(season_year, hhid)
 
 smart_par_end <- Sys.time()
 

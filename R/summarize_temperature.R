@@ -62,23 +62,28 @@ summarize_temperature <- function(temperature, start_month, end_month,
                      median_season = median(x = value, na.rm = na.rm),
                      sd_season = sd(x = value, na.rm = na.rm),
                      skew_season = (mean(x = value, na.rm = na.rm) - median(x = value, na.rm = na.rm))/sd(x = value, na.rm = na.rm),
-                     max_season = max(value, na.rm = na.rm),
-                     gdd = sum(value >= growbase_low & value <= growbase_high),
-                     tempbin20 = sum(value < quantile(x = value, probs = seq(from = 0, to = 1, by = 0.2))[2]),
-                     tempbin40 = sum(value >= quantile(x = value, probs = seq(from = 0, to = 1, by = 0.2))[2] &
-                                       value < quantile(x = value, probs = seq(from = 0, to = 1, by = 0.2))[3]),
-                     tempbin60 = sum(value >= quantile(x = value, probs = seq(from = 0, to = 1, by = 0.2))[3] &
-                                       value < quantile(x = value, probs = seq(from = 0, to = 1, by = 0.2))[4]),
-                     tempbin80 = sum(value >= quantile(x = value, probs = seq(from = 0, to = 1, by = 0.2))[4] &
-                                       value < quantile(x = value, probs = seq(from = 0, to = 1, by = 0.2))[5]),
-                     tempbin100 = sum(value >= quantile(x = value, probs = seq(from = 0, to = 1, by = 0.2))[5] &
-                                        value <= quantile(x = value, probs = seq(from = 0, to = 1, by = 0.2))[6]))
+                     max_season = ifelse(test = is.finite(max(value, na.rm = na.rm)),
+                                         yes = max(value, na.rm = na.rm),
+                                         no = NA), # rows of all NA return -Inf by max()
+                     # max_season = if_else(condition = is.finite(max(value, na.rm = na.rm)),
+                     #                      true = max(value, na.rm = na.rm),
+                     #                      false = as.double(NA)), # rows of all NA return -Inf by max()
+                     gdd = sum(value >= growbase_low & value <= growbase_high, na.rm = na.rm),
+                     tempbin20 = sum(value < quantile(x = value, probs = seq(from = 0, to = 1, by = 0.2), na.rm = na.rm)[2], na.rm = na.rm),
+                     tempbin40 = sum(value >= quantile(x = value, probs = seq(from = 0, to = 1, by = 0.2), na.rm = na.rm)[2] &
+                                       value < quantile(x = value, probs = seq(from = 0, to = 1, by = 0.2), na.rm = na.rm)[3], na.rm = na.rm),
+                     tempbin60 = sum(value >= quantile(x = value, probs = seq(from = 0, to = 1, by = 0.2), na.rm = na.rm)[3] &
+                                       value < quantile(x = value, probs = seq(from = 0, to = 1, by = 0.2), na.rm = na.rm)[4], na.rm = na.rm),
+                     tempbin80 = sum(value >= quantile(x = value, probs = seq(from = 0, to = 1, by = 0.2), na.rm = na.rm)[4] &
+                                       value < quantile(x = value, probs = seq(from = 0, to = 1, by = 0.2), na.rm = na.rm)[5], na.rm = na.rm),
+                     tempbin100 = sum(value >= quantile(x = value, probs = seq(from = 0, to = 1, by = 0.2), na.rm = na.rm)[5] &
+                                        value <= quantile(x = value, probs = seq(from = 0, to = 1, by = 0.2), na.rm = na.rm)[6], na.rm = na.rm))
 
   # Calculate seasonal average and standard deviation for gdd
   temperature_summary <- dplyr::ungroup(temperature_summary) %>%
     dplyr::group_by(!!as.name(id_column_name)) %>%
-    dplyr::mutate(mean_gdd = mean(gdd),
-                  sd_gdd = sd(gdd))
+    dplyr::mutate(mean_gdd = mean(gdd, na.rm = na.rm),
+                  sd_gdd = sd(gdd, na.rm = na.rm))
 
   # Finally, calculate deviations from mean for each season, measured as
   # difference from the mean and as z-score
