@@ -35,3 +35,9 @@ large_data <- read.csv(file = "../large-data-files/NPSY1_x1_t1_daily.csv")
 
 # Small data, 100 x 2000
 write.csv(x = large_data[1:100, 1:2000], file = "data/input-temperature-small.csv", row.names = FALSE)
+
+# Medium data, 1000 x 2000; 10 times more rows than small data
+write.csv(x = large_data[1:1000, 1:2000], file = "data/input-temperature-medium.csv", row.names = FALSE)
+
+# Large data; 1000 x 10000; 10 times more rows, 5 times more columns than small
+write.csv(x = large_data[1:1000, 1:10000], file = "data/input-temperature-large.csv", row.names = FALSE)
