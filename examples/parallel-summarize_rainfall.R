@@ -5,11 +5,7 @@
 
 rm(list = ls())
 
-# TODO: Make sure split_var isn't causing any problems with calculations, as it 
-# persists through the group_split function...
-
 ################################################################################
-# Remember https://www.r-bloggers.com/how-to-go-parallel-in-r-basics-tips/
 # Doing this with better parallelization, we see the advantage of parallel
 # (finally!). On 4-core laptop:
 # Data    original   rbr-||  smart-||
@@ -53,18 +49,16 @@ orig_time <- round(x = orig_time, digits = 3)
 message(paste0("Original implementation time: ", orig_time, " seconds"))
 
 ########################################
-# Cluster approach for parallel
+# Row by row parallel, list of length nrows(test_data)
 num_cores <- detectCores() - 1
 clust <- makeCluster(num_cores)
 
 # Need to explicitly make weathercommand available on each node
 clusterEvalQ(clust, library(weathercommand))
 
-####################
-# Row by row parallel, list of length nrows(test_data)
 rbr_par_start <- Sys.time()
-# I don't think the split/unsplit works quite right
-# test_list <- split(x = test_data, f = seq(nrow(test_data)))
+
+# Create a list, which is needed by parLapply
 test_list <- test_data %>%
   dplyr::group_by(y4_hhid) %>%
   dplyr::group_split()
@@ -80,7 +74,12 @@ par_summary <- parLapply(cl = clust,
 
 stopCluster(cl = clust)
 # rain_summary <- unsplit(value = par_summary, f = seq(length(par_summary)))
-rain_summary <- dplyr::bind_rows(par_summary)
+rain_summary_rbr_par <- dplyr::bind_rows(par_summary)
+
+# Need to re-order, first by year, then by y4_hhid to be consistent with serial
+# output
+rain_summary_rbr_par <- rain_summary_rbr_par %>%
+  arrange(season_year, y4_hhid)
 
 rbr_par_end <- Sys.time()
 
@@ -104,7 +103,7 @@ smart_par_start <- Sys.time()
 split_var <- sort(rep(x = 1:num_cores, length = nrow(test_data)))
 test_data$split_var <- split_var[1:nrow(test_data)]
 
-# test_list <- split(x = test_data, f = test_data$split_var, drop = TRUE)
+# Create a list, which is needed by parLapply
 test_list <-  test_data %>%
   dplyr::group_by(split_var) %>%
   dplyr::group_split()
@@ -120,7 +119,12 @@ par_summary <- parLapply(cl = clust,
 
 stopCluster(cl = clust)
 # rain_summary <- unsplit(value = par_summary, f = seq(length(par_summary)))
-rain_summary <- dplyr::bind_rows(par_summary)
+rain_summary_smart_par <- dplyr::bind_rows(par_summary)
+
+# Need to re-order, first by year, then by y4_hhid to be consistent with serial
+# output
+rain_summary_smart_par <- rain_summary_smart_par %>%
+  arrange(season_year, y4_hhid)
 
 smart_par_end <- Sys.time()
 
@@ -128,26 +132,3 @@ smart_par_end <- Sys.time()
 smart_par_time <- difftime(time1 = smart_par_end, time2 = smart_par_start, units = "secs")
 smart_par_time <- round(x = smart_par_time, digits = 3)
 message(paste0("'Smart' || implementation time: ", smart_par_time, " seconds"))
-
-####################
-# Previous implementation
-# Have to make this a list of one-row data frames before sending to lapply
-# test_list <- split(x = test_data, f = seq(nrow(test_data)), drop = TRUE)
-# TODO: Look at dplyr::group_split, too
-# test_list <- test_data %>%
-#   dplyr::group_by(y4_hhid) %>%
-#   dplyr::group_split()
-#
-# par_sum_start <- Sys.time()
-# par_summary <- parLapply(cl = clust,
-#                          X = test_list,
-#                          fun = summarize_rainfall,
-#                          start_month = start_month,
-#                          end_month = end_month,
-#                          start_day = start_day,
-#                          end_day = end_day,
-#                          wide = FALSE)
-# par_sum_end <- Sys.time()
-# stopCluster(cl = clust)
-# rain_summary <- dplyr::bind_rows(par_summary)
-# par_end <- Sys.time()
