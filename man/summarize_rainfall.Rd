@@ -36,9 +36,12 @@ treatment of \code{NA} values}
 
 \item{wide}{logical indicating whether or not to output as wide-
 formatted data}
+
+\item{return_df}{logical indicating whether to return a data frame 
+(default) or tibble}
 }
 \value{
-data frame with rainfall summary statistics
+tibble with rainfall summary statistics
 }
 \description{
 Provides rainfall summary statistics

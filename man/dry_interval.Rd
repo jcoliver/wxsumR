@@ -4,7 +4,12 @@
 \alias{dry_interval}
 \title{Longest stretch of consecutive dry days}
 \usage{
-dry_interval(x, rain_cutoff = 1, period = c("start", "mid", "end"))
+dry_interval(
+  x,
+  rain_cutoff = 1,
+  period = c("start", "mid", "end"),
+  na.rm = TRUE
+)
 }
 \arguments{
 \item{x}{numeric vector of rainfall measurements}
@@ -12,6 +17,11 @@ dry_interval(x, rain_cutoff = 1, period = c("start", "mid", "end"))
 \item{rain_cutoff}{minimum amount of rainfall to count as non-dry day}
 
 \item{period}{period to measure longest dry spell; see \code{return}}
+
+\item{na.rm}{logical indicating treatment of \code{NA} values; by 
+default, \code{na.rm = TRUE}, \code{NA} values are ignored. If set to 
+\code{FALSE}, any \code{NA} values in \code{x} will result in a return value 
+of \code{NA}}
 }
 \value{
 numeric vector of length 1 with the number of days that have rainfall

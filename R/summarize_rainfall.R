@@ -15,16 +15,16 @@
 #' defaults to \code{start_day}
 #' @param rain_cutoff  numeric minimum value for daily rainfall to be counted as
 #' a rain day
-#' @param na.rm        logical passed to summary statistic functions indicating 
+#' @param na.rm        logical passed to summary statistic functions indicating
 #' treatment of \code{NA} values
 #' @param wide         logical indicating whether or not to output as wide-
 #' formatted data
-#' @param return_df    logical indicating whether to return a data frame 
+#' @param return_df    logical indicating whether to return a data frame
 #' (default) or tibble
 #'
 #' @return tibble with rainfall summary statistics
 #'
-#' @seealso \code{\link{summarize_temperature}} 
+#' @seealso \code{\link{summarize_temperature}}
 #' @export
 #' @import dplyr
 #' @importFrom tidyr drop_na
@@ -50,7 +50,7 @@ summarize_rainfall <- function(rain, start_month, end_month,
 
   # Assume first column has site id
   id_column_name <- colnames(rain_long)[1]
-  
+
   # Start with calculating basic statistics, including the longest number of
   # consecutive days without rain in the period
   rain_summary <- rain_long %>%
@@ -66,7 +66,7 @@ summarize_rainfall <- function(rain, start_month, end_month,
                      dry = dry_interval(x = value, rain_cutoff = rain_cutoff, period = "mid", na.rm = na.rm),
                      dry_start = dry_interval(x = value, rain_cutoff = rain_cutoff, period = "start", na.rm = na.rm),
                      dry_end = dry_interval(x = value, rain_cutoff = rain_cutoff, period = "end", na.rm = na.rm))
-  
+
   # Add long-term values mean and standard-deviation values
   rain_summary <- dplyr::ungroup(rain_summary) %>%
     dplyr::group_by(!!as.name(id_column_name)) %>%
@@ -78,7 +78,7 @@ summarize_rainfall <- function(rain, start_month, end_month,
                   sd_period_raindays = sd(x = raindays),
                   mean_period_raindays_percent = mean(x = raindays_percent),
                   sd_period_raindays_percent = sd(x = raindays_percent))
-  
+
   # Finally, calculate deviations as deviations from the mean; for total_season,
   # also report as a z-score
   rain_summary <- dplyr::ungroup(rain_summary) %>%
@@ -88,18 +88,18 @@ summarize_rainfall <- function(rain, start_month, end_month,
                   dev_raindays = raindays - mean_period_raindays,
                   dev_norain = norain - mean_period_norain,
                   dev_raindays_percent = raindays_percent - mean_period_raindays_percent)
-  
+
   if (wide) {
-    # Long-term columns won't be separated out into separate columns for each 
+    # Long-term columns won't be separated out into separate columns for each
     # year
-    long_term_cols <- c("mean_period_total_season", "sd_period_total_season", 
-                        "mean_period_norain", "sd_period_norain", 
-                        "mean_period_raindays", "sd_period_raindays", 
+    long_term_cols <- c("mean_period_total_season", "sd_period_total_season",
+                        "mean_period_norain", "sd_period_norain",
+                        "mean_period_raindays", "sd_period_raindays",
                         "mean_period_raindays_percent", "sd_period_raindays_percent")
-    rain_summary <- wide_summary(x = rain_summary, 
-                                 id_col = id_column_name, 
+    rain_summary <- wide_summary(x = rain_summary,
+                                 id_col = id_column_name,
                                  long_term_cols = long_term_cols)
   }
-  
+
   return(rain_summary)
 }

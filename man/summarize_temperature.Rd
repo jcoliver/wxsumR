@@ -11,7 +11,7 @@ summarize_temperature(
   start_day = 15,
   end_day = start_day,
   growbase_low = 10,
-  growbase_high = 20,
+  growbase_high = 30,
   na.rm = TRUE,
   wide = TRUE
 )
@@ -35,14 +35,14 @@ defaults to \code{start_day}}
 \item{growbase_high}{numeric upper bound for calculating growing degree days
 (inclusive)}
 
-\item{na.rm}{logical passed to summary statistic functions indicating 
+\item{na.rm}{logical passed to summary statistic functions indicating
 treatment of \code{NA} values}
 
 \item{wide}{logical indicating whether or not to output as wide-
 formatted data}
 }
 \value{
-data frame with temperature summary statistics
+tibble with temperature summary statistics
 }
 \description{
 Provides temperature summary statistics
