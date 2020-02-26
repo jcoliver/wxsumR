@@ -43,10 +43,20 @@ par_summarize_rainfall <- function(rain, num_cores = NULL, ...) {
 
   rain_summary_smart_par <- dplyr::bind_rows(par_summary)
 
-  # Re-order, first by year, then by id column to be consistent with serial
-  # output
-  rain_summary_smart_par <- rain_summary_smart_par %>%
-    arrange(season_year, y4_hhid)
+  # Need to re-order rows to be consistent with output from serial
+  # implementation, but re-ordering depends on whether or not the output is in
+  # wide or long format. The former will not have a season_year column, so a
+  # check for presence/absence of that column affords the type of re-ordering
+  # to do
+  if ("season_year" %in% colnames(rain_summary_smart_par)) {
+    # Long format, re-order by season_year, then id column
+    rain_summary_smart_par <- rain_summary_smart_par %>%
+      arrange(season_year, y4_hhid)
+  } else {
+    # Wide format, re-order only by id column
+    rain_summary_smart_par <- rain_summary_smart_par %>%
+      arrange(y4_hhid)
+  }
 
   return(rain_summary_smart_par)
 }

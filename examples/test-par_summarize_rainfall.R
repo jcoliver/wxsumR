@@ -8,9 +8,6 @@ rm(list = ls())
 ################################################################################
 library(weathercommand)
 # Delete below calls to library when ... gets figured out
-# library(tidyverse)
-# source(file = "R/par_summarize_rainfall.R")
-# source(file = "R/summarize_rainfall.R")
 
 infile <- "data/input-rain-small.csv"
 
@@ -19,7 +16,7 @@ test_data <- read.csv(file = infile)
 ########################################
 # Test 1, season includes new year
 test_num <- 1
-message(paste0("Running test ", test_num, " of summarize_rainfall"))
+message(paste0("Running test ", test_num, " of par_summarize_rainfall"))
 start_month <- 11
 end_month <- 02
 start_day <- 15
@@ -63,7 +60,7 @@ message(paste0("Test ", test_num, " time: ", test_time, " seconds"))
 ########################################
 # Test 2, season includes new year (same as test 1) but output wide format data
 test_num <- 2
-message(paste0("Running test ", test_num, " of summarize_rainfall"))
+message(paste0("Running test ", test_num, " of par_summarize_rainfall"))
 start_month <- 11
 end_month <- 02
 start_day <- 15
@@ -102,4 +99,4 @@ if (all(season_means == rain_summary$mean_season_1983)) {
 }
 test_time <- difftime(time1 = test_end, time2 = test_start, units = "secs")
 test_time <- round(x = test_time, digits = 3)
-message(paste0("Test ", test_num, " time: ", test_time, " minutes"))
+message(paste0("Test ", test_num, " time: ", test_time, " seconds"))
