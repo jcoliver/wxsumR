@@ -7,9 +7,8 @@ rm(list = ls())
 
 ################################################################################
 library(weathercommand)
-# Delete below calls to library when ... gets figured out
 
-infile <- "data/input-rain-small.csv"
+infile <- "data/input-rain-medium.csv"
 
 test_data <- read.csv(file = infile)
 
@@ -48,7 +47,7 @@ rain_summary <- par_summarize_rainfall(rain = test_data,
                                        end_day = end_day,
                                        wide = FALSE)
 test_end <- Sys.time()
-if (all(season_means == rain_summary$mean_season[rain_summary$season_year == 1983])) {
+if (all(summary(rain_summary$mean_season[rain_summary$season_year == 1983]) == summary(season_means))) {
   message("Test ", test_num, " PASS")
 } else {
   message("Test ", test_num, " FAIL")
@@ -92,7 +91,7 @@ rain_summary <- par_summarize_rainfall(rain = test_data,
                                        end_day = end_day,
                                        wide = TRUE)
 test_end <- Sys.time()
-if (all(season_means == rain_summary$mean_season_1983)) {
+if (all(summary(season_means) == summary(rain_summary$mean_season_1983))) {
   message("Test ", test_num, " PASS")
 } else {
   message("Test ", test_num, " FAIL")
