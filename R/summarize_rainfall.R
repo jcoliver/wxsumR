@@ -2,8 +2,6 @@
 # defensive programming here
 # + No February 29, or at least a warning
 
-# TODO: Add parameter for site id (could assume column 1)
-
 #' Provides rainfall summary statistics
 #'
 #' @param rain         data frame with daily rainfall data for each site
@@ -19,8 +17,7 @@
 #' treatment of \code{NA} values
 #' @param wide         logical indicating whether or not to output as wide-
 #' formatted data
-#' @param return_df    logical indicating whether to return a data frame
-#' (default) or tibble
+#' @param id_index     integer column index of unique site id
 #'
 #' @return tibble with rainfall summary statistics
 #'
@@ -32,10 +29,14 @@
 #' @importFrom utils read.csv
 summarize_rainfall <- function(rain, start_month, end_month,
                                start_day = 15, end_day = start_day,
-                               rain_cutoff = 1, na.rm = TRUE, wide = TRUE) {
+                               rain_cutoff = 1, na.rm = TRUE, wide = TRUE,
+                               id_index = 1) {
 
+  # Extract name of column with site id
+  id_column_name <- colnames(rain)[id_index]
+  
   # Use to_long to convert to long format and parse column names into dates
-  rain_long <- to_long(data = rain)
+  rain_long <- to_long(data = rain, keep_cols = id_index)
 
   # Exclude NA dates
   rain_long <- rain_long %>%
@@ -47,9 +48,6 @@ summarize_rainfall <- function(rain, start_month, end_month,
                                  end_month = end_month,
                                  start_day = start_day,
                                  end_day = end_day)
-
-  # Assume first column has site id
-  id_column_name <- colnames(rain_long)[1]
 
   # Start with calculating basic statistics, including the longest number of
   # consecutive days without rain in the period

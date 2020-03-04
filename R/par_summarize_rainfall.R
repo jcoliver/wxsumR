@@ -4,6 +4,7 @@
 #' @param rain         data frame with daily rainfall data for each site
 #' @param num_cores    integer indicating number of processors to use; if
 #' \code{NULL} (default), uses one fewer than the number of processors available
+#' @param id_index     integer column index of unique site id
 #' @param ...          additional values passed to \code{\link{summarize_rainfall}}
 #'
 #' @return tibble with rainfall summary statistics
@@ -12,7 +13,7 @@
 #' @export
 #' @import dplyr
 #' @import parallel
-par_summarize_rainfall <- function(rain, num_cores = NULL, ...) {
+par_summarize_rainfall <- function(rain, num_cores = NULL, id_index = 1, ...) {
   if (is.null(num_cores)) {
     num_cores <- parallel::detectCores() - 1
   }
@@ -37,6 +38,7 @@ par_summarize_rainfall <- function(rain, num_cores = NULL, ...) {
   par_summary <- parallel::parLapply(cl = clust,
                                      X = rain_list,
                                      fun = summarize_rainfall,
+                                     id_index = id_index,
                                      ...)
 
   parallel::stopCluster(cl = clust)
@@ -48,14 +50,15 @@ par_summarize_rainfall <- function(rain, num_cores = NULL, ...) {
   # wide or long format. The former will not have a season_year column, so a
   # check for presence/absence of that column affords the type of re-ordering
   # to do
+  id_column_name <- colnames(rain)[id_index]
   if ("season_year" %in% colnames(rain_summary_smart_par)) {
     # Long format, re-order by season_year, then id column
     rain_summary_smart_par <- rain_summary_smart_par %>%
-      arrange(season_year, y4_hhid)
+      arrange(season_year, !!as.name(id_column_name))
   } else {
     # Wide format, re-order only by id column
     rain_summary_smart_par <- rain_summary_smart_par %>%
-      arrange(y4_hhid)
+      arrange(!!as.name(id_column_name))
   }
 
   return(rain_summary_smart_par)

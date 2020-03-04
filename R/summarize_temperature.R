@@ -1,9 +1,6 @@
 # TODO: Given the wrapper nature of this function, would be good to add some
 # defensive programming here
-# File exists
 # No February 29, or at least a warning
-
-# TODO: Add parameter for site id (could assume column 1)
 
 #' Provides temperature summary statistics
 #'
@@ -22,6 +19,7 @@
 #' treatment of \code{NA} values
 #' @param wide         logical indicating whether or not to output as wide-
 #' formatted data
+#' @param id_index     integer column index of unique site id
 #'
 #' @return tibble with temperature summary statistics
 #'
@@ -34,10 +32,13 @@
 summarize_temperature <- function(temperature, start_month, end_month,
                                   start_day = 15, end_day = start_day,
                                   growbase_low = 10, growbase_high = 30,
-                                  na.rm = TRUE, wide = TRUE) {
+                                  na.rm = TRUE, wide = TRUE, id_index = 1) {
 
+  # Extract name of column with site id
+  id_column_name <- colnames(temperature)[id_index]
+  
   # Use to_long to convert to long format and parse column names into dates
-  temperature_long <- to_long(data = temperature)
+  temperature_long <- to_long(data = temperature, keep_cols = id_index)
 
   # Exclude NA dates
   temperature_long <- temperature_long %>%
@@ -49,9 +50,6 @@ summarize_temperature <- function(temperature, start_month, end_month,
                                  end_month = end_month,
                                  start_day = start_day,
                                  end_day = end_day)
-
-  # Assume first column has site id
-  id_column_name <- colnames(temperature_long)[1]
 
   # Start with calculating basic statistics, including the growing degree days
   # for the season (Here defined as number of days in season that were within
