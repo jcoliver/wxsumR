@@ -4,16 +4,9 @@
 \alias{summarize_rainfall}
 \title{Provides rainfall summary statistics}
 \usage{
-summarize_rainfall(
-  rain,
-  start_month,
-  end_month,
-  start_day = 15,
-  end_day = start_day,
-  rain_cutoff = 1,
-  na.rm = TRUE,
-  wide = TRUE
-)
+summarize_rainfall(rain, start_month, end_month, start_day = 15,
+  end_day = start_day, rain_cutoff = 1, na.rm = TRUE, wide = TRUE,
+  id_index = 1)
 }
 \arguments{
 \item{rain}{data frame with daily rainfall data for each site}
@@ -31,14 +24,13 @@ defaults to \code{start_day}}
 \item{rain_cutoff}{numeric minimum value for daily rainfall to be counted as
 a rain day}
 
-\item{na.rm}{logical passed to summary statistic functions indicating 
+\item{na.rm}{logical passed to summary statistic functions indicating
 treatment of \code{NA} values}
 
 \item{wide}{logical indicating whether or not to output as wide-
 formatted data}
 
-\item{return_df}{logical indicating whether to return a data frame 
-(default) or tibble}
+\item{id_index}{integer column index of unique site id}
 }
 \value{
 tibble with rainfall summary statistics

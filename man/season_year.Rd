@@ -4,7 +4,8 @@
 \alias{season_year}
 \title{Value for season year for observation}
 \usage{
-season_year(x, start_month, end_month, start_day = 15, end_day = start_day)
+season_year(x, start_month, end_month, start_day = 15,
+  end_day = start_day)
 }
 \arguments{
 \item{x}{vector of Date data}

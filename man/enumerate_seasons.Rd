@@ -4,13 +4,8 @@
 \alias{enumerate_seasons}
 \title{Enumerates seasons in data frame}
 \usage{
-enumerate_seasons(
-  data,
-  start_month,
-  end_month,
-  start_day = 15,
-  end_day = start_day
-)
+enumerate_seasons(data, start_month, end_month, start_day = 15,
+  end_day = start_day)
 }
 \arguments{
 \item{data}{long-format data frame with weather data; ideally output

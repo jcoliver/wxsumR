@@ -4,12 +4,8 @@
 \alias{dry_interval}
 \title{Longest stretch of consecutive dry days}
 \usage{
-dry_interval(
-  x,
-  rain_cutoff = 1,
-  period = c("start", "mid", "end"),
-  na.rm = TRUE
-)
+dry_interval(x, rain_cutoff = 1, period = c("start", "mid", "end"),
+  na.rm = TRUE)
 }
 \arguments{
 \item{x}{numeric vector of rainfall measurements}

@@ -9,7 +9,6 @@ rm(list = ls())
 library(weathercommand)
 
 infile <- "data/input-temperature-small.csv"
-outfile <- NULL
 
 test_data <- read.csv(file = infile)
 

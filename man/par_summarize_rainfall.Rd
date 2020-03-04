@@ -5,11 +5,15 @@
 \title{A wrapper for \code{summarize_rainfall} to perform summary statistics
 calculations in parallel}
 \usage{
-par_summarize_rainfall(num_cores = NULL, ...)
+par_summarize_rainfall(rain, num_cores = NULL, id_index = 1, ...)
 }
 \arguments{
+\item{rain}{data frame with daily rainfall data for each site}
+
 \item{num_cores}{integer indicating number of processors to use; if
 \code{NULL} (default), uses one fewer than the number of processors available}
+
+\item{id_index}{integer column index of unique site id}
 
 \item{...}{additional values passed to \code{\link{summarize_rainfall}}}
 }

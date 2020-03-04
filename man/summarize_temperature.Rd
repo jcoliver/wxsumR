@@ -4,17 +4,9 @@
 \alias{summarize_temperature}
 \title{Provides temperature summary statistics}
 \usage{
-summarize_temperature(
-  temperature,
-  start_month,
-  end_month,
-  start_day = 15,
-  end_day = start_day,
-  growbase_low = 10,
-  growbase_high = 30,
-  na.rm = TRUE,
-  wide = TRUE
-)
+summarize_temperature(temperature, start_month, end_month,
+  start_day = 15, end_day = start_day, growbase_low = 10,
+  growbase_high = 30, na.rm = TRUE, wide = TRUE, id_index = 1)
 }
 \arguments{
 \item{temperature}{data frame with daily temperature data for each site}
@@ -40,6 +32,8 @@ treatment of \code{NA} values}
 
 \item{wide}{logical indicating whether or not to output as wide-
 formatted data}
+
+\item{id_index}{integer column index of unique site id}
 }
 \value{
 tibble with temperature summary statistics
