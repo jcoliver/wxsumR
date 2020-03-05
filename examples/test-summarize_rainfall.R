@@ -8,10 +8,8 @@ rm(list = ls())
 ################################################################################
 library(weathercommand)
 
-infile <- "data/input-rain-small.csv"
-outfile <- NULL
-
-test_data <- read.csv(file = infile)
+infile <- "data/rain-medium.Rds"
+test_data <- readRDS(file = infile)
 
 ########################################
 # Test 1, season includes new year
@@ -48,14 +46,14 @@ rain_summary <- summarize_rainfall(rain = test_data,
                                    end_day = end_day,
                                    wide = FALSE)
 test_end <- Sys.time()
-if (all(season_means == rain_summary$mean_season[rain_summary$season_year == 1983])) {
-  message("Test ", test_num, " PASS")
+if (all(summary(season_means) == summary(rain_summary$mean_season[rain_summary$season_year == 1983]))) {
+  message("summarize_rainfall: Test ", test_num, " PASS")
 } else {
-  message("Test ", test_num, " FAIL")
+  message("summarize_rainfall: Test ", test_num, " FAIL")
 }
 test_time <- difftime(time1 = test_end, time2 = test_start, units = "mins")
 test_time <- round(x = test_time, digits = 3)
-message(paste0("Test ", test_num, " time: ", test_time, " minutes"))
+message(paste0("summarize_rainfall: Test ", test_num, " time: ", test_time, " minutes"))
 
 ########################################
 # Test 2, season excludes new year
@@ -89,14 +87,14 @@ rain_summary <- summarize_rainfall(rain = test_data,
                                    end_day = end_day,
                                    wide = FALSE)
 test_end <- Sys.time()
-if (all(season_means == rain_summary$mean_season[rain_summary$season_year == 1983])) {
-  message("Test ", test_num, " PASS")
+if (all(summary(season_means) == summary(rain_summary$mean_season[rain_summary$season_year == 1983]))) {
+  message("summarize_rainfall: Test ", test_num, " PASS")
 } else {
-  message("Test ", test_num, " FAIL")
+  message("summarize_rainfall: Test ", test_num, " FAIL")
 }
 test_time <- difftime(time1 = test_end, time2 = test_start, units = "mins")
 test_time <- round(x = test_time, digits = 3)
-message(paste0("Test ", test_num, " time: ", test_time, " minutes"))
+message(paste0("summarize_rainfall: Test ", test_num, " time: ", test_time, " minutes"))
 
 ########################################
 # Test 3, season includes new year (same as test 1) but output wide format data
@@ -133,14 +131,14 @@ rain_summary <- summarize_rainfall(rain = test_data,
                                    end_day = end_day,
                                    wide = TRUE)
 test_end <- Sys.time()
-if (all(season_means == rain_summary$mean_season_1983)) {
-  message("Test ", test_num, " PASS")
+if (all(summary(season_means) == summary(rain_summary$mean_season_1983))) {
+  message("summarize_rainfall: Test ", test_num, " PASS")
 } else {
-  message("Test ", test_num, " FAIL")
+  message("summarize_rainfall: Test ", test_num, " FAIL")
 }
 test_time <- difftime(time1 = test_end, time2 = test_start, units = "mins")
 test_time <- round(x = test_time, digits = 3)
-message(paste0("Test ", test_num, " time: ", test_time, " minutes"))
+message(paste0("summarize_rainfall: Test ", test_num, " time: ", test_time, " minutes"))
 
 ########################################
 # Test 4, same as 3, with profiling
@@ -180,11 +178,11 @@ rain_summary <- summarize_rainfall(rain = test_data,
 test_end <- Sys.time()
 Rprof()
 summaryRprof(tmp)
-if (all(season_means == rain_summary$mean_season_1983)) {
-  message("Test ", test_num, " PASS")
+if (all(summary(season_means) == summary(rain_summary$mean_season_1983))) {
+  message("summarize_rainfall: Test ", test_num, " PASS")
 } else {
-  message("Test ", test_num, " FAIL")
+  message("summarize_rainfall: Test ", test_num, " FAIL")
 }
 test_time <- difftime(time1 = test_end, time2 = test_start, units = "mins")
 test_time <- round(x = test_time, digits = 3)
-message(paste0("Test ", test_num, " time: ", test_time, " minutes"))
+message(paste0("summarize_rainfall: Test ", test_num, " time: ", test_time, " minutes"))

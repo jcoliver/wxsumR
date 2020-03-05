@@ -48,13 +48,13 @@ temperature_summary <- summarize_temperature(temperature = test_data,
                                              wide = FALSE)
 test_end <- Sys.time()
 if (all(season_means == temperature_summary$mean_season[temperature_summary$season_year == 1983])) {
-  message("Test ", test_num, " PASS")
+  message("summarize_temperature: Test ", test_num, " PASS")
 } else {
-  message("Test ", test_num, " FAIL")
+  message("summarize_temperature: Test ", test_num, " FAIL")
 }
 test_time <- difftime(time1 = test_end, time2 = test_start, units = "mins")
 test_time <- round(x = test_time, digits = 3)
-message(paste0("Test ", test_num, " time: ", test_time, " minutes"))
+message(paste0("summarize_temperature: Test ", test_num, " time: ", test_time, " minutes"))
 
 ########################################
 # Test 2, season excludes new year
@@ -89,13 +89,13 @@ temperature_summary <- summarize_temperature(temperature = test_data,
                                              wide = FALSE)
 test_end <- Sys.time()
 if (all(season_means == temperature_summary$mean_season[temperature_summary$season_year == 1983])) {
-  message("Test ", test_num, " PASS")
+  message("summarize_temperature: Test ", test_num, " PASS")
 } else {
-  message("Test ", test_num, " FAIL")
+  message("summarize_temperature: Test ", test_num, " FAIL")
 }
 test_time <- difftime(time1 = test_end, time2 = test_start, units = "mins")
 test_time <- round(x = test_time, digits = 3)
-message(paste0("Test ", test_num, " time: ", test_time, " minutes"))
+message(paste0("summarize_temperature: Test ", test_num, " time: ", test_time, " minutes"))
 
 ########################################
 # Test 3, season includes new year (same as test 1) but output wide format data
@@ -133,10 +133,10 @@ temperature_summary <- summarize_temperature(temperature = test_data,
                                              wide = TRUE)
 test_end <- Sys.time()
 if (all(season_means == temperature_summary$mean_season_1983)) {
-  message("Test ", test_num, " PASS")
+  message("summarize_temperature: Test ", test_num, " PASS")
 } else {
-  message("Test ", test_num, " FAIL")
+  message("summarize_temperature: Test ", test_num, " FAIL")
 }
 test_time <- difftime(time1 = test_end, time2 = test_start, units = "mins")
 test_time <- round(x = test_time, digits = 3)
-message(paste0("Test ", test_num, " time: ", test_time, " minutes"))
+message(paste0("summarize_temperature: Test ", test_num, " time: ", test_time, " minutes"))

@@ -9,17 +9,20 @@ rm(list = ls())
 # RAIN
 large_data <- read.csv(file = "../large-data-files/NPSY4_x1_rf1_daily.csv")
 
-# Large data; 1000 x 10000; 10 times more rows, 5 times more columns than small
-write.csv(x = large_data[1:1000, 1:10000], file = "data/input-rain-large.csv", row.names = FALSE)
+# Small data, 100 x 2000
+write.csv(x = large_data[1:100, 1:2000], file = "data/input-rain-small.csv", row.names = FALSE)
+saveRDS(large_data[1:100, 1:2000], file = "data/rain-small.Rds")
 
 # Medium wide data; 100 x 10000; 5 times more columns than small data
 write.csv(x = large_data[1:100, 1:10000], file = "data/input-rain-medium-wider.csv", row.names = FALSE)
 
 # Medium data, 1000 x 2000; 10 times more rows than small data
 write.csv(x = large_data[1:1000, 1:2000], file = "data/input-rain-medium.csv", row.names = FALSE)
+saveRDS(large_data[1:1000, 1:2000], file = "data/rain-medium.Rds")
 
-# Small data, 100 x 2000
-write.csv(x = large_data[1:100, 1:2000], file = "data/input-rain-small.csv", row.names = FALSE)
+# Large data; 1000 x 10000; 10 times more rows, 5 times more columns than small
+write.csv(x = large_data[1:1000, 1:10000], file = "data/input-rain-large.csv", row.names = FALSE)
+saveRDS(large_data[1:1000, 1:10000], file = "data/rain-large.Rds")
 
 # Tiny data, 20 x 1000
 write.csv(x = large_data[1:20, 1:1000], file = "data/input-rain-tiny.csv", row.names = FALSE)
@@ -35,9 +38,12 @@ large_data <- read.csv(file = "../large-data-files/NPSY1_x1_t1_daily.csv")
 
 # Small data, 100 x 2000
 write.csv(x = large_data[1:100, 1:2000], file = "data/input-temperature-small.csv", row.names = FALSE)
+saveRDS(large_data[1:100, 1:2000], file = "data/temperature-small.Rds")
 
 # Medium data, 1000 x 2000; 10 times more rows than small data
 write.csv(x = large_data[1:1000, 1:2000], file = "data/input-temperature-medium.csv", row.names = FALSE)
+saveRDS(large_data[1:1000, 1:2000], file = "data/temperature-medium.Rds")
 
 # Large data; 1000 x 10000; 10 times more rows, 5 times more columns than small
 write.csv(x = large_data[1:1000, 1:10000], file = "data/input-temperature-large.csv", row.names = FALSE)
+saveRDS(large_data[1:1000, 1:10000], file = "data/temperature-large.Rds")

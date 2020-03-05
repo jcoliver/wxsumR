@@ -7,13 +7,12 @@ rm(list = ls())
 ################################################################################
 library(weathercommand)
 
-df <- read.csv(file = "data/input-rain-tiny.csv")
+infile <- "data/rain-medium.Rds"
+df <- readRDS(file = infile)
 long_df <- weathercommand:::to_long(data = df)
 
-df <- read.csv(file = "data/input-rain-small.csv")
-long_df <- weathercommand:::to_long(data = df)
-
-df <- read.csv(file = "data/input-rain-messy.csv")
-message("to_long test passes if next line shows a warning:")
-long_df <- weathercommand:::to_long(data = df) # Should throw warning
-
+if (round(mean(long_df$value, na.rm = TRUE), digits = 4) == 2.8695) {
+  message("Test 1 of to_long PASS")
+} else {
+  message("Test 1 of to_long FAIL")
+}

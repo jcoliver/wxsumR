@@ -1,7 +1,3 @@
-# TODO: Given the wrapper nature of this function, would be good to add some
-# defensive programming here
-# + No February 29, or at least a warning
-
 #' Provides rainfall summary statistics
 #'
 #' @param rain         data frame with daily rainfall data for each site

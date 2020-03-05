@@ -8,14 +8,13 @@ rm(list = ls())
 ################################################################################
 library(weathercommand)
 
-infile <- "data/input-temperature-medium.csv"
-
-test_data <- read.csv(file = infile)
+infile <- "data/temperature-medium.Rds"
+test_data <- readRDS(file = infile)
 
 ########################################
-# Test 1, season includes new year
+# par_summarize_temperature: Test 1, season includes new year
 test_num <- 1
-message(paste0("Running test ", test_num, " of summarize_temperature"))
+message(paste0("Running test ", test_num, " of par_summarize_temperature"))
 start_month <- 11
 end_month <- 02
 start_day <- 15
@@ -36,7 +35,7 @@ while (current_date <= end_date) {
 }
 
 # Calculate the row mean for this subset of data; results should correspond to
-# values in the mean_season column in output of summarize_temperature
+# values in the mean_season column in output of par_summarize_temperature
 season_means <- rowMeans(x = test_data[order(test_data$hhid), test_col_names])
 
 test_start <- Sys.time()
@@ -48,18 +47,18 @@ temperature_summary <- par_summarize_temperature(temperature = test_data,
                                                  wide = FALSE)
 test_end <- Sys.time()
 if (all(summary(season_means) == summary(temperature_summary$mean_season[temperature_summary$season_year == 1983]))) {
-  message("Test ", test_num, " PASS")
+  message("par_summarize_temperature: Test ", test_num, " PASS")
 } else {
-  message("Test ", test_num, " FAIL")
+  message("par_summarize_temperature: Test ", test_num, " FAIL")
 }
 test_time <- difftime(time1 = test_end, time2 = test_start, units = "secs")
 test_time <- round(x = test_time, digits = 3)
-message(paste0("Test ", test_num, " time: ", test_time, " seconds"))
+message(paste0("par_summarize_temperature: Test ", test_num, " time: ", test_time, " seconds"))
 
 ########################################
-# Test 2, season includes new year (same as test 1) but output wide format data
+# Test 2, season includes new year (same as Test 1) but output wide format data
 test_num <- 2
-message(paste0("Running test ", test_num, " of summarize_temperature"))
+message(paste0("Running test ", test_num, " of par_summarize_temperature"))
 start_month <- 11
 end_month <- 02
 start_day <- 15
@@ -80,7 +79,7 @@ while (current_date <= end_date) {
 }
 
 # Calculate the row mean for this subset of data; results should correspond to
-# values in the mean_season column in output of summarize_temperature
+# values in the mean_season column in output of par_summarize_temperature
 season_means <- rowMeans(x = test_data[order(test_data$hhid), test_col_names])
 
 test_start <- Sys.time()
@@ -92,10 +91,10 @@ temperature_summary <- par_summarize_temperature(temperature = test_data,
                                                  wide = TRUE)
 test_end <- Sys.time()
 if (all(summary(season_means) == summary(temperature_summary$mean_season_1983))) {
-  message("Test ", test_num, " PASS")
+  message("par_summarize_temperature: Test ", test_num, " PASS")
 } else {
-  message("Test ", test_num, " FAIL")
+  message("par_summarize_temperature: Test ", test_num, " FAIL")
 }
 test_time <- difftime(time1 = test_end, time2 = test_start, units = "secs")
 test_time <- round(x = test_time, digits = 3)
-message(paste0("Test ", test_num, " time: ", test_time, " secs"))
+message(paste0("par_summarize_temperature: Test ", test_num, " time: ", test_time, " secs"))

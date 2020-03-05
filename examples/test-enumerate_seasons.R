@@ -8,8 +8,10 @@ rm(list = ls())
 ################################################################################
 library(weathercommand)
 
-df <- read.csv(file = "data/input-rain-small.csv")
+df <- readRDS(file = "data/rain-small.Rds")
+
 long_df <- weathercommand:::to_long(data = df)
+
 # Exclude NA dates
 long_df <- long_df[!is.na(long_df$date), ]
 
@@ -27,13 +29,13 @@ enumerated_df <- weathercommand:::enumerate_seasons(data = long_df,
                                                     start_day = day)
 test_end <- Sys.time()
 if (all(table(enumerated_df$season_year) == c(4600, 9300, 9300, 9300, 9300, 9300))) {
-  message("Test ", test_num, " PASS")
+  message("enumerate_seasons: Test ", test_num, " PASS")
 } else {
-  message("Test ", test_num, " FAIL")
+  message("enumerate_seasons: Test ", test_num, " FAIL")
 }
 test_time <- difftime(time1 = test_end, time2 = test_start, units = "mins")
 test_time <- round(test_time, digits = 3)
-message(paste0("Test ", test_num, " time: ", test_time, " minutes"))
+message(paste0("enumerate_seasons: Test ", test_num, " time: ", test_time, " minutes"))
 
 ####################
 # Test 2, season excludes new year
@@ -49,10 +51,10 @@ enumerated_df <- weathercommand:::enumerate_seasons(data = long_df,
                                                     start_day = day)
 test_end <- Sys.time()
 if (all(table(enumerated_df$season_year) == c(27400, 27500, 27400, 27400, 27400, 12800))) {
-  message("Test ", test_num, " PASS")
+  message("enumerate_seasons: Test ", test_num, " PASS")
 } else {
-  message("Test ", test_num, " FAIL")
+  message("enumerate_seasons: Test ", test_num, " FAIL")
 }
 test_time <- difftime(time1 = test_end, time2 = test_start, units = "mins")
 test_time <- round(test_time, digits = 3)
-message(paste0("Test ", test_num, " time: ", test_time, " minutes"))
+message(paste0("enumerate_seasons: Test ", test_num, " time: ", test_time, " minutes"))

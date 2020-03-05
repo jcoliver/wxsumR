@@ -1,7 +1,3 @@
-# TODO: Given the wrapper nature of this function, would be good to add some
-# defensive programming here
-# No February 29, or at least a warning
-
 #' Provides temperature summary statistics
 #'
 #' @param temperature   data frame with daily temperature data for each site

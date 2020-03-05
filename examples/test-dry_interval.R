@@ -19,13 +19,13 @@ dry_test <- c(weathercommand:::dry_interval(x = rain, period = "start"),
               weathercommand:::dry_interval(x = rain, period = "end"))
 test_end <- Sys.time()
 if (all(dry_test == c(1, 2, 3))) {
-  message("Test ", test_num, " PASS")
+  message("dry_interval: Test ", test_num, " PASS")
 } else {
-  message("Test ", test_num, " FAIL")
+  message("dry_interval: Test ", test_num, " FAIL")
 }
 test_time <- difftime(time1 = test_end, time2 = test_start, units = "mins")
 test_time <- round(x = test_time, digits = 3)
-message(paste0("Test ", test_num, " time: ", test_time, " minutes"))
+message(paste0("dry_interval: Test ", test_num, " time: ", test_time, " minutes"))
 
 # Test 2, season starts with a rain day
 test_num <- 2
@@ -38,13 +38,13 @@ dry_test <- c(weathercommand:::dry_interval(x = rain, period = "start"),
               weathercommand:::dry_interval(x = rain, period = "end"))
 test_end <- Sys.time()
 if (all(dry_test == c(0, 2, 3))) {
-  message("Test ", test_num, " PASS")
+  message("dry_interval: Test ", test_num, " PASS")
 } else {
-  message("Test ", test_num, " FAIL")
+  message("dry_interval: Test ", test_num, " FAIL")
 }
 test_time <- difftime(time1 = test_end, time2 = test_start, units = "mins")
 test_time <- round(x = test_time, digits = 3)
-message(paste0("Test ", test_num, " time: ", test_time, " minutes"))
+message(paste0("dry_interval: Test ", test_num, " time: ", test_time, " minutes"))
 
 # Test 3, season ends with a rain day
 test_num <- 3
@@ -57,13 +57,13 @@ dry_test <- c(weathercommand:::dry_interval(x = rain, period = "start"),
               weathercommand:::dry_interval(x = rain, period = "end"))
 test_end <- Sys.time()
 if (all(dry_test == c(1, 3, 0))) {
-  message("Test ", test_num, " PASS")
+  message("dry_interval: Test ", test_num, " PASS")
 } else {
-  message("Test ", test_num, " FAIL")
+  message("dry_interval: Test ", test_num, " FAIL")
 }
 test_time <- difftime(time1 = test_end, time2 = test_start, units = "mins")
 test_time <- round(x = test_time, digits = 3)
-message(paste0("Test ", test_num, " time: ", test_time, " minutes"))
+message(paste0("dry_interval: Test ", test_num, " time: ", test_time, " minutes"))
 
 # Test 4, season starts and ends with dry days, but only rain in between
 test_num <- 4
@@ -76,13 +76,13 @@ dry_test <- c(weathercommand:::dry_interval(x = rain, period = "start"),
               weathercommand:::dry_interval(x = rain, period = "end"))
 test_end <- Sys.time()
 if (all(dry_test == c(1, 0, 4))) {
-  message("Test ", test_num, " PASS")
+  message("dry_interval: Test ", test_num, " PASS")
 } else {
-  message("Test ", test_num, " FAIL")
+  message("dry_interval: Test ", test_num, " FAIL")
 }
 test_time <- difftime(time1 = test_end, time2 = test_start, units = "mins")
 test_time <- round(x = test_time, digits = 3)
-message(paste0("Test ", test_num, " time: ", test_time, " minutes"))
+message(paste0("dry_interval: Test ", test_num, " time: ", test_time, " minutes"))
 
 # Test 5, season starts with dry days, but only rain afterwards
 test_num <- 5
@@ -95,13 +95,13 @@ dry_test <- c(weathercommand:::dry_interval(x = rain, period = "start"),
               weathercommand:::dry_interval(x = rain, period = "end"))
 test_end <- Sys.time()
 if (all(dry_test == c(3, 0, 0))) {
-  message("Test ", test_num, " PASS")
+  message("dry_interval: Test ", test_num, " PASS")
 } else {
-  message("Test ", test_num, " FAIL")
+  message("dry_interval: Test ", test_num, " FAIL")
 }
 test_time <- difftime(time1 = test_end, time2 = test_start, units = "mins")
 test_time <- round(x = test_time, digits = 3)
-message(paste0("Test ", test_num, " time: ", test_time, " minutes"))
+message(paste0("dry_interval: Test ", test_num, " time: ", test_time, " minutes"))
 
 # Test 6, entire season is dry except for last day
 test_num <- 6
@@ -114,13 +114,13 @@ dry_test <- c(weathercommand:::dry_interval(x = rain, period = "start"),
               weathercommand:::dry_interval(x = rain, period = "end"))
 test_end <- Sys.time()
 if (all(dry_test == c(10, 0, 0))) {
-  message("Test ", test_num, " PASS")
+  message("dry_interval: Test ", test_num, " PASS")
 } else {
-  message("Test ", test_num, " FAIL")
+  message("dry_interval: Test ", test_num, " FAIL")
 }
 test_time <- difftime(time1 = test_end, time2 = test_start, units = "mins")
 test_time <- round(x = test_time, digits = 3)
-message(paste0("Test ", test_num, " time: ", test_time, " minutes"))
+message(paste0("dry_interval: Test ", test_num, " time: ", test_time, " minutes"))
 
 # Test 7, season ends with dry days, but only rain beforehand
 test_num <- 7
@@ -133,13 +133,13 @@ dry_test <- c(weathercommand:::dry_interval(x = rain, period = "start"),
               weathercommand:::dry_interval(x = rain, period = "end"))
 test_end <- Sys.time()
 if (all(dry_test == c(0, 0, 2))) {
-  message("Test ", test_num, " PASS")
+  message("dry_interval: Test ", test_num, " PASS")
 } else {
-  message("Test ", test_num, " FAIL")
+  message("dry_interval: Test ", test_num, " FAIL")
 }
 test_time <- difftime(time1 = test_end, time2 = test_start, units = "mins")
 test_time <- round(x = test_time, digits = 3)
-message(paste0("Test ", test_num, " time: ", test_time, " minutes"))
+message(paste0("dry_interval: Test ", test_num, " time: ", test_time, " minutes"))
 
 # Test 8, entire season is dry except for first day
 test_num <- 8
@@ -152,9 +152,9 @@ dry_test <- c(weathercommand:::dry_interval(x = rain, period = "start"),
               weathercommand:::dry_interval(x = rain, period = "end"))
 test_end <- Sys.time()
 if (all(dry_test == c(0, 0, 10))) {
-  message("Test ", test_num, " PASS")
+  message("dry_interval: Test ", test_num, " PASS")
 } else {
-  message("Test ", test_num, " FAIL")
+  message("dry_interval: Test ", test_num, " FAIL")
 }
 test_time <- difftime(time1 = test_end, time2 = test_start, units = "mins")
 test_time <- round(x = test_time, digits = 3)
