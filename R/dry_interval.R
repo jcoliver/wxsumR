@@ -2,10 +2,10 @@
 #'
 #' @param x           numeric vector of rainfall measurements
 #' @param rain_cutoff minimum amount of rainfall to count as non-dry day
-#' @param period      period to measure longest dry spell; see \code{return}
-#' @param na.rm       logical indicating treatment of \code{NA} values; by 
-#' default, \code{na.rm = TRUE}, \code{NA} values are ignored. If set to 
-#' \code{FALSE}, any \code{NA} values in \code{x} will result in a return value 
+#' @param period      period to measure longest dry spell; see \code{value}
+#' @param na.rm       logical indicating treatment of \code{NA} values; by
+#' default, \code{na.rm = TRUE}, \code{NA} values are ignored. If set to
+#' \code{FALSE}, any \code{NA} values in \code{x} will result in a return value
 #' of \code{NA}
 #'
 #' @return numeric vector of length 1 with the number of days that have rainfall
@@ -25,24 +25,43 @@
 #'   will be zero}
 #' }
 #'
+#' @example
+#' \donttest{
+#'   rain <- c(0, 2, 3, 0, 0, 2, 0, 3, 0, 0, 0)
+#'   # Longest interval at the end of season
+#'   dry_test <- weathercommand:::dry_interval(x = rain, period = "end")
+#'   dry_test
+#'   # 3
+#'
+#'   # Longest interval in middle of season
+#'   dry_test <- weathercommand:::dry_interval(x = rain, period = "mid")
+#'   dry_test
+#'   # 2
+#'
+#'   # Longest interval at start of season, considering days with rain of 2 or
+#'   # lower (unitless) as dry days
+#'   dry_test <- weathercommand:::dry_interval(x = rain, rain_cutoff = 2, period = "start")
+#'   dry_test
+#'   # 2
+#' }
 #' @importFrom stringr str_split str_c str_sub
 dry_interval <- function(x, rain_cutoff = 1, period = c("start", "mid", "end"),
                          na.rm = TRUE) {
-  
-  # Vector of 0s and 1s, where 0s are days where rainfall is below rain_cutoff 
+
+  # Vector of 0s and 1s, where 0s are days where rainfall is below rain_cutoff
   # and 1s are days where rain is above rain_cutoff
   rain_binary <- as.integer(x >= rain_cutoff)
-  
+
   # If all values are NA, return NA
   if (all(is.na(rain_binary))) {
     return(NA)
   }
 
-  # For the purposes of this calculation, if na.rm is TRUE, we need to 
-  # eliminate NA values from the rain_binary vector, but we cannot simply drop 
-  # them. That is, if we did, c(0, 0, NA, 0) becomes c(0, 0, 0). These two 
-  # resultant vectors have very different interpretations of the duration of the 
-  # longest dry periods. Instead, and for these purposes only, we replace NA 
+  # For the purposes of this calculation, if na.rm is TRUE, we need to
+  # eliminate NA values from the rain_binary vector, but we cannot simply drop
+  # them. That is, if we did, c(0, 0, NA, 0) becomes c(0, 0, 0). These two
+  # resultant vectors have very different interpretations of the duration of the
+  # longest dry periods. Instead, and for these purposes only, we replace NA
   # values with a "1" which is only indicating that the day was not a "dry" day
   if (na.rm) {
     rain_binary[is.na(rain_binary)] <- 1
@@ -52,7 +71,7 @@ dry_interval <- function(x, rain_cutoff = 1, period = c("start", "mid", "end"),
   # rainfall is below rain_cutoff and 1s are days where rain is above
   # rain_cutoff
   rain_string <- stringr::str_c(rain_binary, collapse = "")
-  
+
   if (length(rain_string) == 0 | (length(rain_string) == 1 & is.na(rain_string))) {
     return(NA)
   }
@@ -66,7 +85,7 @@ dry_interval <- function(x, rain_cutoff = 1, period = c("start", "mid", "end"),
   # implementation, but it kinda blew me away.
   rain_string_split <- unlist(stringr::str_split(string = rain_string,
                                                  pattern = "1"))
-  
+
   longest <- 0
   if (period == "start") {
     # Only return non-zero value for longest at start if first day was dry
