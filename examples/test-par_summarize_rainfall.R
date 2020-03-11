@@ -8,7 +8,9 @@ rm(list = ls())
 ################################################################################
 library(weathercommand)
 
+# infile <- "data/rain-small.Rds"
 infile <- "data/rain-medium.Rds"
+# infile <- "data/rain-large.Rds"
 test_data <- readRDS(file = infile)
 
 ########################################

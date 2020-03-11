@@ -8,9 +8,10 @@ rm(list = ls())
 ################################################################################
 library(weathercommand)
 
-infile <- "data/input-temperature-small.csv"
-
-test_data <- read.csv(file = infile)
+# infile <- "data/temperature-small.Rds"
+infile <- "data/temperature-medium.Rds"
+# infile <- "data/temperature-large.Rds"
+test_data <- readRDS(file = infile)
 
 ########################################
 # Test 1, season includes new year

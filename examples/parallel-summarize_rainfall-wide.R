@@ -10,11 +10,10 @@ library(weathercommand)
 library(parallel)
 library(tidyverse)
 
-infile <- "data/input-rain-small.csv"
-# infile <- "data/input-rain-medium.csv"
-# infile <- "data/input-rain-large.csv"
-
-test_data <- read.csv(file = infile)
+# infile <- "data/rain-small.Rds"
+infile <- "data/rain-medium.Rds"
+# infile <- "data/rain-large.Rds"
+test_data <- readRDS(file = infile)
 
 start_month <- 11
 end_month <- 02

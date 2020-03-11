@@ -26,10 +26,9 @@ library(weathercommand)
 library(dplyr)
 library(tidyr)
 
-input_files <- c("data/input-rain-small.csv",
-                 "data/input-rain-medium.csv",
-                 "data/input-rain-medium-wider.csv",
-                 "data/input-rain-large.csv")
+input_files <- c("data/rain-small.Rds",
+                 "data/rain-medium.Rds",
+                 "data/rain-large.Rds")
 
 outputs <- data.frame(infile = input_files,
                       to_long = NA,
@@ -46,7 +45,7 @@ for (infile in input_files) {
   cat(paste0("Input file: ", infile, "\n"))
   i <- which(input_files == infile)
 
-  orig_data <- read.csv(file = infile)
+  orig_data <- readRDS(file = infile)
 
   ########################################
   # to_long
