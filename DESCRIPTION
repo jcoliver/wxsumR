@@ -7,8 +7,9 @@ Authors@R: as.person(c(
     "Jeffrey D. Michler <jdmichler@email.arizona.edu> [aut]"
     ))
 Maintainer: Jeffrey C. Oliver <jcoliver@email.arizona.edu>
-Description: More about what it does (maybe more than one line)
-    Use four spaces when indenting paragraphs within the Description.
+Description: Provides functions for calculating several summary statistics for 
+    rainfall and temperature data. Uses daily site data to calculate values for 
+    annual, user-defined seasons.
 License: MIT + file LICENSE
 Encoding: UTF-8
 LazyData: true

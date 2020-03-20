@@ -5,8 +5,7 @@
 \title{A wrapper for \code{summarize_temperature} to perform summary statistics
 calculations in parallel}
 \usage{
-par_summarize_temperature(temperature, num_cores = NULL, id_index = 1,
-  ...)
+par_summarize_temperature(temperature, num_cores = NULL, id_index = 1, ...)
 }
 \arguments{
 \item{temperature}{data frame with daily temperature data for each site}

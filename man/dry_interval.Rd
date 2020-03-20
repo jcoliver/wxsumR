@@ -4,19 +4,23 @@
 \alias{dry_interval}
 \title{Longest stretch of consecutive dry days}
 \usage{
-dry_interval(x, rain_cutoff = 1, period = c("start", "mid", "end"),
-  na.rm = TRUE)
+dry_interval(
+  x,
+  rain_cutoff = 1,
+  period = c("start", "mid", "end"),
+  na.rm = TRUE
+)
 }
 \arguments{
 \item{x}{numeric vector of rainfall measurements}
 
 \item{rain_cutoff}{minimum amount of rainfall to count as non-dry day}
 
-\item{period}{period to measure longest dry spell; see \code{return}}
+\item{period}{period to measure longest dry spell; see \code{value}}
 
-\item{na.rm}{logical indicating treatment of \code{NA} values; by 
-default, \code{na.rm = TRUE}, \code{NA} values are ignored. If set to 
-\code{FALSE}, any \code{NA} values in \code{x} will result in a return value 
+\item{na.rm}{logical indicating treatment of \code{NA} values; by
+default, \code{na.rm = TRUE}, \code{NA} values are ignored. If set to
+\code{FALSE}, any \code{NA} values in \code{x} will result in a return value
 of \code{NA}}
 }
 \value{
@@ -39,4 +43,24 @@ less than \code{rain_cutoff}; value returned is determined by value of
 }
 \description{
 Longest stretch of consecutive dry days
+}
+\examples{
+\donttest{
+  rain <- c(0, 2, 3, 0, 0, 2, 0, 3, 0, 0, 0)
+  # Longest interval at the end of season
+  dry_test <- weathercommand:::dry_interval(x = rain, period = "end")
+  dry_test
+  # 3
+
+  # Longest interval in middle of season
+  dry_test <- weathercommand:::dry_interval(x = rain, period = "mid")
+  dry_test
+  # 2
+
+  # Longest interval at start of season, considering days with rain of 2 or
+  # lower (unitless) as dry days
+  dry_test <- weathercommand:::dry_interval(x = rain, rain_cutoff = 2, period = "start")
+  dry_test
+  # 2
+}
 }
