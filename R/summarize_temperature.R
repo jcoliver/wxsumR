@@ -1,4 +1,25 @@
-#' Provides temperature summary statistics
+#' Temperature summary statistics
+#'
+#' @description Uses daily site data to calculate summary temperature statistics
+#' for an annual season.
+#'
+#' @details User-defined seasons will be, at most, one year long, defined by the
+#' \code{start_*} and \code{end_*} parameters. Seasons \emph{can} span across
+#' the new year, e.g. a season can start in November and end in March. Seasons
+#' are enumerated by the year in which they start; i.e. if a season starts in
+#' November and ends in March, the output for year YYYY will be based on the
+#' data from November and December of YYYY and January, February, and March of
+#' YYYY + 1.
+#'
+#' By default, will return data in "long" format, with a column indicating the
+#' year the data correspond to (but see discussion of season enumeration above).
+#' If \code{wide = TRUE}, output will include a separate column for each
+#' statistic for each year (see \strong{Value}). For example, if \code{wide =
+#' FALSE} and the data include daily measurements from 1997 to 2002, the output
+#' will have a column \code{year} and a column \code{mean_season}. For these
+#' same data, if \code{wide = TRUE}, there will be no \code{year} column, but
+#' instead it will contain columns \code{mean_season_1997},
+#' \code{mean_season_1998}...\code{mean_season_2002}.
 #'
 #' @param temperature   data frame with daily temperature data for each site
 #' @param start_month   numeric starting month defining season (inclusive)
@@ -18,8 +39,65 @@
 #' @param id_index     integer column index of unique site id
 #'
 #' @return tibble with temperature summary statistics
+#' If \code{wide = FALSE}, returns values for each year for each site:
+#' \describe{
+#'   \item{mean_season}{Mean temperature for the season}
+#'   \item{median_season}{Median temperature for the season}
+#'   \item{sd_season}{Standard deviation of temperature for the season}
+#'   \item{skew_season}{Skew of temperatures for the season, where skew is
+#'   defined by (mean - median)/sd}
+#'   \item{max_season}{Maximum temperature over the season}
+#'   \item{gdd}{Number growing degree days, defined as days with recorded
+#'   temperature between \code{growbase_low} and \code{growbase_high},
+#'   inclusive}
+#'   \item{tempbin20}{Number of days with temperature in the first quintile
+#'   (0-20th percentile)}
+#'   \item{tempbin40}{Number of days with temperature in the second quintile
+#'   (20-40th percentile)}
+#'   \item{tempbin60}{Number of days with temperature in the third quintile
+#'   (40-60th percentile)}
+#'   \item{tempbin80}{Number of days with temperature in the fourth quintile
+#'   (60-80th percentile)}
+#'   \item{tempbin100}{Number of days with temperature in the fifth quintile
+#'   (80-100th percentile)}
+#'   \item{mean_gdd}{Mean growing degree days across all seasons}
+#'   \item{sd_gdd}{Standard deviation of growing degree days across all seasons}
+#'   \item{dev_gdd}{Seasonal deviation from the mean number of growing degree
+#'   days across all seasons}
+#'   \item{z_gdd}{Difference between the number of growing degree days in a
+#'   season and the mean number of growing degree days across all seasons,
+#'   divided by \code{sd_gdd}}
+#'
+#' If \code{wide = TRUE}, all columns except \code{mean_gdd} and \code{"sd_gdd}
+#' are replaced with one column for each year. For example, if the data include
+#' daily measurements from 1997 to 2002, there will be no \code{mean_season}
+#' column in the output, but will instead have columns \code{mean_season_1997},
+#' \code{mean_season_1998}...\code{mean_season_2002}.
 #'
 #' @seealso \code{\link{summarize_rainfall}}
+#'
+#' #' @examples
+#' \donttest{
+#' df <- readRDS(file = "data/temperature-small.Rds")
+#' # Season defined by 15 March through 15 November
+#' temperature_summary <- summarize_temperature(temperature = df,
+#'                                              start_month = 3,
+#'                                              end_month = 11)
+#'
+#' # As example above, but output in "long" format
+#' temperature_summary <- summarize_temperature(temperature = df,
+#'                                              start_month = 3,
+#'                                              end_month = 11,
+#'                                              wide = FALSE)
+#'
+#' # Season defined by 30 November through 15 March
+#' temperature_summary <- summarize_temperature(temperature = df,
+#'                                              start_month = 11,
+#'                                              end_month = 3,
+#'                                              start_day = 30,
+#'                                              end_day = 15)
+#' }
+#'
 #' @export
 #' @import dplyr
 #' @importFrom tidyr drop_na
@@ -32,7 +110,7 @@ summarize_temperature <- function(temperature, start_month, end_month,
 
   # Extract name of column with site id
   id_column_name <- colnames(temperature)[id_index]
-  
+
   # Use to_long to convert to long format and parse column names into dates
   temperature_long <- to_long(data = temperature, keep_cols = id_index)
 

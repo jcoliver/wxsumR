@@ -1,15 +1,33 @@
-#' A wrapper for \code{summarize_temperature} to perform summary statistics
-#' calculations in parallel
+#' Temperature summary statistics calculated in parallel
+#'
+#' @description A wrapper for \link{summarize_temperature} to perform
+#' temperature summary statistics calculations in parallel.
 #'
 #' @param temperature  data frame with daily temperature data for each site
 #' @param num_cores    integer indicating number of processors to use; if
 #' \code{NULL} (default), uses one fewer than the number of processors available
 #' @param id_index     integer column index of unique site id
-#' @param ...          additional values passed to \code{\link{summarize_temperature}}
+#' @param ...          additional values passed to
+#'                     \code{\link{summarize_temperature}}
 #'
 #' @return tibble with temperature summary statistics
 #'
 #' @seealso \code{\link{summarize_temperature}}
+#'
+#' @examples
+#' \donttest{
+#' df <- readRDS(file = "data/temperature-small.Rds")
+#' # Season defined by 15 March through 15 November
+#' temperature_summary <- par_summarize_temperature(temperature = df,
+#'                                                  start_month = 3,
+#'                                                  end_month = 11)
+#' # Same as example above, but restrict use to 2 processors
+#' temperature_summary <- par_summarize_temperature(temperature = df,
+#'                                                  start_month = 3,
+#'                                                  end_month = 11,
+#'                                                  num_cores = 2)
+#' }
+#'
 #' @export
 #' @import dplyr
 #' @import parallel

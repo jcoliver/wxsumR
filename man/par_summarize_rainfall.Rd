@@ -2,8 +2,7 @@
 % Please edit documentation in R/par_summarize_rainfall.R
 \name{par_summarize_rainfall}
 \alias{par_summarize_rainfall}
-\title{A wrapper for \code{summarize_rainfall} to perform summary statistics
-calculations in parallel}
+\title{Rainfall summary statistics calculated in parallel}
 \usage{
 par_summarize_rainfall(rain, num_cores = NULL, id_index = 1, ...)
 }
@@ -15,14 +14,30 @@ par_summarize_rainfall(rain, num_cores = NULL, id_index = 1, ...)
 
 \item{id_index}{integer column index of unique site id}
 
-\item{...}{additional values passed to \code{\link{summarize_rainfall}}}
+\item{...}{additional values passed to
+\code{\link{summarize_rainfall}}}
 }
 \value{
 tibble with rainfall summary statistics
 }
 \description{
-A wrapper for \code{summarize_rainfall} to perform summary statistics
-calculations in parallel
+A wrapper for \link{summarize_rainfall} to perform rainfall
+summary statistics calculations in parallel.
+}
+\examples{
+\donttest{
+df <- readRDS(file = "data/rain-small.Rds")
+# Season defined by 15 March through 15 November
+rain_summary <- par_summarize_rainfall(rain = df,
+                                       start_month = 3,
+                                       end_month = 11)
+# Same as example above, but restrict use to 2 processors
+rain_summary <- par_summarize_rainfall(rain = df,
+                                       start_month = 3,
+                                       end_month = 11,
+                                       num_cores = 2)
+}
+
 }
 \seealso{
 \code{\link{summarize_rainfall}}

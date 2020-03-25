@@ -2,7 +2,7 @@
 % Please edit documentation in R/summarize_temperature.R
 \name{summarize_temperature}
 \alias{summarize_temperature}
-\title{Provides temperature summary statistics}
+\title{Temperature summary statistics}
 \usage{
 summarize_temperature(
   temperature,
@@ -45,11 +45,53 @@ formatted data}
 \item{id_index}{integer column index of unique site id}
 }
 \value{
-tibble with temperature summary statistics
+
 }
 \description{
-Provides temperature summary statistics
+Uses daily site data to calculate summary temperature statistics
+for an annual season.
+}
+\details{
+User-defined seasons will be, at most, one year long, defined by the
+\code{start_*} and \code{end_*} parameters. Seasons \emph{can} span across
+the new year, e.g. a season can start in November and end in March. Seasons
+are enumerated by the year in which they start; i.e. if a season starts in
+November and ends in March, the output for year YYYY will be based on the
+data from November and December of YYYY and January, February, and March of
+YYYY + 1.
+
+By default, will return data in "long" format, with a column indicating the
+year the data correspond to (but see discussion of season enumeration above).
+If \code{wide = TRUE}, output will include a separate column for each
+statistic for each year (see \strong{Value}). For example, if \code{wide =
+FALSE} and the data include daily measurements from 1997 to 2002, the output
+will have a column \code{year} and a column \code{mean_season}. For these
+same data, if \code{wide = TRUE}, there will be no \code{year} column, but
+instead it will contain columns \code{mean_season_1997},
+\code{mean_season_1998}...\code{mean_season_2002}.
 }
 \seealso{
 \code{\link{summarize_rainfall}}
+
+#' @examples
+\donttest{
+df <- readRDS(file = "data/temperature-small.Rds")
+# Season defined by 15 March through 15 November
+temperature_summary <- summarize_temperature(temperature = df,
+                                             start_month = 3,
+                                             end_month = 11)
+
+# As example above, but output in "long" format
+temperature_summary <- summarize_temperature(temperature = df,
+                                             start_month = 3,
+                                             end_month = 11,
+                                             wide = FALSE)
+
+# Season defined by 30 November through 15 March
+temperature_summary <- summarize_temperature(temperature = df,
+                                             start_month = 11,
+                                             end_month = 3,
+                                             start_day = 30,
+                                             end_day = 15)
+}
 }

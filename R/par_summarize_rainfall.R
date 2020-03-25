@@ -1,15 +1,33 @@
-#' A wrapper for \code{summarize_rainfall} to perform summary statistics
-#' calculations in parallel
+#' Rainfall summary statistics calculated in parallel
+#'
+#' @description A wrapper for \link{summarize_rainfall} to perform rainfall
+#' summary statistics calculations in parallel.
 #'
 #' @param rain         data frame with daily rainfall data for each site
 #' @param num_cores    integer indicating number of processors to use; if
 #' \code{NULL} (default), uses one fewer than the number of processors available
 #' @param id_index     integer column index of unique site id
-#' @param ...          additional values passed to \code{\link{summarize_rainfall}}
+#' @param ...          additional values passed to
+#'                     \code{\link{summarize_rainfall}}
 #'
 #' @return tibble with rainfall summary statistics
 #'
 #' @seealso \code{\link{summarize_rainfall}}
+#'
+#' @examples
+#' \donttest{
+#' df <- readRDS(file = "data/rain-small.Rds")
+#' # Season defined by 15 March through 15 November
+#' rain_summary <- par_summarize_rainfall(rain = df,
+#'                                        start_month = 3,
+#'                                        end_month = 11)
+#' # Same as example above, but restrict use to 2 processors
+#' rain_summary <- par_summarize_rainfall(rain = df,
+#'                                        start_month = 3,
+#'                                        end_month = 11,
+#'                                        num_cores = 2)
+#' }
+#'
 #' @export
 #' @import dplyr
 #' @import parallel
