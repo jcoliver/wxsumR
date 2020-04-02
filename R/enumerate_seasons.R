@@ -1,8 +1,4 @@
-# TODO: Could do a little more by checking for June 31, February 30?
-
-# TODO: Do checks to ensure date column is present in data
-
-#' Enumerates seasons in data frame
+#' Enumerate seasons in data frame
 #'
 #' @param data         long-format data frame with weather data; ideally output
 #' of \code{toLong}
@@ -14,7 +10,11 @@
 #' defaults to \code{start_day}
 #'
 #' @return data frame with new columns, "season" and "season_year"
-#' 
+#'
+#' @examples
+#' \donttest{
+#' }
+#'
 #' @importFrom tidyr drop_na
 enumerate_seasons <- function(data, start_month, end_month, start_day = 15,
                               end_day = start_day) {
@@ -53,7 +53,7 @@ enumerate_seasons <- function(data, start_month, end_month, start_day = 15,
 #' defaults to \code{start_day}
 #'
 #' @return  integer vector of season year to which observation corresponds to
-#' 
+#'
 #' @importFrom lubridate year as_date
 #' @importFrom stringr str_c
 season_year <- function(x, start_month, end_month, start_day = 15,

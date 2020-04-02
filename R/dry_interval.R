@@ -1,4 +1,22 @@
-#' Longest stretch of consecutive dry days
+#' Longest interval of consecutive dry days
+#'
+#' @description Determines the longest interval of consecutive days that are
+#' considered "dry". Values of \code{x} that are less than \code{rain_cutoff}
+#' are categorized as dry.
+#'
+#' @details Missing values are not simply removed for purpose of calculation.
+#' If \code{x} includes \code{NA} values and \code{na.rm = FALSE}, \code{NA} is
+#' returned. However, when \code{x} includes \code{NA} values and
+#' \code{na.rm = TRUE}, special consideration is required. In contrast with
+#' other methods, \code{NA} cannot be dropped without significant implications
+#' on calculations. Consider a vector of \code{c(0, 0, NA, 0)}. If \code{NA}
+#' values are removed, the vector reduces to \code{c(0, 0, 0)} and the longest
+#' consectutive stretch of dry days becomes 3. This is not an accurate
+#' representation of the data. Instead, when \code{na.rm = TRUE}, vectors with
+#' \code{NA} values will evaluate missing values as non-dry days. In the
+#' example above, this results in the longest dry interval being 2. This
+#' provides a more accurate representation of dry day intervals based on
+#' non-missing data.
 #'
 #' @param x           numeric vector of rainfall measurements
 #' @param rain_cutoff minimum amount of rainfall to count as non-dry day
