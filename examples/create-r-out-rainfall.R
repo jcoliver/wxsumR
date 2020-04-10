@@ -7,9 +7,11 @@ rm(list = ls())
 
 ################################################################################
 library(weathercommand)
+library(tidyverse)
 
+# STOP: this data file has id values that have been rounded, creating many
+# duplicates
 input_file <- "../large-data-files/essy2_x3_rf2_daily.csv"
-test_data <- read.csv(file = input_file)
 
 # Season is March 15 through November 15
 start_month <- 3
