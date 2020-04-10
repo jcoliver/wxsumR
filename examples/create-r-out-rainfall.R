@@ -23,3 +23,7 @@ rain_summary <- par_summarize_rainfall(rain = test_data,
                                        start_day = start_day,
                                        end_day = end_day,
                                        wide = TRUE)
+
+write.csv(x = rain_summary,
+          file = "data/essy2_rf_weathercommand.csv",
+          row.names = FALSE)
