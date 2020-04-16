@@ -9,9 +9,8 @@ rm(list = ls())
 library(weathercommand)
 library(tidyverse)
 
-# STOP: this data file has id values that have been rounded, creating many
-# duplicates
-input_file <- "../large-data-files/essy2_x3_rf2_daily.csv"
+input_file <- "data/stata-rain.csv"
+test_data <- read.csv(file = input_file)
 
 # Season is March 15 through November 15
 start_month <- 3
@@ -27,5 +26,5 @@ rain_summary <- par_summarize_rainfall(rain = test_data,
                                        wide = TRUE)
 
 write.csv(x = rain_summary,
-          file = "data/essy2_rf_weathercommand.csv",
+          file = "data/r-rain-output.csv",
           row.names = FALSE)

@@ -9,6 +9,9 @@ rm(list = ls())
 # RAIN
 large_data <- read.csv(file = "../large-data-files/NPSY4_x1_rf1_daily.csv")
 
+# Data for stata comparison, 100 rows, 1462 columns (four years)
+write.csv(x = large_data[1:100, 1:1462], file = "data/stata-rain.csv", row.names = FALSE)
+
 # Small data, 100 x 2000
 write.csv(x = large_data[1:100, 1:2000], file = "data/input-rain-small.csv", row.names = FALSE)
 saveRDS(large_data[1:100, 1:2000], file = "data/rain-small.Rds")
@@ -35,6 +38,9 @@ write.csv(x = messy_data[1:100, 1:1000], file = "data/input-rain-messy.csv", row
 ########################################
 # TEMPERATURE
 large_data <- read.csv(file = "../large-data-files/NPSY1_x1_t1_daily.csv")
+
+# Data for stata comparison, 100 rows, 1462 columns (four years)
+write.csv(x = large_data[1:100, 1:1462], file = "data/stata-temperature.csv", row.names = FALSE)
 
 # Small data, 100 x 2000
 write.csv(x = large_data[1:100, 1:2000], file = "data/input-temperature-small.csv", row.names = FALSE)
