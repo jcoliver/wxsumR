@@ -52,16 +52,21 @@ result_diffs <- r_results[, 2:ncol(r_results)] -
 result_diffs <- as.matrix(result_diffs)
 rownames(result_diffs) <- unlist(r_results[, id_column])
 
-r_results$dev_raindays_1983[15:18]
-stata_results$dev_raindays_1983[15:18]
-
 # Where are differences "large"
 big_diffs <- abs(result_diffs) > delta_cutoff
 cols_with_big_diff <- colSums(big_diffs)[colSums(big_diffs) > 0]
-# dev_raindays_1983    dev_raindays_1984    dev_raindays_1985
-# 100                  100                  100
-# dev_raindays_1986 mean_period_raindays   sd_period_raindays
-# 100                  100                  100
+
+# All the z_gdd_YYYY are returning NA for colSums
+r_results$z_gdd_1986[15:19]
+stata_results$z_gdd_1986[15:19]
+
+# Are all z_gdd values NA?
+r_z_gdd <- r_results[, c("z_gdd_1983", "z_gdd_1984", "z_gdd_1985", "z_gdd_1986")]
+summary(r_z_gdd)
+# Yes, all sd_gdd values are zero, sending a 0 to the denominator for the
+# calculation of the z-score. Same result in Stata output. Do not worry about
+# for now
+cols_with_big_diff <- cols_with_big_diff[!is.na(cols_with_big_diff)]
 
 ########################################
 # Comparison 2, based on relative differences in values
@@ -75,12 +80,26 @@ r_denominator[r_denominator == 0] <- 1e-16
 result_rhos <- abs((r_results[, 2:ncol(r_results)] -
                   stata_results[, 2:ncol(stata_results)]) / r_denominator)
 result_rhos <- as.matrix(result_rhos)
-rownames(result_rhos) <- r_results[, id_column]
+rownames(result_rhos) <- unlist(r_results[, id_column])
 
 big_rhos <- result_rhos > rho_cutoff
 cols_with_big_rho <- colSums(big_rhos)[colSums(big_rhos) > 0]
-# dev_raindays_1983    dev_raindays_1984    dev_raindays_1985
-#               100                  100                  100
-# dev_raindays_1986 mean_period_raindays   sd_period_raindays
-#               100                  100                  100
+cols_with_big_rho <- cols_with_big_rho[!is.na(cols_with_big_rho)]
 
+# Focus on tempbin, which are different (previous versions of the R package did
+# not divide the number of days by total; that has been fixed)
+r_results$tempbin20_1983[22:27]
+stata_results$tempbin20_1983[22:27]
+
+# For results, are the values summing to 1? Inclusion/exclusion of values in
+# the percentile bins, may be effecting the differences. i.e. inclusive or
+# exclusive ranges. Since we start with counts, then divide, there is potential
+# for values to be included in two bins (at least)
+
+tempbin_1983_cols <- paste0("tempbin", seq(from = 20, to = 100, by = 20), "_1983")
+r_tempbin_1983 <- r_results[, c(tempbin_1983_cols)]
+stata_tempbin_1983 <- stata_results[, c(tempbin_1983_cols)]
+r_binsum_1983 <- rowSums(r_tempbin_1983)
+stata_binsum_1983 <- rowSums(stata_tempbin_1983)
+mean(r_binsum_1983)
+mean(stata_binsum_1983)
