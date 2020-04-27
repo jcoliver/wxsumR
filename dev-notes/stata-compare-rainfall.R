@@ -22,8 +22,11 @@ dplyr::setdiff(colnames(r_results), colnames(stata_results))
 # Remove those columns, as we cannot compare them
 r_results <- r_results %>%
   select(-starts_with(match = "dry_start_"), -starts_with("dry_end_"))
+
 # Make sure set members are identical
+dplyr::setdiff(colnames(stata_results), colnames(r_results))
 dplyr::setdiff(colnames(r_results), colnames(stata_results))
+
 # Are columns in same order (if > 0, then no)
 sum(colnames(r_results) != colnames(stata_results))
 
@@ -48,10 +51,7 @@ stata_results$dev_raindays_1983[15:18]
 # Where are differences "large"
 big_diffs <- abs(result_diffs) > delta_cutoff
 cols_with_big_diff <- colSums(big_diffs)[colSums(big_diffs) > 0]
-# dev_raindays_1983    dev_raindays_1984    dev_raindays_1985
-# 100                  100                  100
-# dev_raindays_1986 mean_period_raindays   sd_period_raindays
-# 100                  100                  100
+# named numeric(0)
 
 ########################################
 # Comparison 2, based on relative differences in values
@@ -69,10 +69,9 @@ rownames(result_rhos) <- r_results$y4_hhid
 
 big_rhos <- result_rhos > rho_cutoff
 cols_with_big_rho <- colSums(big_rhos)[colSums(big_rhos) > 0]
-# dev_raindays_1983    dev_raindays_1984    dev_raindays_1985
-#               100                  100                  100
-# dev_raindays_1986 mean_period_raindays   sd_period_raindays
-#               100                  100                  100
+# named numeric(0)
+
+# Below here was before Stata calculations got fixed.
 
 ########################################
 # Comparisons

@@ -48,7 +48,7 @@
 #'   \item{norain}{Total number of days with rain less than \code{rain_cutoff}}
 #'   \item{raindays}{Total number of days with rain greater than or equal to
 #'   \code{rain_cutoff}}
-#'   \item{raindays_percent}{Percentage of days in season with rain greater than
+#'   \item{percent_raindays}{Percentage of days in season with rain greater than
 #'   or equal to \code{rain_cutoff}}
 #'   \item{dry}{Longest stretch of days with less than \code{rain_cutoff}
 #'   contained within the period; if rainfall was less than \code{rain_cutoff}
@@ -73,9 +73,9 @@
 #'   or equal to \code{rain_cutoff} across all seasons}
 #'   \item{sd_period_norain}{Standard deviation of number of days with rainfall
 #'   greater than or equal to \code{rain_cutoff} across all seasons}
-#'   \item{mean_period_raindays_percent}{Mean percentage of days in season with
+#'   \item{mean_period_percent_raindays}{Mean percentage of days in season with
 #'   rain greater than or equal to \code{rain_cutoff} across all seasons}
-#'   \item{sd_period_raindays_percent}{Standard deviation of percentage of days
+#'   \item{sd_period_percent_raindays}{Standard deviation of percentage of days
 #'   in season with rain greater than or equal to \code{rain_cutoff} across all
 #'   seasons}
 #'   \item{dev_total_season}{Amount by which season total rainfall deviates from
@@ -88,9 +88,13 @@
 #'   \item{dev_norain}{Difference in number of days with rainfall less than
 #'   \code{rain_cutoff} from the mean number of days with rainfall less than
 #'   \code{rain_cutoff} across seasons}
-#'   \item{dev_raindays_percent}{Difference in percentage of days with rainfall
+#'   \item{dev_percent_raindays}{Difference in percentage of days with rainfall
 #'   greater than or equal to \code{rain_cutoff} from the percentage of days
 #'   with rainfall greater than or equal to \code{rain_cutoff} across seasons}
+#'   \item{z_percent_raindays}{Difference in percentage of days with rainfall
+#'   greater than or equal to \code{rain_cutoff} from
+#'   \code{mean_period_percent_raindays}, divided by
+#'   \code{sd_period_percent_raindays}
 #' }
 #'
 #' If \code{wide = TRUE}, all columns except those with *_period_* pattern are
@@ -161,7 +165,7 @@ summarize_rainfall <- function(rain, start_month, end_month,
                      skew_season = (mean(x = value, na.rm = na.rm) - median(x = value, na.rm = na.rm))/sd(x = value, na.rm = na.rm),
                      norain = sum(x = value < rain_cutoff, na.rm = na.rm),
                      raindays = sum(x = value >= rain_cutoff, na.rm = na.rm),
-                     raindays_percent = sum(x = value >= rain_cutoff, na.rm = na.rm)/dplyr::n(),
+                     percent_raindays = sum(x = value >= rain_cutoff, na.rm = na.rm)/dplyr::n(),
                      dry = dry_interval(x = value, rain_cutoff = rain_cutoff, period = "mid", na.rm = na.rm),
                      dry_start = dry_interval(x = value, rain_cutoff = rain_cutoff, period = "start", na.rm = na.rm),
                      dry_end = dry_interval(x = value, rain_cutoff = rain_cutoff, period = "end", na.rm = na.rm))
@@ -175,8 +179,8 @@ summarize_rainfall <- function(rain, start_month, end_month,
                   sd_period_norain = sd(x = norain),
                   mean_period_raindays = mean(x = raindays),
                   sd_period_raindays = sd(x = raindays),
-                  mean_period_raindays_percent = mean(x = raindays_percent),
-                  sd_period_raindays_percent = sd(x = raindays_percent))
+                  mean_period_percent_raindays = mean(x = percent_raindays),
+                  sd_period_percent_raindays = sd(x = percent_raindays))
 
   # Finally, calculate deviations as deviations from the mean; for total_season,
   # also report as a z-score
@@ -186,7 +190,8 @@ summarize_rainfall <- function(rain, start_month, end_month,
                   z_total_season = (total_season - mean_period_total_season)/sd_period_total_season,
                   dev_raindays = raindays - mean_period_raindays,
                   dev_norain = norain - mean_period_norain,
-                  dev_raindays_percent = raindays_percent - mean_period_raindays_percent)
+                  dev_percent_raindays = percent_raindays - mean_period_percent_raindays,
+                  z_percent_raindays = (percent_raindays - mean_period_percent_raindays)/sd_period_percent_raindays)
 
   if (wide) {
     # Long-term columns won't be separated out into separate columns for each
@@ -194,7 +199,7 @@ summarize_rainfall <- function(rain, start_month, end_month,
     long_term_cols <- c("mean_period_total_season", "sd_period_total_season",
                         "mean_period_norain", "sd_period_norain",
                         "mean_period_raindays", "sd_period_raindays",
-                        "mean_period_raindays_percent", "sd_period_raindays_percent")
+                        "mean_period_percent_raindays", "sd_period_percent_raindays")
     rain_summary <- wide_summary(x = rain_summary,
                                  id_col = id_column_name,
                                  long_term_cols = long_term_cols)
