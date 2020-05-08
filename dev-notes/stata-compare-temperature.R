@@ -86,10 +86,11 @@ big_rhos <- result_rhos > rho_cutoff
 cols_with_big_rho <- colSums(big_rhos)[colSums(big_rhos) > 0]
 cols_with_big_rho <- cols_with_big_rho[!is.na(cols_with_big_rho)]
 
+########################################
 # Focus on tempbin, which are different (previous versions of the R package did
 # not divide the number of days by total; that has been fixed)
-r_results$tempbin20_1983[22:27]
-stata_results$tempbin20_1983[22:27]
+r_results$tempbin20_1983[1:5]
+stata_results$tempbin20_1983[1:5]
 
 # For results, are the values summing to 1? Inclusion/exclusion of values in
 # the percentile bins, may be effecting the differences. i.e. inclusive or
@@ -97,9 +98,78 @@ stata_results$tempbin20_1983[22:27]
 # for values to be included in two bins (at least)
 
 tempbin_1983_cols <- paste0("tempbin", seq(from = 20, to = 100, by = 20), "_1983")
-r_tempbin_1983 <- r_results[, c(tempbin_1983_cols)]
-stata_tempbin_1983 <- stata_results[, c(tempbin_1983_cols)]
-r_binsum_1983 <- rowSums(r_tempbin_1983)
-stata_binsum_1983 <- rowSums(stata_tempbin_1983)
+# Create little data frames with just 1983 bins
+r_tempbin_1983 <- r_results[, c(id_column, tempbin_1983_cols)]
+# Just some isoteric syntax to get the id column to a character without
+# actually referring to the column by name. For fun times about dealing with
+# column names in an environment variable, look at documentation for :=
+# via ?":="
+r_tempbin_1983 <- r_tempbin_1983 %>%
+  mutate(!!id_column := as.character(!!as.name(id_column)))
+
+stata_tempbin_1983 <- stata_results[, c(id_column, tempbin_1983_cols)]
+stata_tempbin_1983 <- stata_tempbin_1983 %>%
+  mutate(!!id_column := as.character(!!as.name(id_column)))
+
+# Ensure rows of bins are summing to 1
+r_binsum_1983 <- rowSums(r_tempbin_1983[, tempbin_1983_cols])
+stata_binsum_1983 <- rowSums(stata_tempbin_1983[, tempbin_1983_cols])
 mean(r_binsum_1983)
 mean(stata_binsum_1983)
+
+# Pull out the first id as a character vector (more fun with environment
+# variables! bang bang)
+id_of_interest <- r_tempbin_1983[22, id_column] %>%
+  pull(!!id_column)
+
+# The original data!
+orig_data <- read.csv(file = "data/stata-temperature.csv")
+
+# One row of interest
+one_row <- orig_data %>%
+  filter(!!as.name(id_column) == id_of_interest) %>%
+  mutate(!!id_column := as.character(!!as.name(id_column)))
+
+# Get data for the one season of interest 1983, 15 March through 15 November
+# Pattern
+# PROBLEM with pattern. Includes all days of March & November
+mar_pattern <- paste0("tmp_198303", "(",
+                      paste0("(", seq(from = 15, to = 31, by = 1), ")", collapse = "|"),
+                      ")")
+middle_pattern <- "tmp_1983((04)|(05)|(06)|(07)|(08)|(09)|(10))[0-9]{2}"
+nov_pattern <- paste0("tmp_198311", "(",
+                      "(01)|(02)|(03)|(04)|(05)|(06)|(07)|(08)|(09)|(10)|(11)|(12)|(13)|(14)|(15)",
+                      # paste0("(", seq(from = 1, to = 15, by = 1), ")", collapse = "|"),
+                      ")")
+pattern <- paste0("(", mar_pattern, ")|",
+                  "(", middle_pattern, ")|",
+                  "(", nov_pattern, ")")
+
+season_col_names <- grep(pattern = pattern,
+                         x = colnames(one_row),
+                         value = TRUE)
+
+one_season <- one_row[, c(id_column, season_col_names)]
+
+temp_quantiles <- quantile(x = one_season[, season_col_names],
+                           probs = c(seq(from = 0, to = 1.0, by = 0.2)))
+
+# Calculate percent of days in each bin
+temp_bins <- numeric(5)
+names(temp_bins) <- paste0("t", seq(from = 20, to = 100, by = 20))
+temp_bins[1] <- sum(one_season[, season_col_names] < temp_quantiles[1, 2])/length(season_col_names)
+temp_bins[2] <- sum(one_season[, season_col_names] >= temp_quantiles[1, 2] &
+               one_season[, season_col_names] < temp_quantiles[1, 3])/length(season_col_names)
+temp_bins[3] <- sum(one_season[, season_col_names] >= temp_quantiles[1, 3] &
+               one_season[, season_col_names] < temp_quantiles[1, 4])/length(season_col_names)
+temp_bins[4] <- sum(one_season[, season_col_names] >= temp_quantiles[1, 4] &
+               one_season[, season_col_names] < temp_quantiles[1, 5])/length(season_col_names)
+temp_bins[5] <- sum(one_season[, season_col_names] >= temp_quantiles[1, 5])/length(season_col_names)
+
+# manual calculation matches R output, not Stata
+temp_bins
+r_results[r_results[, id_column] == id_of_interest, c(id_column, tempbin_1983_cols)]
+stata_results[stata_results[, id_column] == id_of_interest, c(id_column, tempbin_1983_cols)]
+
+# Could the Stata percentiles be based on temperatures at ALL sites, rather
+# than a site-by-site basis as coded in R?

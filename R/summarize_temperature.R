@@ -138,6 +138,14 @@ summarize_temperature <- function(temperature, start_month, end_month,
                                          yes = max(value, na.rm = na.rm),
                                          no = NA), # rows of all NA return -Inf by max()
                      gdd = sum(value >= growbase_low & value <= growbase_high, na.rm = na.rm),
+                     # tempbin20 = sum(value < quantile(x = value, probs = 0.2, na.rm = na.rm), na.rm = na.rm),
+                     # tempbin40 = sum(value >= quantile(x = value, probs = 0.2, na.rm = na.rm) &
+                     #                   value < quantile(x = value, probs = 0.4, na.rm = na.rm), na.rm = na.rm),
+                     # tempbin60 = sum(value >= quantile(x = value, probs = 0.4, na.rm = na.rm) &
+                     #                   value < quantile(x = value, probs = 0.6, na.rm = na.rm), na.rm = na.rm),
+                     # tempbin80 = sum(value >= quantile(x = value, probs = 0.6, na.rm = na.rm) &
+                     #                   value < quantile(x = value, probs = 0.8, na.rm = na.rm), na.rm = na.rm),
+                     # tempbin100 = sum(value >= quantile(x = value, probs = 0.8, na.rm = na.rm), na.rm = na.rm))
                      tempbin20 = sum(value < quantile(x = value, probs = 0.2, na.rm = na.rm), na.rm = na.rm)/n(),
                      tempbin40 = sum(value >= quantile(x = value, probs = 0.2, na.rm = na.rm) &
                                        value < quantile(x = value, probs = 0.4, na.rm = na.rm), na.rm = na.rm)/n(),
@@ -145,8 +153,7 @@ summarize_temperature <- function(temperature, start_month, end_month,
                                        value < quantile(x = value, probs = 0.6, na.rm = na.rm), na.rm = na.rm)/n(),
                      tempbin80 = sum(value >= quantile(x = value, probs = 0.6, na.rm = na.rm) &
                                        value < quantile(x = value, probs = 0.8, na.rm = na.rm), na.rm = na.rm)/n(),
-                     tempbin100 = sum(value >= quantile(x = value, probs = 0.8, na.rm = na.rm) &
-                                        value <= quantile(x = value, probs = 1.0, na.rm = na.rm), na.rm = na.rm)/n())
+                     tempbin100 = sum(value >= quantile(x = value, probs = 0.8, na.rm = na.rm), na.rm = na.rm)/n())
 
   # Calculate seasonal average and standard deviation for gdd
   temperature_summary <- dplyr::ungroup(temperature_summary) %>%
