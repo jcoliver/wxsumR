@@ -151,20 +151,20 @@ season_col_names <- grep(pattern = pattern,
 
 one_season <- one_row[, c(id_column, season_col_names)]
 
-temp_quantiles <- quantile(x = one_season[, season_col_names],
+temp_quantiles <- quantile(x = as.matrix(one_season[, season_col_names]),
                            probs = c(seq(from = 0, to = 1.0, by = 0.2)))
 
 # Calculate percent of days in each bin
 temp_bins <- numeric(5)
 names(temp_bins) <- paste0("t", seq(from = 20, to = 100, by = 20))
-temp_bins[1] <- sum(one_season[, season_col_names] < temp_quantiles[1, 2])/length(season_col_names)
-temp_bins[2] <- sum(one_season[, season_col_names] >= temp_quantiles[1, 2] &
-               one_season[, season_col_names] < temp_quantiles[1, 3])/length(season_col_names)
-temp_bins[3] <- sum(one_season[, season_col_names] >= temp_quantiles[1, 3] &
-               one_season[, season_col_names] < temp_quantiles[1, 4])/length(season_col_names)
-temp_bins[4] <- sum(one_season[, season_col_names] >= temp_quantiles[1, 4] &
-               one_season[, season_col_names] < temp_quantiles[1, 5])/length(season_col_names)
-temp_bins[5] <- sum(one_season[, season_col_names] >= temp_quantiles[1, 5])/length(season_col_names)
+temp_bins[1] <- sum(one_season[, season_col_names] < temp_quantiles[2])/length(season_col_names)
+temp_bins[2] <- sum(one_season[, season_col_names] >= temp_quantiles[2] &
+               one_season[, season_col_names] < temp_quantiles[3])/length(season_col_names)
+temp_bins[3] <- sum(one_season[, season_col_names] >= temp_quantiles[3] &
+               one_season[, season_col_names] < temp_quantiles[4])/length(season_col_names)
+temp_bins[4] <- sum(one_season[, season_col_names] >= temp_quantiles[4] &
+               one_season[, season_col_names] < temp_quantiles[5])/length(season_col_names)
+temp_bins[5] <- sum(one_season[, season_col_names] >= temp_quantiles[5])/length(season_col_names)
 
 # manual calculation matches R output, not Stata
 temp_bins
@@ -173,3 +173,31 @@ stata_results[stata_results[, id_column] == id_of_interest, c(id_column, tempbin
 
 # Could the Stata percentiles be based on temperatures at ALL sites, rather
 # than a site-by-site basis as coded in R?
+
+# Create quantiles based on data at all sites
+temp_data_1983 <- as.matrix(orig_data[, season_col_names])
+
+temp_quantiles_all <- quantile(x = temp_data_1983,
+                               probs = c(seq(from = 0, to = 1.0, by = 0.2)))
+
+# See how well season of interest matches those quantiles
+temp_bins_all <- numeric(5)
+names(temp_bins_all) <- paste0("t", seq(from = 20, to = 100, by = 20))
+num_days <- length(season_col_names)
+temp_bins_all[1] <- sum(one_season[, season_col_names] < temp_quantiles_all[2])/num_days
+temp_bins_all[2] <- sum(one_season[, season_col_names] >= temp_quantiles_all[2] &
+                      one_season[, season_col_names] < temp_quantiles_all[3])/num_days
+temp_bins_all[3] <- sum(one_season[, season_col_names] >= temp_quantiles_all[3] &
+                      one_season[, season_col_names] < temp_quantiles_all[4])/num_days
+temp_bins_all[4] <- sum(one_season[, season_col_names] >= temp_quantiles_all[4] &
+                      one_season[, season_col_names] < temp_quantiles_all[5])/num_days
+temp_bins_all[5] <- sum(one_season[, season_col_names] >= temp_quantiles_all[5])/num_days
+
+# Compare single-site quantiles to quantiles based on all sites
+temp_bins
+temp_bins_all
+
+# Hmm...identical, but not too surprising as basing the percentiles on all
+# sites only changes the two extreme values (0% and 100%):
+temp_quantiles
+temp_quantiles_all
