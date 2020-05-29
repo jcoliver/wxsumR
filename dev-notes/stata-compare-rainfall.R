@@ -21,7 +21,9 @@ dplyr::setdiff(colnames(r_results), colnames(stata_results))
 
 # Remove those columns, as we cannot compare them
 r_results <- r_results %>%
-  select(-starts_with(match = "dry_start_"), -starts_with("dry_end_"))
+  select(-starts_with(match = "dry_start_"),
+         -starts_with("dry_end_"),
+         -starts_with("z_percent_raindays_"))
 
 # Make sure set members are identical
 dplyr::setdiff(colnames(stata_results), colnames(r_results))

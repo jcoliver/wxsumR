@@ -87,35 +87,39 @@ cols_with_big_rho <- colSums(big_rhos)[colSums(big_rhos) > 0]
 cols_with_big_rho <- cols_with_big_rho[!is.na(cols_with_big_rho)]
 
 ########################################
-# Focus on tempbin, which are different (previous versions of the R package did
-# not divide the number of days by total; that has been fixed)
-r_results$tempbin20_1983[1:5]
-stata_results$tempbin20_1983[1:5]
+# Focus on tempbin, which are different for years 1984-1986!?!
+r_results$tempbin20_1985[1:5]
+stata_results$tempbin20_1985[1:5]
 
 # For results, are the values summing to 1? Inclusion/exclusion of values in
 # the percentile bins, may be effecting the differences. i.e. inclusive or
 # exclusive ranges. Since we start with counts, then divide, there is potential
 # for values to be included in two bins (at least)
 
-tempbin_1983_cols <- paste0("tempbin", seq(from = 20, to = 100, by = 20), "_1983")
-# Create little data frames with just 1983 bins
-r_tempbin_1983 <- r_results[, c(id_column, tempbin_1983_cols)]
+tempbin_1985_cols <- paste0("tempbin", seq(from = 20, to = 100, by = 20), "_1985")
+# Create little data frames with just 1985 bins
+r_tempbin_1985 <- r_results[, c(id_column, tempbin_1985_cols)]
 # Just some isoteric syntax to get the id column to a character without
 # actually referring to the column by name. For fun times about dealing with
 # column names in an environment variable, look at documentation for :=
 # via ?":="
-r_tempbin_1983 <- r_tempbin_1983 %>%
+r_tempbin_1985 <- r_tempbin_1985 %>%
   mutate(!!id_column := as.character(!!as.name(id_column)))
 
-stata_tempbin_1983 <- stata_results[, c(id_column, tempbin_1983_cols)]
-stata_tempbin_1983 <- stata_tempbin_1983 %>%
+stata_tempbin_1985 <- stata_results[, c(id_column, tempbin_1985_cols)]
+stata_tempbin_1985 <- stata_tempbin_1985 %>%
   mutate(!!id_column := as.character(!!as.name(id_column)))
 
 # Ensure rows of bins are summing to 1
-r_binsum_1983 <- rowSums(r_tempbin_1983[, tempbin_1983_cols])
-stata_binsum_1983 <- rowSums(stata_tempbin_1983[, tempbin_1983_cols])
-mean(r_binsum_1983)
-mean(stata_binsum_1983)
+r_binsum_1985 <- rowSums(r_tempbin_1985[, tempbin_1985_cols])
+stata_binsum_1985 <- rowSums(stata_tempbin_1985[, tempbin_1985_cols])
+mean(r_binsum_1985)
+mean(stata_binsum_1985)
+
+#### 1984-1985 to HERE
+# 1984 summing to 2, 1985 summing to 3. Variable isn't being reset in
+# counts
+
 
 # Pull out the first id as a character vector (more fun with environment
 # variables! bang bang)
