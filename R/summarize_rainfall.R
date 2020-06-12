@@ -103,7 +103,7 @@
 #' column in the output, but will instead have columns \code{mean_season_1997},
 #' \code{mean_season_1998}...\code{mean_season_2002}.
 #'
-#' @seealso \code{\link{summarize_temperature}}
+#' @seealso \code{\link{summarize_temperature}}, \code{\link{par_summarize_rainfall}}
 #'
 #' @examples
 #' \donttest{
