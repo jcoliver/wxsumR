@@ -35,6 +35,8 @@
 #' @param wide         logical indicating whether or not to output as wide-
 #' formatted data
 #' @param id_index     integer column index of unique site id
+#' @param date_sep     character used to delimit variable prefix from date in
+#' column names; defaults to underscore ("_")
 #'
 #' @return tibble with rainfall summary statistics
 #' If \code{wide = FALSE}, returns values for each year for each site:
@@ -135,13 +137,15 @@
 summarize_rainfall <- function(rain, start_month, end_month,
                                start_day = 15, end_day = start_day,
                                rain_cutoff = 1, na.rm = TRUE, wide = TRUE,
-                               id_index = 1) {
+                               id_index = 1, date_sep = "_") {
 
   # Extract name of column with site id
   id_column_name <- colnames(rain)[id_index]
 
   # Use to_long to convert to long format and parse column names into dates
-  rain_long <- to_long(data = rain, keep_cols = id_index)
+  rain_long <- to_long(data = rain,
+                       keep_cols = id_index,
+                       date_sep = date_sep)
 
   # Exclude NA dates
   rain_long <- rain_long %>%

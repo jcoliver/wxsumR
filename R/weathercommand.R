@@ -1,9 +1,11 @@
 #' weathercommand: A package for calculating annual summary statistics of site-
 #' specific climate data
 #'
-#' The weathercommand provides functions for two types of daily data: rainfall
-#' and temperature. The resulting output from the functions are a variety of
-#' summary statistics (mean, standard deviation, etc.).
+#' The weathercommand package provides functions for two types of daily data:
+#' rainfall and temperature. The resulting output from the functions are a
+#' variety of summary statistics (mean, standard deviation, etc.). See
+#' documentation for each function for full details of the statistics being
+#' calculated.
 #'
 #' @section weathercommand functions:
 #' The two primary functions are:
@@ -28,6 +30,14 @@
 #' six years ago.
 #'
 #' @section weathercommand data:
+#' Sample datasets for both rainfall and temperature are provided as examples.
+#'
+#' These datasets illustrate the expected format of input as well as column
+#' naming conventions. As column names are expected to include information (i.e.
+#' the date of an observation), it is imperative that this format is used for
+#' all input files. For more information about expected input column formats,
+#' see documentation for \code{date_sep} parameter in
+#' \code{\link{summarize_rainfall}} or \code{\link{summarize_temperature}}.
 #'
 #' @docType package
 #' @name weathercommand

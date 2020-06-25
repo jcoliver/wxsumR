@@ -37,6 +37,8 @@
 #' @param wide         logical indicating whether or not to output as wide-
 #' formatted data
 #' @param id_index     integer column index of unique site id
+#' @param date_sep     character used to delimit variable prefix from date in
+#' column names; defaults to underscore ("_")
 #'
 #' @return tibble with temperature summary statistics
 #' If \code{wide = FALSE}, returns values for each year for each site:
@@ -106,13 +108,16 @@
 summarize_temperature <- function(temperature, start_month, end_month,
                                   start_day = 15, end_day = start_day,
                                   growbase_low = 10, growbase_high = 30,
-                                  na.rm = TRUE, wide = TRUE, id_index = 1) {
+                                  na.rm = TRUE, wide = TRUE, id_index = 1,
+                                  date_sep = "_") {
 
   # Extract name of column with site id
   id_column_name <- colnames(temperature)[id_index]
 
   # Use to_long to convert to long format and parse column names into dates
-  temperature_long <- to_long(data = temperature, keep_cols = id_index)
+  temperature_long <- to_long(data = temperature,
+                              keep_cols = id_index,
+                              date_sep = date_sep)
 
   # Exclude NA dates
   temperature_long <- temperature_long %>%
