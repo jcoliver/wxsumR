@@ -1,0 +1,47 @@
+---
+title: "weathercommand Quick Reference"
+date: "`r Sys.Date()`"
+author: Jeffrey C. Oliver
+output: 
+  pdf_document:
+    latex_engine: xelatex
+  html_document: default
+vignette: >
+  %\VignetteIndexEntry{weathercommand-quickref}
+  %\VignetteEncoding{UTF-8}
+  %\VignetteEngine{knitr::rmarkdown}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+
+```{r setup}
+library(weathercommand)
+```
+
+# Preamble
+## What this does
+## What the data should look like
+### rainfall
+```{r}
+rain <- read.csv(file = "../data/rain-2yr.csv")
+```
+### temperature
+```{r}
+temperature <- read.csv(file = "../data/rain-2yr.csv")
+```
+
+# Serial implementations
+## `summarize_rainfall`
+## `summarize_temperature`
+
+# Parallel implementations
+## `par_summarize_rainfall`
+## `par_summarize_temperature`
+
+# Large data, small RAM
+## One solution, using serial approach

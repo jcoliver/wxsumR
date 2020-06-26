@@ -1,12 +1,13 @@
 Package: weathercommand
 Type: Package
 Title: Summary Statistics for Weather Data
-Version: 0.1.0
+Version: 0.9.0
 Authors@R: as.person(c(
     "Jeffrey C. Oliver <jcoliver@email.arizona.edu> [aut, cre]",
     "Jeffrey D. Michler <jdmichler@email.arizona.edu> [aut]"
     ))
 Maintainer: Jeffrey C. Oliver <jcoliver@email.arizona.edu>
+Depends: R (>= 3.6.0)
 Description: Provides functions for calculating several summary statistics for 
     rainfall and temperature data. Uses daily site data to calculate values for 
     annual, user-defined seasons.
@@ -19,3 +20,7 @@ Imports:
     stringr (>= 1.3.1),
     tidyr (>= 1.0.0)
 RoxygenNote: 7.0.2
+Suggests: 
+    knitr,
+    rmarkdown
+VignetteBuilder: knitr
