@@ -1,5 +1,9 @@
 #' A tiny (two-year) example data set of daily rainfall measurements
 #'
+#' @docType data
+#'
+#' @usage data(rain_2yr)
+#'
 #' @format A data frame with 100 rows and 732 columns
 #' \describe{
 #'   \item{y4_hhid}{unique ID of site}
@@ -8,7 +12,7 @@
 #'   \item{...}{}
 #'   \item{rf_19841231}{rainfall for 1984-12-31}
 #' }
-"rain-2yr.csv"
+"rain_2yr"
 
 #' A small (four-year) example data set of daily rainfall measurements
 #'
@@ -20,7 +24,7 @@
 #'   \item{...}{}
 #'   \item{rf_19861231}{rainfall for 1986-12-31}
 #' }
-"rain-small"
+"rain_4yr"
 
 #' A tiny (two-year) example data set of daily temperature measurements
 #'
@@ -32,7 +36,7 @@
 #'   \item{...}{}
 #'   \item{tmp_19841231}{temperature for 1984-12-31, in degrees Celsius}
 #' }
-"temperature-2yr.csv"
+"temperature_2yr"
 
 #' A small (four-year) example data set of daily temperature measurements
 #'
@@ -45,4 +49,4 @@
 #'   \item{tmp_19861231}{temperature for 1986-12-31, in degrees Celsius}
 #'   \item{...}{}
 #' }
-"temperature-4yr"
+"temperature_4yr"

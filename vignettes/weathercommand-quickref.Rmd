@@ -28,11 +28,11 @@ library(weathercommand)
 ## What the data should look like
 ### rainfall
 ```{r}
-rain <- read.csv(file = "../data/rain-2yr.csv")
+rain[1:4, 1:5]
 ```
 ### temperature
 ```{r}
-temperature <- read.csv(file = "../data/rain-2yr.csv")
+
 ```
 
 # Serial implementations
