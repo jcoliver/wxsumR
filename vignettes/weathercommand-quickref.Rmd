@@ -19,24 +19,69 @@ knitr::opts_chunk$set(
 )
 ```
 
-```{r setup}
+# Preamble
+
+## Summary
+
+The weathercommand package provides functions to calculate annual summary statistics for rainfall and temperature data. The specifics of each statistic can be found in the documentation for specific functions. All calculations are performed on a per-site, per-season basis. This vignette provides an introduction on their use and the expectations of input data.
+
+Functions and data in the weathercommand package can be made available through the `library` command:
+
+```{r load-package}
 library(weathercommand)
 ```
 
-# Preamble
-## What this does
-## What the data should look like
-### rainfall
-```{r}
-rain[1:4, 1:5]
-```
-### temperature
-```{r}
+The package includes both serial and parallel implementations, the latter being wrappers for the former that use functions from the parallel package. For smaller data sets (i.e. 150,000 cells of data or fewer), a serial implementation will likely work fine on a modern laptop. For larger data sets, consider the parallel implementations (functions that begin with `par_`) or, for _really_ big data sets, parallel implementations on high-performance computer clusters may be the optimal solution.
 
+## Input data
+
+The weathercommand functions take a data frame with two types of data:
+
+1. A single column with a unique identifier for the site where weather measurements were taken; this column can be type numeric, character, or factor.
+2. All remaining columns are measurements for _either_ rainfall or temperature. Given separate functions for rainfall and temperature, avoid sending the wrong weather data to functions (i.e. do not pass a data frame with rainfall measurements to `summarize_temperature`).
+
+The names of the columns in point 2 above must be in a specific format: \<measurement\>\_YYYYMMDD. That is, each column name should be prefixed with a character string indicating what was measured (e.g. "rf" for rainfall, "tmp" for temperature), followed by an underscore, "\_", followed by the date in YYYYMMDD format.
+
+### Rainfall
+
+The included data set, `rain_2yr`, has two years of rainfall data for 100 sites. If we look at the first six rows of columns 1-4, we see:
+
+```{r}
+head(rain_2yr[, 1:4])
 ```
+
+The first column, `r colnames(rain_2yr)[1]`, contains the unique identifier for each site. The remaining columns show daily measurements of rainfall. Note the format of column names for those columns with rainfall data (columns 2 through `r ncol(rain_2yr)`): `r colnames(rain_2yr)[2]` shows the format \<measurement\>\_YYYYMMDD as described above.
+
+### Temperature
+
+The included data set, `temperature_2yr`, has two years of temperature data for 100 sites. If we look at the first six rows of columns 1-4, we see:
+
+```{r}
+head(temperature_2yr[, 1:4])
+```
+
+The first column, `r colnames(temperature_2yr)[1]`, contains the unique identifier for each site. The remaining columns show daily measurements of temperature. Note the format of column names for those columns with temperature data (columns 2 through `r ncol(temperature_2yr)`): `r colnames(temperature_2yr)[2]` shows the format \<measurement\>\_YYYYMMDD as described above.
 
 # Serial implementations
+
 ## `summarize_rainfall`
+
+The bare minimum of information for calculating rainfall summary statistics is:
+
++ A data frame with daily rainfall data, as described in [Input data](#input-data)
++ The month in which the user-defined season starts
++ The month in which the user-defined season ends
+
+By default, seasons start and end on the fifteenth day of the month, but this can be changed through the `start_day` and `end_day` parameters, respectively. If only the `start_day` parameter is specified, the same value will be used for `end_day`. Users should be cautious when specifiying days at the end of the month, given variation among months in which day is the last day of the month (28, 29, 30, 31).
+
+In the example above, we calculate summary statistics for the two-year data set, with the season starting on 15 March and ending on 15 November.
+
+```{r rain-serial}
+rain_summary <- summarize_rainfall(rain = rain_2yr, 
+                                   start_month = 3,
+                                   end_month = 11)
+```
+
 ## `summarize_temperature`
 
 # Parallel implementations
