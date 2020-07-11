@@ -31,7 +31,8 @@
 #' @export
 #' @import dplyr
 #' @import parallel
-par_summarize_temperature <- function(temperature, num_cores = NULL, id_index = 1, ...) {
+par_summarize_temperature <- function(temperature, num_cores = NULL,
+                                      id_index = 1, ...) {
   if (is.null(num_cores)) {
     num_cores <- parallel::detectCores() - 1
   }
