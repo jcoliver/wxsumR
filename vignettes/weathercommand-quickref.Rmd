@@ -189,8 +189,54 @@ long_par_temperature_summary <- par_summarize_temperature(temperature = temperat
 
 # Large data, small RAM
 
-"I have a large data set, but I don't have much computer memory, and I don't have access to an HPC."
+_I have a large data set, but I don't have much computer memory, and I don't have access to an HPC._
 
+## One solution, using the serial approach
 
+OK, this is possible, but it is slow. Very. Slow. The basic approach is to calculate summary statistics one-by-one on each row (site) of data, and add the output to a data frame that you create beforehand. 
 
-## One solution, using serial approach
+```{r avoid-ram-gobbling, eval = FALSE}
+# Read a large data file into memory
+# E.g. 3,000 sites (rows) of 13,000 daily rainfall measurements (columns)
+infile <- "data/rainfall-data.csv"
+large_rain <- readr::read_csv(infile)
+
+# This will ultimately become a data frame with results
+rain_summary <- NULL
+
+# The months that define the start and end of the season
+season_start_month <- 3
+season_end_month <- 11
+
+for (i in 1:nrow(large_rain)) {
+  # This conditional provides a little reporting message the prints on every 
+  # hundredth row
+  if (i %% 100 == 0) {
+    message(paste0("At row ", i))
+  }
+  if (i == 1) {
+    # Need to set up the output data frame, with the right number of rows
+    # Begin by assigning the output of summarize_rainfall based on a single 
+    # row (in this case, the first row)
+    rain_summary <- summarize_rainfall(rain = large_rain[i, ],
+                                    start_month = season_start_month,
+                                    end_month = season_end_month)
+    # rain_summary now has one row and the appropriate number of columns; we 
+    # create empty rows in the data frame to avoid growing the results on each 
+    # iteration of the for loop
+    rain_summary[2:nrow(large_rain), ] <- NA
+  } else {
+    # For rows (sites) 2 and up, we can add the output of summarize_rainfall to 
+    # the appropriate row in rain_summary
+    rain_summary[i, ] <- summarize_rainfall(rain = large_rain[i, ],
+                                            start_month = season_start_month,
+                                            end_month = season_end_month)
+  }
+}
+```
+
+A couple of caveats are warranted:
+
++ This implementation assumes wide-formatted data is the desired output format. If you want long-formatted data, this will _not_ work as written. You'll need to get creative in the creation and subsequent updating of the data frame holding the results (`rain_summary`). Why? The wide-formatted output will create exactly one row of summary statistics for each row of the input data (so, in this case, `nrow(large_rain) = nrow(rain_summary)`). This is not true for longer formatted data, because for each row of the input data, it will produce a separate row of summary statistics calculated for each year (season). So if your input file has 3 years of data, the number of rows of output will be three times the number of rows of the input. For example, if you have 100 sites (rows) of input data that covers three seasons (years) and pass `wide = FALSE` to `summarize_rainfall`, the resulting output will have 300 rows of summary statistics.
++ This could be made a little more creative, where individual sites are farmed out to different processors, in a para-parallel approach. Check out the source code for the parallel implementations (`par_summarize_rainfall` and `par_summarize_temperature`) for ideas on using the parallel package.
++ This approach, and caveats, also apply to `summarize_temperature`.
