@@ -108,21 +108,20 @@
 #' @seealso \code{\link{summarize_temperature}}, \code{\link{par_summarize_rainfall}}
 #'
 #' @examples
-#' \donttest{
-#' df <- readRDS(file = "data/rain-small.Rds")
+#' \dontrun{
 #' # Season defined by 15 March through 15 November
-#' rain_summary <- summarize_rainfall(rain = df,
+#' rain_summary <- summarize_rainfall(rain = rain_2yr,
 #'                                    start_month = 3,
 #'                                    end_month = 11)
 #'
 #' # As example above, but output in "long" format
-#' rain_summary <- summarize_rainfall(rain = df,
+#' rain_summary <- summarize_rainfall(rain = rain_2yr,
 #'                                    start_month = 3,
 #'                                    end_month = 11,
 #'                                    wide = FALSE)
 #'
 #' # Season defined by 30 November through 15 March
-#' rain_summary <- summarize_rainfall(rain = df,
+#' rain_summary <- summarize_rainfall(rain = rain_2yr,
 #'                                    start_month = 11,
 #'                                    end_month = 3,
 #'                                    start_day = 30,

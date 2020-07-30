@@ -44,7 +44,7 @@
 #' }
 #'
 #' @examples
-#' \donttest{
+#' \dontrun{
 #'   rain <- c(0, 2, 3, 0, 0, 2, 0, 3, 0, 0, 0)
 #'   # Longest interval at the end of season
 #'   dry_test <- weathercommand:::dry_interval(x = rain, period = "end")

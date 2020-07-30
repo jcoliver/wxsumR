@@ -79,21 +79,20 @@
 #' @seealso \code{\link{summarize_rainfall}}, \code{\link{par_summarize_temperature}}
 #'
 #' #' @examples
-#' \donttest{
-#' df <- readRDS(file = "data/temperature-small.Rds")
+#' \dontrun{
 #' # Season defined by 15 March through 15 November
-#' temperature_summary <- summarize_temperature(temperature = df,
+#' temperature_summary <- summarize_temperature(temperature = temperature_2yr,
 #'                                              start_month = 3,
 #'                                              end_month = 11)
 #'
 #' # As example above, but output in "long" format
-#' temperature_summary <- summarize_temperature(temperature = df,
+#' temperature_summary <- summarize_temperature(temperature = temperature_2yr,
 #'                                              start_month = 3,
 #'                                              end_month = 11,
 #'                                              wide = FALSE)
 #'
 #' # Season defined by 30 November through 15 March
-#' temperature_summary <- summarize_temperature(temperature = df,
+#' temperature_summary <- summarize_temperature(temperature = temperature_2yr,
 #'                                              start_month = 11,
 #'                                              end_month = 3,
 #'                                              start_day = 30,
@@ -143,14 +142,6 @@ summarize_temperature <- function(temperature, start_month, end_month,
                                          yes = max(value, na.rm = na.rm),
                                          no = NA), # rows of all NA return -Inf by max()
                      gdd = sum(value >= growbase_low & value <= growbase_high, na.rm = na.rm),
-                     # tempbin20 = sum(value < quantile(x = value, probs = 0.2, na.rm = na.rm), na.rm = na.rm),
-                     # tempbin40 = sum(value >= quantile(x = value, probs = 0.2, na.rm = na.rm) &
-                     #                   value < quantile(x = value, probs = 0.4, na.rm = na.rm), na.rm = na.rm),
-                     # tempbin60 = sum(value >= quantile(x = value, probs = 0.4, na.rm = na.rm) &
-                     #                   value < quantile(x = value, probs = 0.6, na.rm = na.rm), na.rm = na.rm),
-                     # tempbin80 = sum(value >= quantile(x = value, probs = 0.6, na.rm = na.rm) &
-                     #                   value < quantile(x = value, probs = 0.8, na.rm = na.rm), na.rm = na.rm),
-                     # tempbin100 = sum(value >= quantile(x = value, probs = 0.8, na.rm = na.rm), na.rm = na.rm))
                      tempbin20 = sum(value < quantile(x = value, probs = 0.2, na.rm = na.rm), na.rm = na.rm)/n(),
                      tempbin40 = sum(value >= quantile(x = value, probs = 0.2, na.rm = na.rm) &
                                        value < quantile(x = value, probs = 0.4, na.rm = na.rm), na.rm = na.rm)/n(),
@@ -178,8 +169,8 @@ summarize_temperature <- function(temperature, start_month, end_month,
     # year
     long_term_cols <- c("mean_gdd", "sd_gdd")
     temperature_summary <- wide_summary(x = temperature_summary,
-                                 id_col = id_column_name,
-                                 long_term_cols = long_term_cols)
+                                        id_col = id_column_name,
+                                        long_term_cols = long_term_cols)
   }
 
   return(temperature_summary)

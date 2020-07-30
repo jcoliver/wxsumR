@@ -9,3 +9,16 @@ climate data. Largely an R implementation of the Stata package available at [htt
 + lubridate (>= 1.7.4),
 + stringr (>= 1.3.1),
 + tidyr (>= 1.0.0)
+
+## Installation
+
+### Development version
+
+The latest version is available through GitHub (you'll need the 
+[devtools](https://cran.r-project.org/web/packages/devtools/index.html) 
+package to install):
+
+``` r
+# install.packages("devtools")
+devtools::install_github("jcoliver/weathercommand")
+```

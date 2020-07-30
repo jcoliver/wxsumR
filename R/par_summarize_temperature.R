@@ -15,17 +15,24 @@
 #' @seealso \code{\link{summarize_temperature}}
 #'
 #' @examples
-#' \donttest{
-#' df <- readRDS(file = "data/temperature-small.Rds")
+#' \dontrun{
 #' # Season defined by 15 March through 15 November
-#' temperature_summary <- par_summarize_temperature(temperature = df,
+#' temperature_summary <- par_summarize_temperature(temperature = temperature_2yr,
 #'                                                  start_month = 3,
 #'                                                  end_month = 11)
+#'
 #' # Same as example above, but restrict use to 2 processors
-#' temperature_summary <- par_summarize_temperature(temperature = df,
+#' temperature_summary <- par_summarize_temperature(temperature = temperature_2yr,
 #'                                                  start_month = 3,
 #'                                                  end_month = 11,
 #'                                                  num_cores = 2)
+#'
+#' # Season defined by 15 March through 15 November output separate rows for
+#' # each year
+#' temperature_summary <- par_summarize_temperature(temperature = temperature_2yr,
+#'                                                  start_month = 3,
+#'                                                  end_month = 11,
+#'                                                  wide = FALSE)
 #' }
 #'
 #' @export

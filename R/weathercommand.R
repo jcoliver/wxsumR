@@ -20,6 +20,7 @@
 #'   \item \code{\link{par_summarize_rainfall}}
 #'   \item \code{\link{par_summarize_temperature}}
 #' }
+#'
 #' The parallel versions are primarily just wrappers for the serial
 #' implementations. A note of caution is warranted with the parallel processing
 #' functions: these will happily attempt to consume as much RAM as they need.
@@ -27,7 +28,8 @@
 #' that have 10 million cells or more) on a not-so-new machine (pre-2018),
 #' consider using the serial functions. This will take longer, but is less
 #' likely to crash your well-meaning but not quite up to the task laptop from
-#' six years ago.
+#' six years ago. One example of how this can be implemented can be found in the
+#' weathercommand Quick Reference vignette.
 #'
 #' @section weathercommand data:
 #' Sample datasets for both rainfall and temperature are provided as examples.

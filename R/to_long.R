@@ -32,9 +32,9 @@
 #' class \code\link{[base]{Date}}.
 #'
 #' @examples
-#' \donttest{
-#' df <- readRDS(file = "data/rain-small.Rds")
-#' rain_long <- to_long(data = df)
+#' \dontrun{
+#' # to_long is not exported, so we use triple-colon (:::)
+#' rain_long <- weathercommand:::to_long(data = rain_2yr)
 #' }
 #'
 #' @import tidyr

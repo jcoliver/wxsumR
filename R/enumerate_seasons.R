@@ -28,16 +28,18 @@
 #' for a season spanning November through March would be 1984).
 #'
 #' @examples
-#' \donttest{
-#' df <- readRDS(file = "data/rain-small.Rds")
-#' # convert to long format and parse column names into dates
-#' rain_long <- to_long(data = df)
+#' \dontrun{
+#' # to_long and enumerate_seasons are internal functions, hence the triple-
+#' colon (:::)
+#' # enumerate_seasons expects long-formatted data
+#' rain_long <- weathercommand:::to_long(data = rain_2yr)
+#'
 #' # enumerate seasons, defined by 30 November through 15 March
-#' rain_long <- enumerate_seasons(data = df,
-#'                                start_month = 11,
-#'                                end_month = 3,
-#'                                start_day = 30,
-#'                                end_day = 15)
+#' rain_seasons <- weathercommand:::enumerate_seasons(data = rain_long,
+#'                                                    start_month = 11,
+#'                                                    end_month = 3,
+#'                                                    start_day = 30,
+#'                                                    end_day = 15)
 #' }
 #'
 #' @importFrom tidyr drop_na
@@ -87,7 +89,7 @@ enumerate_seasons <- function(data, start_month, end_month, start_day = 15,
 #' season spanning November through March would be 1984).
 #'
 #' @examples
-#' \donttest{
+#' \dontrun{
 #' dates <- as.Date(x = c("1983-12-15", "1984-03-01", "1984-12-15", "1985-03-01"))
 #' # identify season year, where season is defined as 30 November through
 #' # 15 March
