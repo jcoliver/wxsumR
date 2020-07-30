@@ -69,8 +69,9 @@
 #'   \item{z_gdd}{Difference between the number of growing degree days in a
 #'   season and the mean number of growing degree days across all seasons,
 #'   divided by \code{sd_gdd}}
+#' }
 #'
-#' If \code{wide = TRUE}, all columns except \code{mean_gdd} and \code{"sd_gdd}
+#' If \code{wide = TRUE}, all columns except \code{mean_gdd} and \code{sd_gdd}
 #' are replaced with one column for each year. For example, if the data include
 #' daily measurements from 1997 to 2002, there will be no \code{mean_season}
 #' column in the output, but will instead have columns \code{mean_season_1997},
@@ -78,7 +79,7 @@
 #'
 #' @seealso \code{\link{summarize_rainfall}}, \code{\link{par_summarize_temperature}}
 #'
-#' #' @examples
+#' @examples
 #' \dontrun{
 #' # Season defined by 15 March through 15 November
 #' temperature_summary <- summarize_temperature(temperature = temperature_2yr,
@@ -101,8 +102,9 @@
 #'
 #' @export
 #' @import dplyr
+#' @importFrom rlang .data
+#' @importFrom stats median na.omit sd quantile
 #' @importFrom tidyr drop_na
-#' @importFrom stats median na.omit sd
 #' @importFrom utils read.csv
 summarize_temperature <- function(temperature, start_month, end_month,
                                   start_day = 15, end_day = start_day,
@@ -134,35 +136,35 @@ summarize_temperature <- function(temperature, start_month, end_month,
   # the range defined by (growbase_low, growbase_high))
   temperature_summary <- temperature_long %>%
     dplyr::group_by(season_year, !!as.name(id_column_name)) %>%
-    dplyr::summarize(mean_season = mean(x = value, na.rm = na.rm),
-                     median_season = median(x = value, na.rm = na.rm),
-                     sd_season = sd(x = value, na.rm = na.rm),
-                     skew_season = (mean(x = value, na.rm = na.rm) - median(x = value, na.rm = na.rm))/sd(x = value, na.rm = na.rm),
-                     max_season = ifelse(test = !all(is.na(value)),
-                                         yes = max(value, na.rm = na.rm),
+    dplyr::summarize(mean_season = mean(x = .data$value, na.rm = na.rm),
+                     median_season = median(x = .data$value, na.rm = na.rm),
+                     sd_season = sd(x = .data$value, na.rm = na.rm),
+                     skew_season = (mean(x = .data$value, na.rm = na.rm) - median(x = .data$value, na.rm = na.rm))/sd(x = .data$value, na.rm = na.rm),
+                     max_season = ifelse(test = !all(is.na(.data$value)),
+                                         yes = max(.data$value, na.rm = na.rm),
                                          no = NA), # rows of all NA return -Inf by max()
-                     gdd = sum(value >= growbase_low & value <= growbase_high, na.rm = na.rm),
-                     tempbin20 = sum(value < quantile(x = value, probs = 0.2, na.rm = na.rm), na.rm = na.rm)/n(),
-                     tempbin40 = sum(value >= quantile(x = value, probs = 0.2, na.rm = na.rm) &
-                                       value < quantile(x = value, probs = 0.4, na.rm = na.rm), na.rm = na.rm)/n(),
-                     tempbin60 = sum(value >= quantile(x = value, probs = 0.4, na.rm = na.rm) &
-                                       value < quantile(x = value, probs = 0.6, na.rm = na.rm), na.rm = na.rm)/n(),
-                     tempbin80 = sum(value >= quantile(x = value, probs = 0.6, na.rm = na.rm) &
-                                       value < quantile(x = value, probs = 0.8, na.rm = na.rm), na.rm = na.rm)/n(),
-                     tempbin100 = sum(value >= quantile(x = value, probs = 0.8, na.rm = na.rm), na.rm = na.rm)/n())
+                     gdd = sum(.data$value >= growbase_low & .data$value <= growbase_high, na.rm = na.rm),
+                     tempbin20 = sum(.data$value < quantile(x = .data$value, probs = 0.2, na.rm = na.rm), na.rm = na.rm)/n(),
+                     tempbin40 = sum(.data$value >= quantile(x = .data$value, probs = 0.2, na.rm = na.rm) &
+                                       .data$value < quantile(x = .data$value, probs = 0.4, na.rm = na.rm), na.rm = na.rm)/n(),
+                     tempbin60 = sum(.data$value >= quantile(x = .data$value, probs = 0.4, na.rm = na.rm) &
+                                       .data$value < quantile(x = .data$value, probs = 0.6, na.rm = na.rm), na.rm = na.rm)/n(),
+                     tempbin80 = sum(.data$value >= quantile(x = .data$value, probs = 0.6, na.rm = na.rm) &
+                                       .data$value < quantile(x = .data$value, probs = 0.8, na.rm = na.rm), na.rm = na.rm)/n(),
+                     tempbin100 = sum(.data$value >= quantile(x = .data$value, probs = 0.8, na.rm = na.rm), na.rm = na.rm)/n())
 
   # Calculate seasonal average and standard deviation for gdd
   temperature_summary <- dplyr::ungroup(temperature_summary) %>%
     dplyr::group_by(!!as.name(id_column_name)) %>%
-    dplyr::mutate(mean_gdd = mean(gdd, na.rm = na.rm),
-                  sd_gdd = sd(gdd, na.rm = na.rm))
+    dplyr::mutate(mean_gdd = mean(x = .data$gdd, na.rm = na.rm),
+                  sd_gdd = sd(x = .data$gdd, na.rm = na.rm))
 
   # Finally, calculate deviations from mean for each season, measured as
   # difference from the mean and as z-score
   temperature_summary <- dplyr::ungroup(temperature_summary) %>%
     dplyr::group_by(season_year, !!as.name(id_column_name)) %>%
-    dplyr::mutate(dev_gdd = gdd - mean_gdd,
-                  z_gdd = (gdd - mean_gdd)/sd_gdd)
+    dplyr::mutate(dev_gdd = .data$gdd - .data$mean_gdd,
+                  z_gdd = (.data$gdd - .data$mean_gdd)/.data$sd_gdd)
 
   if (wide) {
     # Long-term columns won't be separated out into separate columns for each

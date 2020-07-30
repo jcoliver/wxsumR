@@ -13,13 +13,56 @@ wide_summary(x, id_col, year_col = "season_year", long_term_cols = "")
 
 \item{year_col}{name of column with year value}
 
-\item{long_term_cols}{vector of names of columns not to be transformed 
+\item{long_term_cols}{vector of names of columns not to be transformed
 to separate values for each year}
 }
 \value{
-wide-formatted data, where summary statistics for individual years 
+wide-formatted tibble, where summary statistics for individual years
 are in separate columns
 }
 \description{
-Wide-formatted summary data
+\code{wide_summary} converts long-formatted summary data to
+wide-format. Season-specific statistics are characterized by column names
+ending in "_YYYY", where "YYYY" is the four-digit year the season
+corresponds to. Long-term, season-independent statistics lack this suffix.
+}
+\details{
+The function generally works from long-formatted data, within one
+of the \code{summarize_*} functions. When transforming to wide,
+season-specific statistics (e.g. mean total rainfall for a season) are
+represented in a separate column for each season, with column names appended
+with the year of the season in "_YYYY" format. See specific
+\code{summarize_*} functions (below) for more details about output. The
+long-formatted data may include statistics that are not specific to a
+particular season (e.g. the mean total seasonal rainfall across all seasons,
+calculated by \code{\link{summarize_rainfall}}). Even though the
+long-formatted data will represent those values in multiple rows (i.e. one
+row for each year/site combination), the values are identical and do not
+require separate columns in wide-formatted data. Thus each season-independent
+statistic is represented by a single column in the resultant wide-formatted
+data.
+}
+\examples{
+\dontrun{
+# An example, although this function should not be called on its own; rather,
+when using any of the \code{summarize_} or \code{par_summarize_} functions,
+pass \code{wide = FALSE}.
+# Generate "long" format summary statistics
+temperature_summary_long <- summarize_temperature(temperature = temperature_2yr,
+                                                  start_month = 3,
+                                                  end_month = 11,
+                                                  wide = FALSE)
+# Identify those columns that do not have year_specific values
+long_term_cols <- c("mean_gdd", "sd_gdd")
+# Identify the column that has the site unique id
+id_column_name <- colnames(temperature_summary_long)[2]
+# Convert to "wide" format
+temperature_summary <- weathercommand:::wide_summary(x = temperature_summary_long,
+                                                     id_col = id_column_name,
+                                                     long_term_cols = long_term_cols)
+}
+
+}
+\seealso{
+\code{\link{summarize_rainfall}}, \code{\link{summarize_temperature}}
 }

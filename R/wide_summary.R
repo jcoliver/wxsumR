@@ -51,8 +51,9 @@
 #'                                                      long_term_cols = long_term_cols)
 #' }
 #'
-#' @import tidyr
 #' @import dplyr
+#' @import tidyr
+#' @importFrom rlang .data
 wide_summary <- function(x, id_col, year_col = "season_year", long_term_cols = "") {
   # Start by converting to long format
   x_long <- x %>%
@@ -61,8 +62,8 @@ wide_summary <- function(x, id_col, year_col = "season_year", long_term_cols = "
   # Convert annual stats to wide format, appending year to column name
   x_wide <- x_long %>%
     tidyr::pivot_wider(id_cols = id_col,
-                names_from = c(name, year_col),
-                values_from = value,
+                names_from = c(.data$name, year_col),
+                values_from = .data$value,
                 names_sep = "_")
 
   # Extract long-term statistics from original data, and restrict to unique

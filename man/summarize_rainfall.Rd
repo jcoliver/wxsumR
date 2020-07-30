@@ -13,7 +13,8 @@ summarize_rainfall(
   rain_cutoff = 1,
   na.rm = TRUE,
   wide = TRUE,
-  id_index = 1
+  id_index = 1,
+  date_sep = "_"
 )
 }
 \arguments{
@@ -39,6 +40,9 @@ treatment of \code{NA} values}
 formatted data}
 
 \item{id_index}{integer column index of unique site id}
+
+\item{date_sep}{character used to delimit variable prefix from date in
+column names; defaults to underscore ("_")}
 }
 \value{
 tibble with rainfall summary statistics
@@ -53,7 +57,7 @@ If \code{wide = FALSE}, returns values for each year for each site:
   \item{norain}{Total number of days with rain less than \code{rain_cutoff}}
   \item{raindays}{Total number of days with rain greater than or equal to
   \code{rain_cutoff}}
-  \item{raindays_percent}{Percentage of days in season with rain greater than
+  \item{percent_raindays}{Percentage of days in season with rain greater than
   or equal to \code{rain_cutoff}}
   \item{dry}{Longest stretch of days with less than \code{rain_cutoff}
   contained within the period; if rainfall was less than \code{rain_cutoff}
@@ -78,9 +82,9 @@ If \code{wide = FALSE}, returns values for each year for each site:
   or equal to \code{rain_cutoff} across all seasons}
   \item{sd_period_norain}{Standard deviation of number of days with rainfall
   greater than or equal to \code{rain_cutoff} across all seasons}
-  \item{mean_period_raindays_percent}{Mean percentage of days in season with
+  \item{mean_period_percent_raindays}{Mean percentage of days in season with
   rain greater than or equal to \code{rain_cutoff} across all seasons}
-  \item{sd_period_raindays_percent}{Standard deviation of percentage of days
+  \item{sd_period_percent_raindays}{Standard deviation of percentage of days
   in season with rain greater than or equal to \code{rain_cutoff} across all
   seasons}
   \item{dev_total_season}{Amount by which season total rainfall deviates from
@@ -93,9 +97,13 @@ If \code{wide = FALSE}, returns values for each year for each site:
   \item{dev_norain}{Difference in number of days with rainfall less than
   \code{rain_cutoff} from the mean number of days with rainfall less than
   \code{rain_cutoff} across seasons}
-  \item{dev_raindays_percent}{Difference in percentage of days with rainfall
+  \item{dev_percent_raindays}{Difference in percentage of days with rainfall
   greater than or equal to \code{rain_cutoff} from the percentage of days
   with rainfall greater than or equal to \code{rain_cutoff} across seasons}
+  \item{z_percent_raindays}{Difference in percentage of days with rainfall
+  greater than or equal to \code{rain_cutoff} from
+  \code{mean_period_percent_raindays}, divided by
+  \code{sd_period_percent_raindays}}
 }
 
 If \code{wide = TRUE}, all columns except those with *_period_* pattern are
@@ -128,21 +136,20 @@ instead it will contain columns \code{mean_season_1997},
 \code{mean_season_1998}...\code{mean_season_2002}.
 }
 \examples{
-\donttest{
-df <- readRDS(file = "data/rain-small.Rds")
+\dontrun{
 # Season defined by 15 March through 15 November
-rain_summary <- summarize_rainfall(rain = df,
+rain_summary <- summarize_rainfall(rain = rain_2yr,
                                    start_month = 3,
                                    end_month = 11)
 
 # As example above, but output in "long" format
-rain_summary <- summarize_rainfall(rain = df,
+rain_summary <- summarize_rainfall(rain = rain_2yr,
                                    start_month = 3,
                                    end_month = 11,
                                    wide = FALSE)
 
 # Season defined by 30 November through 15 March
-rain_summary <- summarize_rainfall(rain = df,
+rain_summary <- summarize_rainfall(rain = rain_2yr,
                                    start_month = 11,
                                    end_month = 3,
                                    start_day = 30,
@@ -151,5 +158,5 @@ rain_summary <- summarize_rainfall(rain = df,
 
 }
 \seealso{
-\code{\link{summarize_temperature}}
+\code{\link{summarize_temperature}}, \code{\link{par_summarize_rainfall}}
 }

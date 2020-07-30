@@ -14,7 +14,8 @@ summarize_temperature(
   growbase_high = 30,
   na.rm = TRUE,
   wide = TRUE,
-  id_index = 1
+  id_index = 1,
+  date_sep = "_"
 )
 }
 \arguments{
@@ -43,9 +44,47 @@ treatment of \code{NA} values}
 formatted data}
 
 \item{id_index}{integer column index of unique site id}
+
+\item{date_sep}{character used to delimit variable prefix from date in
+column names; defaults to underscore ("_")}
 }
 \value{
+tibble with temperature summary statistics
+If \code{wide = FALSE}, returns values for each year for each site:
+\describe{
+  \item{mean_season}{Mean temperature for the season}
+  \item{median_season}{Median temperature for the season}
+  \item{sd_season}{Standard deviation of temperature for the season}
+  \item{skew_season}{Skew of temperatures for the season, where skew is
+  defined by (mean - median)/sd}
+  \item{max_season}{Maximum temperature over the season}
+  \item{gdd}{Number growing degree days, defined as days with recorded
+  temperature between \code{growbase_low} and \code{growbase_high},
+  inclusive}
+  \item{tempbin20}{Number of days with temperature in the first quintile
+  (0-20th percentile)}
+  \item{tempbin40}{Number of days with temperature in the second quintile
+  (20-40th percentile)}
+  \item{tempbin60}{Number of days with temperature in the third quintile
+  (40-60th percentile)}
+  \item{tempbin80}{Number of days with temperature in the fourth quintile
+  (60-80th percentile)}
+  \item{tempbin100}{Number of days with temperature in the fifth quintile
+  (80-100th percentile)}
+  \item{mean_gdd}{Mean growing degree days across all seasons}
+  \item{sd_gdd}{Standard deviation of growing degree days across all seasons}
+  \item{dev_gdd}{Seasonal deviation from the mean number of growing degree
+  days across all seasons}
+  \item{z_gdd}{Difference between the number of growing degree days in a
+  season and the mean number of growing degree days across all seasons,
+  divided by \code{sd_gdd}}
+}
 
+If \code{wide = TRUE}, all columns except \code{mean_gdd} and \code{sd_gdd}
+are replaced with one column for each year. For example, if the data include
+daily measurements from 1997 to 2002, there will be no \code{mean_season}
+column in the output, but will instead have columns \code{mean_season_1997},
+\code{mean_season_1998}...\code{mean_season_2002}.
 }
 \description{
 Uses daily site data to calculate summary temperature statistics
@@ -70,28 +109,28 @@ same data, if \code{wide = TRUE}, there will be no \code{year} column, but
 instead it will contain columns \code{mean_season_1997},
 \code{mean_season_1998}...\code{mean_season_2002}.
 }
-\seealso{
-\code{\link{summarize_rainfall}}
-
-#' @examples
-\donttest{
-df <- readRDS(file = "data/temperature-small.Rds")
+\examples{
+\dontrun{
 # Season defined by 15 March through 15 November
-temperature_summary <- summarize_temperature(temperature = df,
+temperature_summary <- summarize_temperature(temperature = temperature_2yr,
                                              start_month = 3,
                                              end_month = 11)
 
 # As example above, but output in "long" format
-temperature_summary <- summarize_temperature(temperature = df,
+temperature_summary <- summarize_temperature(temperature = temperature_2yr,
                                              start_month = 3,
                                              end_month = 11,
                                              wide = FALSE)
 
 # Season defined by 30 November through 15 March
-temperature_summary <- summarize_temperature(temperature = df,
+temperature_summary <- summarize_temperature(temperature = temperature_2yr,
                                              start_month = 11,
                                              end_month = 3,
                                              start_day = 30,
                                              end_day = 15)
 }
+
+}
+\seealso{
+\code{\link{summarize_rainfall}}, \code{\link{par_summarize_temperature}}
 }

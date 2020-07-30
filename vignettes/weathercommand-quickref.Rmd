@@ -143,10 +143,18 @@ Note that if you have a fairly large data set (like over one million cells), the
 
 The call to `par_summarize_rainfall` echoes what we saw with `summarize_rainfall`:
 
-```{r rain-parallel}
+```{r rain-parallel, eval = FALSE}
 par_rain_summary <- par_summarize_rainfall(rain = rain_2yr, 
                                            start_month = 3,
                                            end_month = 11)
+```
+
+```{r rain-parallel-run, echo = FALSE}
+# We have to restrict example to only two cores in order to pass checks
+par_rain_summary <- par_summarize_rainfall(rain = rain_2yr, 
+                                           start_month = 3,
+                                           end_month = 11,
+                                           num_cores = 2)
 ```
 
 Note the documentation for `par_summarize_rainfall` does not mention the `start_month` and `end_month` arguments, but these are ultimately passed to `summarize_rainfall` (which `par_summarize_rainfall` is calling internally) through the dot dot dot (`...`) notation.
@@ -171,10 +179,18 @@ long_par_rain_summary <- par_summarize_rainfall(rain = rain_2yr,
 
 At this point, it should come as no surprise that the parallel implementation for calculations on temperature data work much the same as for the serial implementation:
 
-```{r temperature-parallel}
+```{r temperature-parallel, eval = FALSE}
 par_temperature_summary <- par_summarize_temperature(temperature = temperature_2yr, 
                                                      start_month = 3,
                                                      end_month = 11)
+```
+
+```{r temperature-parallel-run, echo = FALSE}
+# We have to restrict example to only two cores in order to pass checks
+par_temperature_summary <- par_summarize_temperature(temperature = temperature_2yr, 
+                                                     start_month = 3,
+                                                     end_month = 11,
+                                                     num_cores = 2)
 ```
 
 And if you prefer longer formatted output, where different seasons (years) are distributed among rows, pass `wide = FALSE`:

@@ -1,52 +1,41 @@
 #' A tiny (two-year) example data set of daily rainfall measurements
 #'
+#' The data set includes one column with the unique identifier for the site
+#' (\code{y4_hhid}) and remaining 731 columns with daily rainfall measurements.
+#' Columns are named with the "rf_YYYYMMDD" format. For example, the column
+#' \code{rf_19830101} has rainfall values for 1983-01-01.
+#'
 #' @docType data
-#'
-#' @usage data(rain_2yr)
-#'
-#' @format A data frame with 100 rows and 732 columns
-#' \describe{
-#'   \item{y4_hhid}{unique ID of site}
-#'   \item{rf_19830101}{rainfall for 1983-01-01}
-#'   \item{rf_19830102}{rainfall for 1983-01-02}
-#'   \item{...}{}
-#'   \item{rf_19841231}{rainfall for 1984-12-31}
-#' }
 "rain_2yr"
 
 #' A small (four-year) example data set of daily rainfall measurements
 #'
-#' @format A data frame with 100 rows and 1,462 columns
-#' \describe{
-#'   \item{y4_hhid}{unique ID of site}
-#'   \item{rf_19830101}{rainfall for 1983-01-01}
-#'   \item{rf_19830102}{rainfall for 1983-01-02}
-#'   \item{...}{}
-#'   \item{rf_19861231}{rainfall for 1986-12-31}
-#' }
+#' The data set includes one column with the unique identifier for the site
+#' (\code{y4_hhid}) and remaining 1,461 columns with daily rainfall
+#' measurements. Columns are named with the "rf_YYYYMMDD" format. For example,
+#' the column \code{rf_19830101} has rainfall values for 1983-01-01.
+#'
+#' @docType data
 "rain_4yr"
 
 #' A tiny (two-year) example data set of daily temperature measurements
 #'
-#' @format A data frame with 100 rows and 732 columns
-#' \describe{
-#'   \item{hhid}{unique ID of site}
-#'   \item{tmp_19830101}{temperature for 1983-01-01, in degrees Celsius}
-#'   \item{tmp_19830102}{temperature for 1983-01-02, in degrees Celsius}
-#'   \item{...}{}
-#'   \item{tmp_19841231}{temperature for 1984-12-31, in degrees Celsius}
-#' }
+#' The data set includes one column with the unique identifier for the site
+#' (\code{hhid}) and remaining 731 columns with daily temperature measurements
+#' in degrees Celsius. Columns are named with the "tmp_YYYYMMDD" format. For
+#' example, the column \code{tmp_19830101} has temperature values for
+#' 1983-01-01.
+#'
+#' @docType data
 "temperature_2yr"
 
 #' A small (four-year) example data set of daily temperature measurements
 #'
-#' @format A data frame with 100 rows and 1,462 columns
-#' \describe{
-#'   \item{hhid}{unique ID of site}
-#'   \item{tmp_19830101}{temperature for 1983-01-01, in degrees Celsius}
-#'   \item{tmp_19830102}{temperature for 1983-01-02, in degrees Celsius}
-#'   \item{...}{}
-#'   \item{tmp_19861231}{temperature for 1986-12-31, in degrees Celsius}
-#'   \item{...}{}
-#' }
+#' The data set includes one column with the unique identifier for the site
+#' (\code{hhid}) and remaining 1,461 columns with daily temperature measurements
+#' in degrees Celsius. Columns are named with the "tmp_YYYYMMDD" format. For
+#' example, the column \code{tmp_19830101} has temperature values for
+#' 1983-01-01.
+#'
+#' @docType data
 "temperature_4yr"

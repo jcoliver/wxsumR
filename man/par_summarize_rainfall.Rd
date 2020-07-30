@@ -25,17 +25,24 @@ A wrapper for \link{summarize_rainfall} to perform rainfall
 summary statistics calculations in parallel.
 }
 \examples{
-\donttest{
-df <- readRDS(file = "data/rain-small.Rds")
+\dontrun{
 # Season defined by 15 March through 15 November
-rain_summary <- par_summarize_rainfall(rain = df,
+rain_summary <- par_summarize_rainfall(rain = rain_2yr,
                                        start_month = 3,
                                        end_month = 11)
+
 # Same as example above, but restrict use to 2 processors
-rain_summary <- par_summarize_rainfall(rain = df,
+rain_summary <- par_summarize_rainfall(rain = rain_2yr,
                                        start_month = 3,
                                        end_month = 11,
                                        num_cores = 2)
+
+# Season defined by 15 March through 15 November, output separate rows for
+# each year
+rain_summary <- par_summarize_rainfall(rain = rain_2yr,
+                                       start_month = 3,
+                                       end_month = 11,
+                                       wide = FALSE)
 }
 
 }

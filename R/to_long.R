@@ -29,7 +29,7 @@
 #' @return data frame where each row corresponds to an observation for a single
 #' day. Measurements are in the column \code{value} and date is in the column
 #' \code{date}. Measurements retain the class of original data, and date is of
-#' class \code\link{[base]{Date}}.
+#' class \code{\link[base]{Date}}.
 #'
 #' @examples
 #' \dontrun{
@@ -56,15 +56,17 @@ to_long <- function(data, keep_cols = 1, date_sep = "_") {
   # Parse key column into year, month, day
   long_data <- long_data %>%
     # Start by creating a new column called "date"
-    tidyr::separate(col = col_name, into = c(NA, "date"), sep = date_sep) %>%
+    tidyr::separate(col = .data$col_name, into = c(NA, "date"), sep = date_sep) %>%
     # Parse out the separate parts of the date
-    dplyr::mutate(year = substr(x = date, start = 1, stop = 4),
-                  month = substr(x = date, start = 5, stop = 6),
-                  day = substr(x = date, start = 7, stop = 8)) %>%
+    dplyr::mutate(year = substr(x = .data$date, start = 1, stop = 4),
+                  month = substr(x = .data$date, start = 5, stop = 6),
+                  day = substr(x = .data$date, start = 7, stop = 8)) %>%
     # Make a single column for Date
-    dplyr::mutate(date = lubridate::as_date(stringr::str_c(year, "-", month, "-", day))) %>%
+    dplyr::mutate(date = lubridate::as_date(stringr::str_c(.data$year, "-",
+                                                           .data$month, "-",
+                                                           .data$day))) %>%
     # Drop the year, month, day columns
-    dplyr::select(keep_col_names, date, value)
+    dplyr::select(keep_col_names, date, .data$value)
 
   # Warn users if any date funniness happens
   if (any(is.na(long_data$date))) {

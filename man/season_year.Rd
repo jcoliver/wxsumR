@@ -20,8 +20,29 @@ season_year(x, start_month, end_month, start_day = 15, end_day = start_day)
 defaults to \code{start_day}}
 }
 \value{
-integer vector of season year to which observation corresponds to
+integer vector of season year to which observation corresponds to.
+For seasons that \emph{do not} cross the new year, this is simply the year
+the observation was made. For seasons that \emph{do} include the new year
+(e.g. a season starts in November and ends in the subsequent March),
+\code{season_year} is defined as the year in which the season starts. That
+is, for a season spanning November through March, the value of
+\code{season_year} for observations in January, February, and March is the
+prior year (e.g. \code{season_year} for an observation on 1983-02-01 for a
+season spanning November through March would be 1984).
 }
 \description{
 Value for season year for observation
+}
+\examples{
+\dontrun{
+dates <- as.Date(x = c("1983-12-15", "1984-03-01", "1984-12-15", "1985-03-01"))
+# identify season year, where season is defined as 30 November through
+# 15 March
+sy <- season_year(x = dates,
+                  start_month = 11,
+                  end_month = 3,
+                  start_day = 30,
+                  end_day = 15)
+}
+
 }
