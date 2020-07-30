@@ -21,4 +21,6 @@ package to install):
 ``` r
 # install.packages("devtools")
 devtools::install_github("jcoliver/weathercommand")
+# to include vignette with devtools installation, pass build-vignettes = TRUE
+# devtools::install_github("jcoliver/weathercommand", build-vignettes)
 ```
