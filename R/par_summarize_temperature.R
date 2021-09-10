@@ -46,8 +46,8 @@ par_summarize_temperature <- function(temperature, num_cores = NULL,
 
   clust <- parallel::makeCluster(num_cores)
 
-  # Need to explicitly make weathercommand available on each node
-  parallel::clusterEvalQ(clust, library(weathercommand))
+  # Need to explicitly make wxsumR available on each node
+  parallel::clusterEvalQ(clust, library(wxsumR))
 
   # Split data into num_cores data frames. To do so, need to create an
   # indicator by which to split (can work with split or dplyr::group_split)

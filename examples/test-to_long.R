@@ -5,11 +5,11 @@
 
 rm(list = ls())
 ################################################################################
-library(weathercommand)
+library(wxsumR)
 
 infile <- "data/rain-medium.Rds"
 df <- readRDS(file = infile)
-long_df <- weathercommand:::to_long(data = df)
+long_df <- wxsumR:::to_long(data = df)
 
 if (round(mean(long_df$value, na.rm = TRUE), digits = 4) == 2.8695) {
   message("Test 1 of to_long PASS")

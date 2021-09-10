@@ -46,7 +46,7 @@ warning will be thrown.
 \examples{
 \dontrun{
 # to_long is not exported, so we use triple-colon (:::)
-rain_long <- weathercommand:::to_long(data = rain_2yr)
+rain_long <- wxsumR:::to_long(data = rain_2yr)
 }
 
 }

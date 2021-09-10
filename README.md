@@ -1,4 +1,4 @@
-# weathercommand
+# wxsumR
 
 Code for R package for calculating annual summary statistics of site-specific
 climate data. Largely an R implementation of the Stata package available at [https://github.com/jdavidm/weather_command](https://github.com/jdavidm/weather_command).
@@ -20,7 +20,7 @@ package to install):
 
 ``` r
 # install.packages("devtools")
-devtools::install_github("jcoliver/weathercommand")
+devtools::install_github("jcoliver/wxsumR")
 # to include vignette with devtools installation, pass build-vignettes = TRUE
-# devtools::install_github("jcoliver/weathercommand", build-vignettes)
+# devtools::install_github("jcoliver/wxsumR", build-vignettes)
 ```

@@ -57,7 +57,7 @@ long_term_cols <- c("mean_gdd", "sd_gdd")
 # Identify the column that has the site unique id
 id_column_name <- colnames(temperature_summary_long)[2]
 # Convert to "wide" format
-temperature_summary <- weathercommand:::wide_summary(x = temperature_summary_long,
+temperature_summary <- wxsumR:::wide_summary(x = temperature_summary_long,
                                                      id_col = id_column_name,
                                                      long_term_cols = long_term_cols)
 }

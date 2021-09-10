@@ -6,7 +6,7 @@
 rm(list = ls())
 
 ################################################################################
-library(weathercommand)
+library(wxsumR)
 
 infile <- "../large-data-files/NPSY4_x1_rf1_daily.csv"
 outfile <- NULL

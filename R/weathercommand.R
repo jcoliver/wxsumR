@@ -1,13 +1,13 @@
-#' weathercommand: A package for calculating annual summary statistics of site-
+#' wxsumR: A package for calculating annual summary statistics of site-
 #' specific climate data
 #'
-#' The weathercommand package provides functions for two types of daily data:
+#' The wxsumR package provides functions for two types of daily data:
 #' rainfall and temperature. The resulting output from the functions are a
 #' variety of summary statistics (mean, standard deviation, etc.). See
 #' documentation for each function for full details of the statistics being
 #' calculated.
 #'
-#' @section weathercommand functions:
+#' @section wxsumR functions:
 #' The two primary functions are:
 #' \itemize{
 #'   \item \code{\link{summarize_rainfall}}
@@ -29,9 +29,9 @@
 #' consider using the serial functions. This will take longer, but is less
 #' likely to crash your well-meaning but not quite up to the task laptop from
 #' six years ago. One example of how this can be implemented can be found in the
-#' weathercommand Quick Reference vignette.
+#' wxsumR Quick Reference vignette.
 #'
-#' @section weathercommand data:
+#' @section wxsumR data:
 #' Sample datasets for both rainfall and temperature are provided as examples.
 #'
 #' These datasets illustrate the expected format of input as well as column
@@ -42,5 +42,5 @@
 #' \code{\link{summarize_rainfall}} or \code{\link{summarize_temperature}}.
 #'
 #' @docType package
-#' @name weathercommand
+#' @name wxsumR
 NULL

@@ -1,4 +1,4 @@
-Package: weathercommand
+Package: wxsumR
 Type: Package
 Title: Summary Statistics for Weather Data
 Version: 0.9.0

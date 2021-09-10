@@ -11,7 +11,7 @@ rm(list = ls())
 # No cbind! This approach works, but is painfully slow (like, it takes an hour
 # for the large data set)
 library(tidyverse)
-library(weathercommand)
+library(wxsumR)
 
 infile <- "../large-data-files/NPSY4_x1_rf1_daily.csv"
 large_rain <- read_csv(infile)

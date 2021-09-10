@@ -1,0 +1,346 @@
+---
+title: "wxsumR Quick Reference"
+date: "`r Sys.Date()`"
+author: Jeffrey C. Oliver
+output: 
+  pdf_document:
+    latex_engine: xelatex
+  html_document: default
+vignette: >
+  %\VignetteIndexEntry{wxsumR-quickref}
+  %\VignetteEncoding{UTF-8}
+  %\VignetteEngine{knitr::rmarkdown}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+
+# Preamble
+
+The wxsumR package provides functions to calculate annual summary statistics 
+for rainfall and temperature data. The specifics of each statistic can be found 
+in the documentation for specific functions. All calculations are performed on 
+a per-site, per-season basis. This vignette provides an introduction on their 
+use and the expectations of input data.
+
+Functions and data in the wxsumR package can be made available through the 
+`library` command:
+
+```{r load-package}
+library(wxsumR)
+```
+
+The package includes both serial and parallel implementations, the latter being 
+wrappers for the former that use functions from the parallel package. For 
+smaller data sets (i.e. 150,000 cells of data or fewer), a serial 
+implementation will likely work fine on a modern laptop. For larger data sets, 
+consider the parallel implementations (functions that begin with `par_`) or, 
+for _really_ big data sets, parallel implementations on high-performance 
+computer clusters may be the optimal solution.
+
+## Input data
+
+The wxsumR functions take a data frame with two types of data:
+
+1. A single column with a unique identifier for the site where weather 
+measurements were taken; this column can be type numeric, character, or factor.
+2. All remaining columns are measurements for _either_ rainfall or temperature. 
+Given separate functions for rainfall and temperature, avoid sending the wrong 
+weather data to functions (i.e. do not pass a data frame with rainfall 
+measurements to `summarize_temperature`).
+
+The names of the columns in point 2 above must be in a specific format: \<measurement\>\_YYYYMMDD. That is, each column name should be prefixed with a 
+character string indicating what was measured (e.g. "rf" for rainfall, "tmp" 
+for temperature), followed by an underscore, "\_", followed by the date in 
+YYYYMMDD format.
+
+### Rainfall
+
+The included data set, `rain_2yr`, has two years of rainfall data for six 
+sites. If we look at the first four columns of data, we see:
+
+```{r}
+rain_2yr[, 1:4]
+```
+
+The first column, `r colnames(rain_2yr)[1]`, contains the unique identifier for 
+each site. The remaining columns show daily measurements of rainfall. Note the 
+format of column names for those columns with rainfall data (columns 2 through 
+`r ncol(rain_2yr)`): `r colnames(rain_2yr)[2]` shows the format 
+\<measurement\>\_YYYYMMDD as described above.
+
+### Temperature
+
+The included data set, `temperature_2yr`, has two years of temperature data for 
+six sites. If we look at the first four columns of data, we see:
+
+```{r}
+temperature_2yr[, 1:4]
+```
+
+The first column, `r colnames(temperature_2yr)[1]`, contains the unique 
+identifier for each site. The remaining columns show daily measurements of 
+temperature. Note the format of column names for those columns with temperature 
+data (columns 2 through `r ncol(temperature_2yr)`): 
+`r colnames(temperature_2yr)[2]` shows the format \<measurement\>\_YYYYMMDD as 
+described above.
+
+# Serial implementations
+
+## `summarize_rainfall`
+
+The bare minimum of information for calculating rainfall summary statistics is:
+
++ A data frame with daily rainfall data, as described in [Input data](#input-data)
++ The month in which the user-defined season starts
++ The month in which the user-defined season ends
+
+By default, seasons start and end on the fifteenth day of the month, but this 
+can be changed through the `start_day` and `end_day` parameters, respectively. 
+If only the `start_day` parameter is specified, the same value will be used for 
+`end_day`. Users should be cautious when specifiying days at the end of the 
+month, given variation among months in which day is the last day of the month 
+(28, 29, 30, 31).
+
+In the example above, we calculate summary statistics for the two-year data 
+set, with the season starting on 15 March and ending on 15 November.
+
+```{r rain-serial}
+rain_summary <- summarize_rainfall(rain = rain_2yr, 
+                                   start_month = 3,
+                                   end_month = 11)
+```
+
+By default, the output of `summarize_rainfall` is wide-formatted, with each 
+column corresponding to an individual statistic (such as mean, median, and 
+standard deviation) for a single season (year). The first four columns of data 
+illustrate this:
+
+```{r rain-wide-output}
+rain_summary[, 1:4]
+```
+
+The first column, `r colnames(rain_summary)[1]` is the unique id for site, as 
+we saw in the original data. The next three columns show the mean, median, and 
+standard deviations, respectively, for each site in the 
+`r substr(x = colnames(rain_summary)[2], start = 13, stop = 16)` season.
+
+If you prefer the output in longer format, where values for individual seasons 
+(year) are distributed across rows instead of columns, pass `wide = FALSE` to
+`summarize_rainfall`:
+
+```{r rain-long}
+long_rain_summary <- summarize_rainfall(rain = rain_2yr, 
+                                        start_month = 3,
+                                        end_month = 11,
+                                        wide = FALSE)
+```
+
+The resultant output now has column names corresponding to the statistic only, 
+and values for different seasons are shown in different rows.
+
+```{r rain-long-output}
+long_rain_summary[, 1:5]
+```
+
+## `summarize_temperature`
+
+`summarize_temperature` works in the same way as `summarize_rainfall` and has 
+the same minimum requirements for what is required in the function call:
+
++ A data frame with daily temperature data, as described in [Input data](#input-data)
++ The month in which the user-defined season starts
++ The month in which the user-defined season ends
+
+```{r temperature-serial}
+temperature_summary <- summarize_temperature(temperature = temperature_2yr, 
+                                             start_month = 3,
+                                             end_month = 11)
+```
+
+By default, the output is in wide format, with statistics for different seasons 
+(years) spread across columns:
+
+```{r temperature-wide-output}
+temperature_summary[, 1:4]
+```
+
+Passing `wide = FALSE` to `summarize_temperature` will result in 
+longer-formatted output, where the measurements for different seasons (years) 
+are distributed among rows instead of columns:
+
+```{r temperature-long}
+long_temperature_summary <- summarize_temperature(temperature = temperature_2yr, 
+                                                  start_month = 3,
+                                                  end_month = 11,
+                                                  wide = FALSE)
+long_temperature_summary[, 1:5]
+```
+
+# Parallel implementations
+
+Parallel implementations of the two summarize functions use the parallel 
+package to distribute calculations among multiple processors on your machine. 
+Because calculations are performed for individual sites and thus independent of 
+one another, this "embarrassingly parallel" computation lends itself well to 
+the `parLapply` function in the parallel package. But you don't really need to 
+worry about any of that, because the parallel implementations manage the 
+distribution of calculations to multiple processors.
+
+Note that if you have a fairly large data set (like over one million cells), 
+the parallel implementation may still present computational challenges. This is 
+because R will attempt to use as much RAM as is available as it needs it. So 
+even though the processing is distributed among processors, there is still a 
+limited amount of RAM on the machine you are using. If you find that the 
+parallel implementations are crashing your machine (or making it so slow as to 
+be unuseable), consider running these calculations on a high-performance 
+computer cluster. An alternative solution, which comes with no guarantees, is 
+offered at the end of the document.
+
+## `par_summarize_rainfall`
+
+The call to `par_summarize_rainfall` echoes what we saw with 
+`summarize_rainfall`:
+
+```{r rain-parallel, eval = FALSE}
+par_rain_summary <- par_summarize_rainfall(rain = rain_2yr, 
+                                           start_month = 3,
+                                           end_month = 11)
+```
+
+```{r rain-parallel-run, echo = FALSE}
+# We have to restrict example to only two cores in order to pass checks
+par_rain_summary <- par_summarize_rainfall(rain = rain_2yr, 
+                                           start_month = 3,
+                                           end_month = 11,
+                                           num_cores = 2)
+```
+
+Note the documentation for `par_summarize_rainfall` does not mention the 
+`start_month` and `end_month` arguments, but these are ultimately passed to
+`summarize_rainfall` (which `par_summarize_rainfall` is calling internally) 
+through the dot dot dot (`...`) notation.
+
+A quick glance comparing the first columns of output from the serial and 
+parallel implementations shows the results are identical.
+
+```{r compare-rain-out}
+rain_summary[, 1:2]
+par_rain_summary[, 1:2]
+```
+
+To have the output in longer format, pass `wide = FALSE`, just as we did with
+`summarize_rainfall`:
+
+```{r rain-parallel-long, eval = FALSE}
+long_par_rain_summary <- par_summarize_rainfall(rain = rain_2yr, 
+                                           start_month = 3,
+                                           end_month = 11,
+                                           wide = FALSE)
+```
+
+## `par_summarize_temperature`
+
+At this point, it should come as no surprise that the parallel implementation 
+for calculations on temperature data work much the same as for the serial 
+implementation:
+
+```{r temperature-parallel, eval = FALSE}
+par_temperature_summary <- par_summarize_temperature(temperature = temperature_2yr, 
+                                                     start_month = 3,
+                                                     end_month = 11)
+```
+
+```{r temperature-parallel-run, echo = FALSE}
+# We have to restrict example to only two cores in order to pass checks
+par_temperature_summary <- par_summarize_temperature(temperature = temperature_2yr, 
+                                                     start_month = 3,
+                                                     end_month = 11,
+                                                     num_cores = 2)
+```
+
+And if you prefer longer formatted output, where different seasons (years) are 
+distributed among rows, pass `wide = FALSE`:
+
+```{r temperature-parallel-long, eval = FALSE}
+long_par_temperature_summary <- par_summarize_temperature(temperature = temperature_2yr, 
+                                                          start_month = 3,
+                                                          end_month = 11,
+                                                          wide = FALSE)
+```
+
+
+# Large data, small RAM
+
+_I have a large data set, but I don't have much computer memory, and I don't have access to an HPC._
+
+## One solution, using the serial approach
+
+OK, this is possible, but it is slow. Very. Slow. The basic approach is to 
+calculate summary statistics one-by-one on each row (site) of data, and add the 
+output to a data frame that you create beforehand. 
+
+```{r avoid-ram-gobbling, eval = FALSE}
+# Read a large data file into memory
+# E.g. 3,000 sites (rows) of 13,000 daily rainfall measurements (columns)
+infile <- "data/rainfall-data.csv"
+large_rain <- readr::read_csv(infile)
+
+# This will ultimately become a data frame with results
+rain_summary <- NULL
+
+# The months that define the start and end of the season
+season_start_month <- 3
+season_end_month <- 11
+
+for (i in 1:nrow(large_rain)) {
+  # This conditional provides a little reporting message the prints on every 
+  # hundredth row
+  if (i %% 100 == 0) {
+    message(paste0("At row ", i))
+  }
+  if (i == 1) {
+    # Need to set up the output data frame, with the right number of rows
+    # Begin by assigning the output of summarize_rainfall based on a single 
+    # row (in this case, the first row)
+    rain_summary <- summarize_rainfall(rain = large_rain[i, ],
+                                    start_month = season_start_month,
+                                    end_month = season_end_month)
+    # rain_summary now has one row and the appropriate number of columns; we 
+    # create empty rows in the data frame to avoid growing the results on each 
+    # iteration of the for loop
+    rain_summary[2:nrow(large_rain), ] <- NA
+  } else {
+    # For rows (sites) 2 and up, we can add the output of summarize_rainfall to 
+    # the appropriate row in rain_summary
+    rain_summary[i, ] <- summarize_rainfall(rain = large_rain[i, ],
+                                            start_month = season_start_month,
+                                            end_month = season_end_month)
+  }
+}
+```
+
+A couple of caveats are warranted:
+
++ This implementation assumes wide-formatted data is the desired output format. 
+If you want long-formatted data, this will _not_ work as written. You'll need 
+to get creative in the creation and subsequent updating of the data frame 
+holding the results (`rain_summary`). Why? The wide-formatted output will 
+create exactly one row of summary statistics for each row of the input data 
+(so, in this case, `nrow(large_rain) = nrow(rain_summary)`). This is not true 
+for longer formatted data, because for each row of the input data, it will 
+produce a separate row of summary statistics calculated for each year (season). 
+So if your input file has 3 years of data, the number of rows of output will be 
+three times the number of rows of the input. For example, if you have 100 sites 
+(rows) of input data that covers three seasons (years) and pass `wide = FALSE` 
+to `summarize_rainfall`, the resulting output will have 300 rows of summary 
+statistics.
++ This could be made a little more creative, where individual sites are farmed 
+out to different processors, in a para-parallel approach. Check out the source 
+code for the parallel implementations (`par_summarize_rainfall` and
+`par_summarize_temperature`) for ideas on using the parallel package.
++ This approach, and caveats, also apply to `summarize_temperature`.

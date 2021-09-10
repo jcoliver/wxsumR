@@ -6,7 +6,7 @@
 rm(list = ls())
 
 ################################################################################
-library(weathercommand)
+library(wxsumR)
 
 infile <- "data/rain-medium.Rds"
 test_data <- readRDS(file = infile)

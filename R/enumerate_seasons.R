@@ -32,10 +32,10 @@
 #' # to_long and enumerate_seasons are internal functions, hence the triple-
 #' colon (:::)
 #' # enumerate_seasons expects long-formatted data
-#' rain_long <- weathercommand:::to_long(data = rain_2yr)
+#' rain_long <- wxsumR:::to_long(data = rain_2yr)
 #'
 #' # enumerate seasons, defined by 30 November through 15 March
-#' rain_seasons <- weathercommand:::enumerate_seasons(data = rain_long,
+#' rain_seasons <- wxsumR:::enumerate_seasons(data = rain_long,
 #'                                                    start_month = 11,
 #'                                                    end_month = 3,
 #'                                                    start_day = 30,

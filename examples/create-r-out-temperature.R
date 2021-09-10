@@ -6,7 +6,7 @@
 rm(list = ls())
 
 ################################################################################
-library(weathercommand)
+library(wxsumR)
 library(tidyverse)
 
 input_file <- "data/stata-temperature.csv"

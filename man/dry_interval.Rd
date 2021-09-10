@@ -65,18 +65,18 @@ non-missing data.
 \dontrun{
   rain <- c(0, 2, 3, 0, 0, 2, 0, 3, 0, 0, 0)
   # Longest interval at the end of season
-  dry_test <- weathercommand:::dry_interval(x = rain, period = "end")
+  dry_test <- wxsumR:::dry_interval(x = rain, period = "end")
   dry_test
   # 3
 
   # Longest interval in middle of season
-  dry_test <- weathercommand:::dry_interval(x = rain, period = "mid")
+  dry_test <- wxsumR:::dry_interval(x = rain, period = "mid")
   dry_test
   # 2
 
   # Longest interval at start of season, considering days with rain of 2 or
   # lower (unitless) as dry days
-  dry_test <- weathercommand:::dry_interval(x = rain, rain_cutoff = 2, period = "start")
+  dry_test <- wxsumR:::dry_interval(x = rain, rain_cutoff = 2, period = "start")
   dry_test
   # 2
 }

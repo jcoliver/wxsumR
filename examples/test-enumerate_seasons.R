@@ -6,11 +6,11 @@
 rm(list = ls())
 
 ################################################################################
-library(weathercommand)
+library(wxsumR)
 
 df <- readRDS(file = "data/rain-small.Rds")
 
-long_df <- weathercommand:::to_long(data = df)
+long_df <- wxsumR:::to_long(data = df)
 
 # Exclude NA dates
 long_df <- long_df[!is.na(long_df$date), ]
@@ -23,7 +23,7 @@ start_month <- 11
 end_month <- 02
 day <- 15
 test_start <- Sys.time()
-enumerated_df <- weathercommand:::enumerate_seasons(data = long_df,
+enumerated_df <- wxsumR:::enumerate_seasons(data = long_df,
                                                     start_month = start_month,
                                                     end_month = end_month,
                                                     start_day = day)
@@ -45,7 +45,7 @@ start_month <- 02
 end_month <- 11
 day <- 15
 test_start <- Sys.time()
-enumerated_df <- weathercommand:::enumerate_seasons(data = long_df,
+enumerated_df <- wxsumR:::enumerate_seasons(data = long_df,
                                                     start_month = start_month,
                                                     end_month = end_month,
                                                     start_day = day)

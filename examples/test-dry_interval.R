@@ -6,7 +6,7 @@
 rm(list = ls())
 
 ################################################################################
-library(weathercommand)
+library(wxsumR)
 
 # Test 1, season includes starting, middle, and ending dry stretches
 test_num <- 1
@@ -14,9 +14,9 @@ message(paste0("Running test ", test_num, " of dry_interval"))
 rain <- c(0, 2, 2, 0, 0, 2, 0, 2, 0, 0, 0)
 
 test_start <- Sys.time()
-dry_test <- c(weathercommand:::dry_interval(x = rain, period = "start"),
-              weathercommand:::dry_interval(x = rain, period = "mid"),
-              weathercommand:::dry_interval(x = rain, period = "end"))
+dry_test <- c(wxsumR:::dry_interval(x = rain, period = "start"),
+              wxsumR:::dry_interval(x = rain, period = "mid"),
+              wxsumR:::dry_interval(x = rain, period = "end"))
 test_end <- Sys.time()
 if (all(dry_test == c(1, 2, 3))) {
   message("dry_interval: Test ", test_num, " PASS")
@@ -33,9 +33,9 @@ message(paste0("Running test ", test_num, " of dry_interval"))
 rain <- c(2, 2, 2, 0, 0, 2, 0, 2, 0, 0, 0)
 
 test_start <- Sys.time()
-dry_test <- c(weathercommand:::dry_interval(x = rain, period = "start"),
-              weathercommand:::dry_interval(x = rain, period = "mid"),
-              weathercommand:::dry_interval(x = rain, period = "end"))
+dry_test <- c(wxsumR:::dry_interval(x = rain, period = "start"),
+              wxsumR:::dry_interval(x = rain, period = "mid"),
+              wxsumR:::dry_interval(x = rain, period = "end"))
 test_end <- Sys.time()
 if (all(dry_test == c(0, 2, 3))) {
   message("dry_interval: Test ", test_num, " PASS")
@@ -52,9 +52,9 @@ message(paste0("Running test ", test_num, " of dry_interval"))
 rain <- c(0, 2, 2, 0, 0, 2, 2, 0, 0, 0, 2)
 
 test_start <- Sys.time()
-dry_test <- c(weathercommand:::dry_interval(x = rain, period = "start"),
-              weathercommand:::dry_interval(x = rain, period = "mid"),
-              weathercommand:::dry_interval(x = rain, period = "end"))
+dry_test <- c(wxsumR:::dry_interval(x = rain, period = "start"),
+              wxsumR:::dry_interval(x = rain, period = "mid"),
+              wxsumR:::dry_interval(x = rain, period = "end"))
 test_end <- Sys.time()
 if (all(dry_test == c(1, 3, 0))) {
   message("dry_interval: Test ", test_num, " PASS")
@@ -71,9 +71,9 @@ message(paste0("Running test ", test_num, " of dry_interval"))
 rain <- c(0, 2, 2, 2, 2, 2, 2, 0, 0, 0, 0)
 
 test_start <- Sys.time()
-dry_test <- c(weathercommand:::dry_interval(x = rain, period = "start"),
-              weathercommand:::dry_interval(x = rain, period = "mid"),
-              weathercommand:::dry_interval(x = rain, period = "end"))
+dry_test <- c(wxsumR:::dry_interval(x = rain, period = "start"),
+              wxsumR:::dry_interval(x = rain, period = "mid"),
+              wxsumR:::dry_interval(x = rain, period = "end"))
 test_end <- Sys.time()
 if (all(dry_test == c(1, 0, 4))) {
   message("dry_interval: Test ", test_num, " PASS")
@@ -90,9 +90,9 @@ message(paste0("Running test ", test_num, " of dry_interval"))
 rain <- c(0, 0, 0, 2, 2, 2, 2, 2, 2, 2, 2)
 
 test_start <- Sys.time()
-dry_test <- c(weathercommand:::dry_interval(x = rain, period = "start"),
-              weathercommand:::dry_interval(x = rain, period = "mid"),
-              weathercommand:::dry_interval(x = rain, period = "end"))
+dry_test <- c(wxsumR:::dry_interval(x = rain, period = "start"),
+              wxsumR:::dry_interval(x = rain, period = "mid"),
+              wxsumR:::dry_interval(x = rain, period = "end"))
 test_end <- Sys.time()
 if (all(dry_test == c(3, 0, 0))) {
   message("dry_interval: Test ", test_num, " PASS")
@@ -109,9 +109,9 @@ message(paste0("Running test ", test_num, " of dry_interval"))
 rain <- c(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2)
 
 test_start <- Sys.time()
-dry_test <- c(weathercommand:::dry_interval(x = rain, period = "start"),
-              weathercommand:::dry_interval(x = rain, period = "mid"),
-              weathercommand:::dry_interval(x = rain, period = "end"))
+dry_test <- c(wxsumR:::dry_interval(x = rain, period = "start"),
+              wxsumR:::dry_interval(x = rain, period = "mid"),
+              wxsumR:::dry_interval(x = rain, period = "end"))
 test_end <- Sys.time()
 if (all(dry_test == c(10, 0, 0))) {
   message("dry_interval: Test ", test_num, " PASS")
@@ -128,9 +128,9 @@ message(paste0("Running test ", test_num, " of dry_interval"))
 rain <- c(2, 2, 2, 2, 2, 2, 2, 2, 2, 0, 0)
 
 test_start <- Sys.time()
-dry_test <- c(weathercommand:::dry_interval(x = rain, period = "start"),
-              weathercommand:::dry_interval(x = rain, period = "mid"),
-              weathercommand:::dry_interval(x = rain, period = "end"))
+dry_test <- c(wxsumR:::dry_interval(x = rain, period = "start"),
+              wxsumR:::dry_interval(x = rain, period = "mid"),
+              wxsumR:::dry_interval(x = rain, period = "end"))
 test_end <- Sys.time()
 if (all(dry_test == c(0, 0, 2))) {
   message("dry_interval: Test ", test_num, " PASS")
@@ -147,9 +147,9 @@ message(paste0("Running test ", test_num, " of dry_interval"))
 rain <- c(2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0)
 
 test_start <- Sys.time()
-dry_test <- c(weathercommand:::dry_interval(x = rain, period = "start"),
-              weathercommand:::dry_interval(x = rain, period = "mid"),
-              weathercommand:::dry_interval(x = rain, period = "end"))
+dry_test <- c(wxsumR:::dry_interval(x = rain, period = "start"),
+              wxsumR:::dry_interval(x = rain, period = "mid"),
+              wxsumR:::dry_interval(x = rain, period = "end"))
 test_end <- Sys.time()
 if (all(dry_test == c(0, 0, 10))) {
   message("dry_interval: Test ", test_num, " PASS")
