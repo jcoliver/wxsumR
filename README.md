@@ -21,6 +21,6 @@ package to install):
 ``` r
 # install.packages("devtools")
 devtools::install_github("jcoliver/wxsumR")
-# to include vignette with devtools installation, pass build-vignettes = TRUE
-# devtools::install_github("jcoliver/wxsumR", build-vignettes)
+# to include vignette with devtools installation, pass build_vignettes = TRUE
+# devtools::install_github("jcoliver/wxsumR", build_vignettes = TRUE)
 ```
