@@ -1,0 +1,280 @@
+#' Rainfall summary statistics
+#'
+#' @description Uses daily site data to calculate summary rainfall statistics
+#' for an annual season. This function aligns with the rainfall mode of the
+#' Stata \code{wxsum} command.
+#'
+#' @details User-defined seasons will be, at most, one year long, defined by the
+#' \code{start_*} and \code{end_*} parameters. Seasons \emph{can} span across
+#' the new year, e.g. a season can start in November and end in March. Seasons
+#' are enumerated by the year in which they start; i.e. if a season starts in
+#' November and ends in March, the output for year YYYY will be based on the
+#' data from November and December of YYYY and January, February, and March of
+#' YYYY + 1.
+#'
+#' Deviations and z-scores are computed using a rolling window of
+#' \code{lr_years} strictly preceding seasons. If fewer than \code{lr_years}
+#' preceding seasons are available for a given year, deviations and z-scores
+#' are \code{NA} for that season.
+#'
+#' By default, returns data in "wide" format, with a separate column for each
+#' statistic for each year. If \code{wide = FALSE}, returns "long" format with
+#' a \code{season_year} column.
+#'
+#' @param rain           data frame with daily rainfall data for each site
+#' @param start_month    numeric starting month defining season (inclusive)
+#' @param end_month      numeric ending month defining season (inclusive)
+#' @param start_day      numeric day of starting month defining season
+#' (inclusive); defaults to 1
+#' @param end_day        numeric day of ending month defining season (inclusive);
+#' defaults to \code{start_day}
+#' @param rain_threshold numeric minimum value for daily rainfall to be counted
+#' as a rain day; defaults to 1
+#' @param lr_years       integer number of strictly preceding years used to
+#' calculate rolling deviations and z-scores; defaults to 10
+#' @param na.rm          logical passed to summary statistic functions indicating
+#' treatment of \code{NA} values; defaults to \code{TRUE}
+#' @param wide           logical indicating whether or not to output as wide-
+#' formatted data; defaults to \code{TRUE}
+#' @param id_index       integer column index of unique site id; defaults to 1
+#' @param date_sep       character used to delimit variable prefix from date in
+#' column names; defaults to underscore ("_")
+#'
+#' @return tibble with rainfall summary statistics.
+#' If \code{wide = FALSE}, returns values for each year for each site:
+#' \describe{
+#'   \item{mean_season}{Mean daily rainfall for the season}
+#'   \item{median_season}{Median daily rainfall for the season}
+#'   \item{sd_season}{Standard deviation of daily rainfall for the season}
+#'   \item{skew_season}{Skew of daily rainfall for the season, where skew is
+#'   defined by (mean - median)/sd}
+#'   \item{mean_mo_total_season}{Mean of monthly rainfall totals within the
+#'   season}
+#'   \item{median_mo_total_season}{Median of monthly rainfall totals within the
+#'   season}
+#'   \item{sd_mo_total_season}{Standard deviation of monthly rainfall totals
+#'   within the season}
+#'   \item{skew_mo_total_season}{Skew of monthly rainfall totals within the
+#'   season}
+#'   \item{total_season}{Total rainfall over the season}
+#'   \item{norain}{Number of days with rainfall less than
+#'   \code{rain_threshold}}
+#'   \item{raindays}{Number of days with rainfall greater than or equal to
+#'   \code{rain_threshold}}
+#'   \item{pct_raindays}{Share of observed days with rainfall greater than or
+#'   equal to \code{rain_threshold}}
+#'   \item{dry}{Longest stretch of consecutive days with rainfall less than
+#'   \code{rain_threshold} contained within the season}
+#'   \item{dev_total_season}{Deviation of total seasonal rainfall from the
+#'   rolling mean of the preceding \code{lr_years} seasons}
+#'   \item{z_total_season}{Z-score of total seasonal rainfall relative to
+#'   the preceding \code{lr_years} seasons}
+#'   \item{dev_raindays}{Deviation of rain day count from the rolling mean of
+#'   the preceding \code{lr_years} seasons}
+#'   \item{dev_norain}{Deviation of no-rain day count from the rolling mean of
+#'   the preceding \code{lr_years} seasons}
+#'   \item{dev_pct_raindays}{Deviation of rain day share from the rolling mean
+#'   of the preceding \code{lr_years} seasons}
+#' }
+#'
+#' If \code{wide = TRUE}, each season-specific statistic is represented by a
+#' separate column for each year, with the year appended to the column name
+#' (e.g. \code{mean_season_1997}, \code{total_season_1997}).
+#'
+#' @seealso \code{\link{summarize_rainfall}}
+#'
+#' @examples
+#' \dontrun{
+#' # Season defined by 1 May through 1 October
+#' rain_summary <- rain_sum(rain = rain_2yr,
+#'                          start_month = 5,
+#'                          end_month = 10)
+#'
+#' # Same season, long format output
+#' rain_summary <- rain_sum(rain = rain_2yr,
+#'                          start_month = 5,
+#'                          end_month = 10,
+#'                          wide = FALSE)
+#'
+#' # Season spanning the new year, 15 November through 15 March
+#' rain_summary <- rain_sum(rain = rain_2yr,
+#'                          start_month = 11,
+#'                          end_month = 3,
+#'                          start_day = 15,
+#'                          end_day = 15)
+#' }
+#'
+#' @export
+#' @import dplyr
+#' @import tidyr
+#' @importFrom rlang .data
+#' @importFrom stats median sd
+rain_sum <- function(rain, start_month, end_month,
+                     start_day = 1, end_day = start_day,
+                     rain_threshold = 1, lr_years = 10,
+                     na.rm = TRUE, wide = TRUE,
+                     id_index = 1, date_sep = "_") {
+
+  # Extract name of column with site id
+  id_column_name <- colnames(rain)[id_index]
+
+  # Convert to long format and parse column names into dates
+  rain_long <- to_long(data = rain,
+                       keep_cols = id_index,
+                       date_sep = date_sep)
+
+  # Exclude NA dates
+  rain_long <- rain_long %>%
+    tidyr::drop_na(date)
+
+  # Enumerate seasons
+  rain_long <- enumerate_seasons(data = rain_long,
+                                 start_month = start_month,
+                                 end_month = end_month,
+                                 start_day = start_day,
+                                 end_day = end_day)
+
+  # --- Daily-level statistics per season ---
+  rain_summary <- rain_long %>%
+    dplyr::group_by(.data$season_year, !!as.name(id_column_name)) %>%
+    dplyr::summarize(
+      mean_season = mean(x = .data$value, na.rm = na.rm),
+      median_season = median(x = .data$value, na.rm = na.rm),
+      sd_season = sd(x = .data$value, na.rm = na.rm),
+      skew_season = (mean(x = .data$value, na.rm = na.rm) -
+                       median(x = .data$value, na.rm = na.rm)) /
+        sd(x = .data$value, na.rm = na.rm),
+      total_season = sum(x = .data$value, na.rm = na.rm),
+      norain = sum(x = .data$value < rain_threshold, na.rm = na.rm),
+      raindays = sum(x = .data$value >= rain_threshold, na.rm = na.rm),
+      pct_raindays = sum(x = .data$value >= rain_threshold, na.rm = na.rm) /
+        dplyr::n(),
+      dry = dry_interval(x = .data$value, rain_cutoff = rain_threshold,
+                         period = "mid", na.rm = na.rm),
+      .groups = "drop"
+    )
+
+  # --- Monthly-level statistics per season ---
+  # Extract month from date for grouping
+  rain_long$obs_month <- as.integer(format(rain_long$date, "%m"))
+
+  monthly_totals <- rain_long %>%
+    dplyr::group_by(.data$season_year, !!as.name(id_column_name),
+                    .data$obs_month) %>%
+    dplyr::summarize(mo_total = sum(.data$value, na.rm = na.rm),
+                     .groups = "drop")
+
+  monthly_summary <- monthly_totals %>%
+    dplyr::group_by(.data$season_year, !!as.name(id_column_name)) %>%
+    dplyr::summarize(
+      mean_mo_total_season = mean(.data$mo_total, na.rm = na.rm),
+      median_mo_total_season = median(.data$mo_total, na.rm = na.rm),
+      sd_mo_total_season = ifelse(dplyr::n() > 1,
+                                  sd(.data$mo_total, na.rm = na.rm),
+                                  NA_real_),
+      skew_mo_total_season = ifelse(
+        dplyr::n() > 1,
+        (mean(.data$mo_total, na.rm = na.rm) -
+           median(.data$mo_total, na.rm = na.rm)) /
+          sd(.data$mo_total, na.rm = na.rm),
+        NA_real_
+      ),
+      .groups = "drop"
+    )
+
+  # Join monthly summary into main summary
+  rain_summary <- dplyr::left_join(rain_summary, monthly_summary,
+                                   by = c("season_year", id_column_name))
+
+  # --- Rolling deviations and z-scores ---
+  # Sort by site and season year so rolling window works correctly
+  rain_summary <- dplyr::arrange(rain_summary,
+                                 !!as.name(id_column_name),
+                                 .data$season_year)
+
+  rain_summary <- rain_summary %>%
+    dplyr::group_by(!!as.name(id_column_name)) %>%
+    dplyr::mutate(
+      dev_total_season = .rolling_dev(.data$total_season,
+                                      .data$season_year, lr_years),
+      z_total_season = .rolling_z(.data$total_season,
+                                  .data$season_year, lr_years),
+      dev_raindays = .rolling_dev(.data$raindays,
+                                  .data$season_year, lr_years),
+      dev_norain = .rolling_dev(.data$norain,
+                                .data$season_year, lr_years),
+      dev_pct_raindays = .rolling_dev(.data$pct_raindays,
+                                      .data$season_year, lr_years)
+    ) %>%
+    dplyr::ungroup()
+
+  # --- Output format ---
+  if (wide) {
+    # All columns are year-specific with rolling deviations, so pivot all
+    # non-id, non-year columns to wide format
+    rain_summary <- rain_summary %>%
+      tidyr::pivot_longer(-c(id_column_name, "season_year")) %>%
+      tidyr::pivot_wider(id_cols = id_column_name,
+                         names_from = c(.data$name, .data$season_year),
+                         values_from = .data$value,
+                         names_sep = "_")
+  }
+
+  return(rain_summary)
+}
+
+
+#' Rolling deviation from long-run mean
+#'
+#' @description Computes the deviation of each value from the mean of the
+#' preceding \code{lr_years} values, matched by year. Returns \code{NA} when
+#' fewer than \code{lr_years} preceding years are available.
+#'
+#' @param values  numeric vector of the variable to compute deviations for
+#' @param years   integer vector of season years corresponding to \code{values}
+#' @param lr_years integer number of preceding years in the rolling window
+#'
+#' @return numeric vector of deviations, same length as \code{values}
+#'
+#' @keywords internal
+.rolling_dev <- function(values, years, lr_years) {
+  n <- length(values)
+  dev <- rep(NA_real_, n)
+  for (i in seq_len(n)) {
+    target_years <- seq(years[i] - lr_years, years[i] - 1)
+    window_idx <- which(years %in% target_years)
+    if (length(window_idx) == lr_years) {
+      dev[i] <- values[i] - mean(values[window_idx], na.rm = TRUE)
+    }
+  }
+  dev
+}
+
+
+#' Rolling z-score from long-run mean
+#'
+#' @description Computes the z-score of each value relative to the mean and
+#' standard deviation of the preceding \code{lr_years} values, matched by year.
+#' Returns \code{NA} when fewer than \code{lr_years} preceding years are
+#' available.
+#'
+#' @param values  numeric vector of the variable to compute z-scores for
+#' @param years   integer vector of season years corresponding to \code{values}
+#' @param lr_years integer number of preceding years in the rolling window
+#'
+#' @return numeric vector of z-scores, same length as \code{values}
+#'
+#' @keywords internal
+.rolling_z <- function(values, years, lr_years) {
+  n <- length(values)
+  z <- rep(NA_real_, n)
+  for (i in seq_len(n)) {
+    target_years <- seq(years[i] - lr_years, years[i] - 1)
+    window_idx <- which(years %in% target_years)
+    if (length(window_idx) == lr_years) {
+      z[i] <- (values[i] - mean(values[window_idx], na.rm = TRUE)) /
+        sd(values[window_idx], na.rm = TRUE)
+    }
+  }
+  z
+}
