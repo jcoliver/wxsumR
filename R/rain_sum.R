@@ -32,7 +32,7 @@
 #' as a rain day; defaults to 1
 #' @param lr_years       integer number of strictly preceding years used to
 #' calculate rolling deviations and z-scores; defaults to 10
-#' @param na.rm          logical passed to summary statistic functions indicating
+#' @param na_rm          logical passed to summary statistic functions indicating
 #' treatment of \code{NA} values; defaults to \code{TRUE}
 #' @param wide           logical indicating whether or not to output as wide-
 #' formatted data; defaults to \code{TRUE}
@@ -43,20 +43,20 @@
 #' @return tibble with rainfall summary statistics.
 #' If \code{wide = FALSE}, returns values for each year for each site:
 #' \describe{
-#'   \item{mean_season}{Mean daily rainfall for the season}
-#'   \item{median_season}{Median daily rainfall for the season}
-#'   \item{sd_season}{Standard deviation of daily rainfall for the season}
-#'   \item{skew_season}{Skew of daily rainfall for the season, where skew is
+#'   \item{mean}{Mean daily rainfall for the season}
+#'   \item{median}{Median daily rainfall for the season}
+#'   \item{sd}{Standard deviation of daily rainfall for the season}
+#'   \item{skew}{Skew of daily rainfall for the season, where skew is
 #'   defined by (mean - median)/sd}
-#'   \item{mean_mo_total_season}{Mean of monthly rainfall totals within the
+#'   \item{mean_mo_total}{Mean of monthly rainfall totals within the
 #'   season}
-#'   \item{median_mo_total_season}{Median of monthly rainfall totals within the
+#'   \item{median_mo_total}{Median of monthly rainfall totals within the
 #'   season}
-#'   \item{sd_mo_total_season}{Standard deviation of monthly rainfall totals
+#'   \item{sd_mo_total}{Standard deviation of monthly rainfall totals
 #'   within the season}
-#'   \item{skew_mo_total_season}{Skew of monthly rainfall totals within the
+#'   \item{skew_mo_total}{Skew of monthly rainfall totals within the
 #'   season}
-#'   \item{total_season}{Total rainfall over the season}
+#'   \item{total}{Total rainfall over the season}
 #'   \item{norain}{Number of days with rainfall less than
 #'   \code{rain_threshold}}
 #'   \item{raindays}{Number of days with rainfall greater than or equal to
@@ -65,9 +65,9 @@
 #'   equal to \code{rain_threshold}}
 #'   \item{dry}{Longest stretch of consecutive days with rainfall less than
 #'   \code{rain_threshold} contained within the season}
-#'   \item{dev_total_season}{Deviation of total seasonal rainfall from the
+#'   \item{dev_total}{Deviation of total seasonal rainfall from the
 #'   rolling mean of the preceding \code{lr_years} seasons}
-#'   \item{z_total_season}{Z-score of total seasonal rainfall relative to
+#'   \item{z_total}{Z-score of total seasonal rainfall relative to
 #'   the preceding \code{lr_years} seasons}
 #'   \item{dev_raindays}{Deviation of rain day count from the rolling mean of
 #'   the preceding \code{lr_years} seasons}
@@ -79,7 +79,7 @@
 #'
 #' If \code{wide = TRUE}, each season-specific statistic is represented by a
 #' separate column for each year, with the year appended to the column name
-#' (e.g. \code{mean_season_1997}, \code{total_season_1997}).
+#' (e.g. \code{mean_1997}, \code{total_1997}).
 #'
 #' @seealso \code{\link{summarize_rainfall}}
 #'
@@ -112,13 +112,14 @@
 rain_sum <- function(rain, start_month, end_month,
                      start_day = 1, end_day = start_day,
                      rain_threshold = 1, lr_years = 10,
-                     na.rm = TRUE, wide = TRUE,
+                     na_rm = TRUE, wide = TRUE,
                      id_index = 1, date_sep = "_") {
 
   # Extract name of column with site id
   id_column_name <- colnames(rain)[id_index]
 
   # Convert to long format and parse column names into dates
+  # TODO: This is the time suck right here
   rain_long <- to_long(data = rain,
                        keep_cols = id_index,
                        date_sep = date_sep)
@@ -138,19 +139,19 @@ rain_sum <- function(rain, start_month, end_month,
   rain_summary <- rain_long %>%
     dplyr::group_by(.data$season_year, !!as.name(id_column_name)) %>%
     dplyr::summarize(
-      mean_season = mean(x = .data$value, na.rm = na.rm),
-      median_season = median(x = .data$value, na.rm = na.rm),
-      sd_season = sd(x = .data$value, na.rm = na.rm),
-      skew_season = (mean(x = .data$value, na.rm = na.rm) -
-                       median(x = .data$value, na.rm = na.rm)) /
-        sd(x = .data$value, na.rm = na.rm),
-      total_season = sum(x = .data$value, na.rm = na.rm),
-      norain = sum(x = .data$value < rain_threshold, na.rm = na.rm),
-      raindays = sum(x = .data$value >= rain_threshold, na.rm = na.rm),
-      pct_raindays = sum(x = .data$value >= rain_threshold, na.rm = na.rm) /
+      mean = mean(x = .data$value, na.rm = na_rm),
+      median = median(x = .data$value, na.rm = na_rm),
+      sd = sd(x = .data$value, na.rm = na_rm),
+      skew = (mean(x = .data$value, na.rm = na_rm) -
+                       median(x = .data$value, na.rm = na_rm)) /
+        sd(x = .data$value, na.rm = na_rm),
+      total = sum(x = .data$value, na.rm = na_rm),
+      norain = sum(x = .data$value < rain_threshold, na.rm = na_rm),
+      raindays = sum(x = .data$value >= rain_threshold, na.rm = na_rm),
+      pct_raindays = sum(x = .data$value >= rain_threshold, na.rm = na_rm) /
         dplyr::n(),
       dry = dry_interval(x = .data$value, rain_cutoff = rain_threshold,
-                         period = "mid", na.rm = na.rm),
+                         period = "mid", na.rm = na_rm),
       .groups = "drop"
     )
 
@@ -161,22 +162,22 @@ rain_sum <- function(rain, start_month, end_month,
   monthly_totals <- rain_long %>%
     dplyr::group_by(.data$season_year, !!as.name(id_column_name),
                     .data$obs_month) %>%
-    dplyr::summarize(mo_total = sum(.data$value, na.rm = na.rm),
+    dplyr::summarize(mo_total = sum(.data$value, na.rm = na_rm),
                      .groups = "drop")
 
   monthly_summary <- monthly_totals %>%
     dplyr::group_by(.data$season_year, !!as.name(id_column_name)) %>%
     dplyr::summarize(
-      mean_mo_total_season = mean(.data$mo_total, na.rm = na.rm),
-      median_mo_total_season = median(.data$mo_total, na.rm = na.rm),
-      sd_mo_total_season = ifelse(dplyr::n() > 1,
-                                  sd(.data$mo_total, na.rm = na.rm),
+      mean_mo_total = mean(.data$mo_total, na.rm = na_rm),
+      median_mo_total = median(.data$mo_total, na.rm = na_rm),
+      sd_mo_total = ifelse(dplyr::n() > 1,
+                                  sd(.data$mo_total, na.rm = na_rm),
                                   NA_real_),
-      skew_mo_total_season = ifelse(
+      skew_mo_total = ifelse(
         dplyr::n() > 1,
-        (mean(.data$mo_total, na.rm = na.rm) -
-           median(.data$mo_total, na.rm = na.rm)) /
-          sd(.data$mo_total, na.rm = na.rm),
+        (mean(.data$mo_total, na.rm = na_rm) -
+           median(.data$mo_total, na.rm = na_rm)) /
+          sd(.data$mo_total, na.rm = na_rm),
         NA_real_
       ),
       .groups = "drop"
@@ -195,16 +196,30 @@ rain_sum <- function(rain, start_month, end_month,
   rain_summary <- rain_summary %>%
     dplyr::group_by(!!as.name(id_column_name)) %>%
     dplyr::mutate(
-      dev_total_season = .rolling_dev(.data$total_season,
-                                      .data$season_year, lr_years),
-      z_total_season = .rolling_z(.data$total_season,
-                                  .data$season_year, lr_years),
+      z_total = .rolling_z(.data$total,
+                           .data$season_year, 
+                           lr_years),
+      z_raindays = .rolling_z(.data$raindays,
+                              .data$season_year,
+                              lr_years),
+      z_norain = .rolling_z(.data$norain,
+                            .data$season_year,
+                            lr_years),
+      z_pct_raindays = .rolling_z(.data$pct_raindays,
+                                  .data$season_year,
+                                  lr_years),
+      dev_total = .rolling_dev(.data$total,
+                               .data$season_year, 
+                               lr_years),
       dev_raindays = .rolling_dev(.data$raindays,
-                                  .data$season_year, lr_years),
+                                  .data$season_year, 
+                                  lr_years),
       dev_norain = .rolling_dev(.data$norain,
-                                .data$season_year, lr_years),
+                                .data$season_year, 
+                                lr_years),
       dev_pct_raindays = .rolling_dev(.data$pct_raindays,
-                                      .data$season_year, lr_years)
+                                      .data$season_year, 
+                                      lr_years)
     ) %>%
     dplyr::ungroup()
 
@@ -218,6 +233,16 @@ rain_sum <- function(rain, start_month, end_month,
                          names_from = c(.data$name, .data$season_year),
                          values_from = .data$value,
                          names_sep = "_")
+    # Need to end up removing those columns that have NA values across the 
+    # board for the deviation and z-score columns for the years that did not 
+    # have sufficient historical data (i.e. they had fewer than [lr_years]
+    # years' of data before them).
+    all_na <- apply(X = rain_summary,
+                    MARGIN = 2,
+                    FUN = function(x) {
+                      all(is.na(x))
+                    })
+    rain_summary <- rain_summary[, !all_na]
   }
 
   return(rain_summary)

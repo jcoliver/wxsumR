@@ -3,8 +3,55 @@
 # jcoliver@email.arizona.edu
 # 2020-04-06
 
-rm(list = ls())
+library(haven)  # to read output of wxsum (STATA) output
+library(dplyr)  # some data wrangling fun 
 
+# How example output was created in STATA:
+# I ran ` wxsum rf_, ini_month(05) fin_month(10) ini_day(15) fin_day(15) 
+# rain_data save(rainfall_stats.dta)` to generate the attached rainfall data.
+
+# By default it outputs wide data, so no need to specify wide
+devtools::load_all() # to make sure the package is loaded
+# start_month = 5
+# end_month = 10
+# start_day = 15
+# end_day = 15
+
+rain <- readRDS(file = "data/rain.rds")
+# rain <- read_dta(file = "dev-notes/rain.dta")
+start_time <- Sys.time()
+result_wxsumr <- rain_sum(rain = rain, start_month = 5, end_month = 10, 
+                   start_day = 15, end_day = 15)
+message("Completed after ", Sys.time() - start_time)
+rm(start_time)
+saveRDS(result_wxsumr, file = "dev-notes/rainrall_stats.rds")
+
+# Read in result from stata package
+result_wxsum <- read_dta(file = "dev-notes/rainfall_stats.dta")
+
+# The example includes all the original (daily) data, so remove those columns 
+# for comparison sake
+result_wxsum <- result_wxsum %>%
+  select(-starts_with("rf_"))
+
+# A difference in column number (wxsumr:497, wxsum:740)
+wxsum_extra <- setdiff(colnames(result_wxsum), 
+                       colnames(result_wxsumr))
+wxsumr_extra <- setdiff(colnames(result_wxsumr),
+                        colnames(result_wxsum))  
+sort(wxsum_extra)
+sort(wxsumr_extra)
+
+wxsum_extra_noyear <- sort(unique(gsub(pattern = "_[0-9]{4}",
+                                       replacement = "_YYYY",
+                                       x = wxsum_extra)))
+wxsumr_extra_noyear <- sort(unique(gsub(pattern = "_[0-9]{4}",
+                                        replacement = "_YYYY",
+                                        x = wxsumr_extra)))
+wxsum_extra_noyear
+wxsumr_extra_noyear
+
+# Old below here
 ################################################################################
 # library(haven) # To read in STATA .dta files
 library(tidyverse)
