@@ -115,7 +115,8 @@ dry_interval <- function(x, rain_cutoff = 1, period = c("start", "mid", "end"),
     # by a single stretch of rain followed by consecutive non-rain days (or
     # vice-versa) should return 0
     if (length(rain_string_split) > 2) {
-      longest <- max(nchar(rain_string_split[-c(1, length(rain_string_split))]))
+      # longest <- max(nchar(rain_string_split[-c(1, length(rain_string_split))]))
+      longest <- max(nchar(rain_string_split))
     }
   } else if (period == "end") {
     # Only return non-zero value for longest at start if last day was dry

@@ -26,14 +26,14 @@
 #' @param end_month      numeric ending month defining season (inclusive)
 #' @param start_day      numeric day of starting month defining season
 #' (inclusive); defaults to 1
-#' @param end_day        numeric day of ending month defining season (inclusive);
-#' defaults to \code{start_day}
+#' @param end_day        numeric day of ending month defining season
+#' (inclusive); defaults to \code{start_day}
 #' @param rain_threshold numeric minimum value for daily rainfall to be counted
 #' as a rain day; defaults to 1
 #' @param lr_years       integer number of strictly preceding years used to
 #' calculate rolling deviations and z-scores; defaults to 10
-#' @param na_rm          logical passed to summary statistic functions indicating
-#' treatment of \code{NA} values; defaults to \code{TRUE}
+#' @param na_rm          logical passed to summary statistic functions
+#' indicating treatment of \code{NA} values; defaults to \code{TRUE}
 #' @param wide           logical indicating whether or not to output as wide-
 #' formatted data; defaults to \code{TRUE}
 #' @param id_index       integer column index of unique site id; defaults to 1
@@ -86,22 +86,28 @@
 #' @examples
 #' \dontrun{
 #' # Season defined by 1 May through 1 October
-#' rain_summary <- rain_sum(rain = rain_2yr,
-#'                          start_month = 5,
-#'                          end_month = 10)
+#' rain_summary <- rain_sum(
+#'   rain = rain_2yr,
+#'   start_month = 5,
+#'   end_month = 10
+#' )
 #'
 #' # Same season, long format output
-#' rain_summary <- rain_sum(rain = rain_2yr,
-#'                          start_month = 5,
-#'                          end_month = 10,
-#'                          wide = FALSE)
+#' rain_summary <- rain_sum(
+#'   rain = rain_2yr,
+#'   start_month = 5,
+#'   end_month = 10,
+#'   wide = FALSE
+#' )
 #'
 #' # Season spanning the new year, 15 November through 15 March
-#' rain_summary <- rain_sum(rain = rain_2yr,
-#'                          start_month = 11,
-#'                          end_month = 3,
-#'                          start_day = 15,
-#'                          end_day = 15)
+#' rain_summary <- rain_sum(
+#'   rain = rain_2yr,
+#'   start_month = 11,
+#'   end_month = 3,
+#'   start_day = 15,
+#'   end_day = 15
+#' )
 #' }
 #'
 #' @export
@@ -114,26 +120,29 @@ rain_sum <- function(rain, start_month, end_month,
                      rain_threshold = 1, lr_years = 10,
                      na_rm = TRUE, wide = TRUE,
                      id_index = 1, date_sep = "_") {
-
   # Extract name of column with site id
   id_column_name <- colnames(rain)[id_index]
 
   # Convert to long format and parse column names into dates
   # TODO: This is the time suck right here
-  rain_long <- to_long(data = rain,
-                       keep_cols = id_index,
-                       date_sep = date_sep)
+  rain_long <- to_long(
+    data = rain,
+    keep_cols = id_index,
+    date_sep = date_sep
+  )
 
   # Exclude NA dates
   rain_long <- rain_long %>%
     tidyr::drop_na(date)
 
   # Enumerate seasons
-  rain_long <- enumerate_seasons(data = rain_long,
-                                 start_month = start_month,
-                                 end_month = end_month,
-                                 start_day = start_day,
-                                 end_day = end_day)
+  rain_long <- enumerate_seasons(
+    data = rain_long,
+    start_month = start_month,
+    end_month = end_month,
+    start_day = start_day,
+    end_day = end_day
+  )
 
   # --- Daily-level statistics per season ---
   rain_summary <- rain_long %>%
@@ -143,15 +152,17 @@ rain_sum <- function(rain, start_month, end_month,
       median = median(x = .data$value, na.rm = na_rm),
       sd = sd(x = .data$value, na.rm = na_rm),
       skew = (mean(x = .data$value, na.rm = na_rm) -
-                       median(x = .data$value, na.rm = na_rm)) /
+        median(x = .data$value, na.rm = na_rm)) /
         sd(x = .data$value, na.rm = na_rm),
       total = sum(x = .data$value, na.rm = na_rm),
       norain = sum(x = .data$value < rain_threshold, na.rm = na_rm),
       raindays = sum(x = .data$value >= rain_threshold, na.rm = na_rm),
       pct_raindays = sum(x = .data$value >= rain_threshold, na.rm = na_rm) /
         dplyr::n(),
-      dry = dry_interval(x = .data$value, rain_cutoff = rain_threshold,
-                         period = "mid", na.rm = na_rm),
+      dry = dry_interval(
+        x = .data$value, rain_cutoff = rain_threshold,
+        period = "mid", na.rm = na_rm
+      ),
       .groups = "drop"
     )
 
@@ -160,10 +171,14 @@ rain_sum <- function(rain, start_month, end_month,
   rain_long$obs_month <- as.integer(format(rain_long$date, "%m"))
 
   monthly_totals <- rain_long %>%
-    dplyr::group_by(.data$season_year, !!as.name(id_column_name),
-                    .data$obs_month) %>%
-    dplyr::summarize(mo_total = sum(.data$value, na.rm = na_rm),
-                     .groups = "drop")
+    dplyr::group_by(
+      .data$season_year, !!as.name(id_column_name),
+      .data$obs_month
+    ) %>%
+    dplyr::summarize(
+      mo_total = sum(.data$value, na.rm = na_rm),
+      .groups = "drop"
+    )
 
   monthly_summary <- monthly_totals %>%
     dplyr::group_by(.data$season_year, !!as.name(id_column_name)) %>%
@@ -171,12 +186,13 @@ rain_sum <- function(rain, start_month, end_month,
       mean_mo_total = mean(.data$mo_total, na.rm = na_rm),
       median_mo_total = median(.data$mo_total, na.rm = na_rm),
       sd_mo_total = ifelse(dplyr::n() > 1,
-                                  sd(.data$mo_total, na.rm = na_rm),
-                                  NA_real_),
+        sd(.data$mo_total, na.rm = na_rm),
+        NA_real_
+      ),
       skew_mo_total = ifelse(
         dplyr::n() > 1,
         (mean(.data$mo_total, na.rm = na_rm) -
-           median(.data$mo_total, na.rm = na_rm)) /
+          median(.data$mo_total, na.rm = na_rm)) /
           sd(.data$mo_total, na.rm = na_rm),
         NA_real_
       ),
@@ -185,41 +201,60 @@ rain_sum <- function(rain, start_month, end_month,
 
   # Join monthly summary into main summary
   rain_summary <- dplyr::left_join(rain_summary, monthly_summary,
-                                   by = c("season_year", id_column_name))
+    by = c("season_year", id_column_name)
+  )
 
   # --- Rolling deviations and z-scores ---
   # Sort by site and season year so rolling window works correctly
-  rain_summary <- dplyr::arrange(rain_summary,
-                                 !!as.name(id_column_name),
-                                 .data$season_year)
+  rain_summary <- dplyr::arrange(
+    rain_summary,
+    !!as.name(id_column_name),
+    .data$season_year
+  )
 
   rain_summary <- rain_summary %>%
     dplyr::group_by(!!as.name(id_column_name)) %>%
     dplyr::mutate(
-      z_total = .rolling_z(.data$total,
-                           .data$season_year, 
-                           lr_years),
-      z_raindays = .rolling_z(.data$raindays,
-                              .data$season_year,
-                              lr_years),
-      z_norain = .rolling_z(.data$norain,
-                            .data$season_year,
-                            lr_years),
-      z_pct_raindays = .rolling_z(.data$pct_raindays,
-                                  .data$season_year,
-                                  lr_years),
-      dev_total = .rolling_dev(.data$total,
-                               .data$season_year, 
-                               lr_years),
-      dev_raindays = .rolling_dev(.data$raindays,
-                                  .data$season_year, 
-                                  lr_years),
-      dev_norain = .rolling_dev(.data$norain,
-                                .data$season_year, 
-                                lr_years),
-      dev_pct_raindays = .rolling_dev(.data$pct_raindays,
-                                      .data$season_year, 
-                                      lr_years)
+      z_total = .rolling_z(
+        .data$total,
+        .data$season_year,
+        lr_years
+      ),
+      z_raindays = .rolling_z(
+        .data$raindays,
+        .data$season_year,
+        lr_years
+      ),
+      z_norain = .rolling_z(
+        .data$norain,
+        .data$season_year,
+        lr_years
+      ),
+      z_pct_raindays = .rolling_z(
+        .data$pct_raindays,
+        .data$season_year,
+        lr_years
+      ),
+      dev_total = .rolling_dev(
+        .data$total,
+        .data$season_year,
+        lr_years
+      ),
+      dev_raindays = .rolling_dev(
+        .data$raindays,
+        .data$season_year,
+        lr_years
+      ),
+      dev_norain = .rolling_dev(
+        .data$norain,
+        .data$season_year,
+        lr_years
+      ),
+      dev_pct_raindays = .rolling_dev(
+        .data$pct_raindays,
+        .data$season_year,
+        lr_years
+      )
     ) %>%
     dplyr::ungroup()
 
@@ -229,77 +264,26 @@ rain_sum <- function(rain, start_month, end_month,
     # non-id, non-year columns to wide format
     rain_summary <- rain_summary %>%
       tidyr::pivot_longer(-c(id_column_name, "season_year")) %>%
-      tidyr::pivot_wider(id_cols = id_column_name,
-                         names_from = c(.data$name, .data$season_year),
-                         values_from = .data$value,
-                         names_sep = "_")
-    # Need to end up removing those columns that have NA values across the 
-    # board for the deviation and z-score columns for the years that did not 
+      tidyr::pivot_wider(
+        id_cols = id_column_name,
+        names_from = c(.data$name, .data$season_year),
+        values_from = .data$value,
+        names_sep = "_"
+      )
+    # Need to end up removing those columns that have NA values across the
+    # board for the deviation and z-score columns for the years that did not
     # have sufficient historical data (i.e. they had fewer than [lr_years]
     # years' of data before them).
-    all_na <- apply(X = rain_summary,
-                    MARGIN = 2,
-                    FUN = function(x) {
-                      all(is.na(x))
-                    })
+    all_na <- apply(
+      X = rain_summary,
+      MARGIN = 2,
+      FUN = function(x) {
+        all(is.na(x))
+      }
+    )
     rain_summary <- rain_summary[, !all_na]
   }
 
   return(rain_summary)
 }
 
-
-#' Rolling deviation from long-run mean
-#'
-#' @description Computes the deviation of each value from the mean of the
-#' preceding \code{lr_years} values, matched by year. Returns \code{NA} when
-#' fewer than \code{lr_years} preceding years are available.
-#'
-#' @param values  numeric vector of the variable to compute deviations for
-#' @param years   integer vector of season years corresponding to \code{values}
-#' @param lr_years integer number of preceding years in the rolling window
-#'
-#' @return numeric vector of deviations, same length as \code{values}
-#'
-#' @keywords internal
-.rolling_dev <- function(values, years, lr_years) {
-  n <- length(values)
-  dev <- rep(NA_real_, n)
-  for (i in seq_len(n)) {
-    target_years <- seq(years[i] - lr_years, years[i] - 1)
-    window_idx <- which(years %in% target_years)
-    if (length(window_idx) == lr_years) {
-      dev[i] <- values[i] - mean(values[window_idx], na.rm = TRUE)
-    }
-  }
-  dev
-}
-
-
-#' Rolling z-score from long-run mean
-#'
-#' @description Computes the z-score of each value relative to the mean and
-#' standard deviation of the preceding \code{lr_years} values, matched by year.
-#' Returns \code{NA} when fewer than \code{lr_years} preceding years are
-#' available.
-#'
-#' @param values  numeric vector of the variable to compute z-scores for
-#' @param years   integer vector of season years corresponding to \code{values}
-#' @param lr_years integer number of preceding years in the rolling window
-#'
-#' @return numeric vector of z-scores, same length as \code{values}
-#'
-#' @keywords internal
-.rolling_z <- function(values, years, lr_years) {
-  n <- length(values)
-  z <- rep(NA_real_, n)
-  for (i in seq_len(n)) {
-    target_years <- seq(years[i] - lr_years, years[i] - 1)
-    window_idx <- which(years %in% target_years)
-    if (length(window_idx) == lr_years) {
-      z[i] <- (values[i] - mean(values[window_idx], na.rm = TRUE)) /
-        sd(values[window_idx], na.rm = TRUE)
-    }
-  }
-  z
-}
