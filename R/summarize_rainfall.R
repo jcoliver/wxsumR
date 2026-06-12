@@ -30,7 +30,7 @@
 #' defaults to \code{start_day}
 #' @param rain_cutoff  numeric minimum value for daily rainfall to be counted as
 #' a rain day
-#' @param na.rm        logical passed to summary statistic functions indicating
+#' @param na_rm        logical passed to summary statistic functions indicating
 #' treatment of \code{NA} values
 #' @param wide         logical indicating whether or not to output as wide-
 #' formatted data
@@ -136,7 +136,7 @@
 #' @importFrom utils read.csv
 summarize_rainfall <- function(rain, start_month, end_month,
                                start_day = 15, end_day = start_day,
-                               rain_cutoff = 1, na.rm = TRUE, wide = TRUE,
+                               rain_cutoff = 1, na_rm = TRUE, wide = TRUE,
                                id_index = 1, date_sep = "_") {
 
   # Extract name of column with site id
@@ -162,17 +162,17 @@ summarize_rainfall <- function(rain, start_month, end_month,
   # consecutive days without rain in the period
   rain_summary <- rain_long %>%
     dplyr::group_by(season_year, !!as.name(id_column_name)) %>%
-    dplyr::summarize(mean_season = mean(x = .data$value, na.rm = na.rm),
-                     median_season = median(x = .data$value, na.rm = na.rm),
-                     sd_season = sd(x = .data$value, na.rm = na.rm),
-                     total_season = sum(x = .data$value, na.rm = na.rm),
-                     skew_season = (mean(x = .data$value, na.rm = na.rm) - median(x = .data$value, na.rm = na.rm))/sd(x = .data$value, na.rm = na.rm),
-                     norain = sum(x = .data$value < rain_cutoff, na.rm = na.rm),
-                     raindays = sum(x = .data$value >= rain_cutoff, na.rm = na.rm),
-                     percent_raindays = sum(x = .data$value >= rain_cutoff, na.rm = na.rm)/dplyr::n(),
-                     dry = dry_interval(x = .data$value, rain_cutoff = rain_cutoff, period = "mid", na.rm = na.rm),
-                     dry_start = dry_interval(x = .data$value, rain_cutoff = rain_cutoff, period = "start", na.rm = na.rm),
-                     dry_end = dry_interval(x = .data$value, rain_cutoff = rain_cutoff, period = "end", na.rm = na.rm))
+    dplyr::summarize(mean_season = mean(x = .data$value, na.rm = na_rm),
+                     median_season = median(x = .data$value, na.rm = na_rm),
+                     sd_season = sd(x = .data$value, na.rm = na_rm),
+                     total_season = sum(x = .data$value, na.rm = na_rm),
+                     skew_season = (mean(x = .data$value, na.rm = na_rm) - median(x = .data$value, na.rm = na_rm))/sd(x = .data$value, na.rm = na_rm),
+                     norain = sum(x = .data$value < rain_cutoff, na.rm = na_rm),
+                     raindays = sum(x = .data$value >= rain_cutoff, na.rm = na_rm),
+                     percent_raindays = sum(x = .data$value >= rain_cutoff, na.rm = na_rm)/dplyr::n(),
+                     dry = dry_interval(x = .data$value, rain_cutoff = rain_cutoff, period = "mid", na_rm = na_rm),
+                     dry_start = dry_interval(x = .data$value, rain_cutoff = rain_cutoff, period = "start", na_rm = na_rm),
+                     dry_end = dry_interval(x = .data$value, rain_cutoff = rain_cutoff, period = "end", na_rm = na_rm))
 
   # Add long-term values mean and standard-deviation values
   rain_summary <- dplyr::ungroup(rain_summary) %>%

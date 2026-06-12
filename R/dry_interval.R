@@ -5,14 +5,14 @@
 #' are categorized as dry.
 #'
 #' @details Missing values are not simply removed for purpose of calculation.
-#' If \code{x} includes \code{NA} values and \code{na.rm = FALSE}, \code{NA} is
+#' If \code{x} includes \code{NA} values and \code{na_rm = FALSE}, \code{NA} is
 #' returned. However, when \code{x} includes \code{NA} values and
-#' \code{na.rm = TRUE}, special consideration is required. In contrast with
+#' \code{na_rm = TRUE}, special consideration is required. In contrast with
 #' other methods, \code{NA} cannot be dropped without significant implications
 #' on calculations. Consider a vector of \code{c(0, 0, NA, 0)}. If \code{NA}
 #' values are removed, the vector reduces to \code{c(0, 0, 0)} and the longest
 #' consectutive stretch of dry days becomes 3. This is not an accurate
-#' representation of the data. Instead, when \code{na.rm = TRUE}, vectors with
+#' representation of the data. Instead, when \code{na_rm = TRUE}, vectors with
 #' \code{NA} values will evaluate missing values as non-dry days. In the
 #' example above, this results in the longest dry interval being 2. This
 #' provides a more accurate representation of dry day intervals based on
@@ -21,8 +21,8 @@
 #' @param x           numeric vector of rainfall measurements
 #' @param rain_cutoff minimum amount of rainfall to count as non-dry day
 #' @param period      period to measure longest dry spell; see \code{value}
-#' @param na.rm       logical indicating treatment of \code{NA} values; by
-#' default, \code{na.rm = TRUE}, \code{NA} values are ignored. If set to
+#' @param na_rm       logical indicating treatment of \code{NA} values; by
+#' default, \code{na_rm = TRUE}, \code{NA} values are ignored. If set to
 #' \code{FALSE}, any \code{NA} values in \code{x} will result in a return value
 #' of \code{NA}
 #'
@@ -64,7 +64,7 @@
 #' }
 #' @importFrom stringr str_split str_c str_sub
 dry_interval <- function(x, rain_cutoff = 1, period = c("start", "mid", "end"),
-                         na.rm = TRUE) {
+                         na_rm = TRUE) {
 
   # Vector of 0s and 1s, where 0s are days where rainfall is below rain_cutoff
   # and 1s are days where rain is above rain_cutoff
@@ -75,13 +75,13 @@ dry_interval <- function(x, rain_cutoff = 1, period = c("start", "mid", "end"),
     return(NA)
   }
 
-  # For the purposes of this calculation, if na.rm is TRUE, we need to
+  # For the purposes of this calculation, if na_rm is TRUE, we need to
   # eliminate NA values from the rain_binary vector, but we cannot simply drop
   # them. That is, if we did, c(0, 0, NA, 0) becomes c(0, 0, 0). These two
   # resultant vectors have very different interpretations of the duration of the
   # longest dry periods. Instead, and for these purposes only, we replace NA
   # values with a "1" which is only indicating that the day was not a "dry" day
-  if (na.rm) {
+  if (na_rm) {
     rain_binary[is.na(rain_binary)] <- 1
   }
 
@@ -115,7 +115,7 @@ dry_interval <- function(x, rain_cutoff = 1, period = c("start", "mid", "end"),
     # by a single stretch of rain followed by consecutive non-rain days (or
     # vice-versa) should return 0
     if (length(rain_string_split) > 2) {
-      # longest <- max(nchar(rain_string_split[-c(1, length(rain_string_split))]))
+      longest <- max(nchar(rain_string_split[-c(1, length(rain_string_split))]))
       longest <- max(nchar(rain_string_split))
     }
   } else if (period == "end") {

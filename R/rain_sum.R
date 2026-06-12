@@ -161,8 +161,13 @@ rain_sum <- function(rain, start_month, end_month,
         dplyr::n(),
       dry = dry_interval(
         x = .data$value, rain_cutoff = rain_threshold,
-        period = "mid", na.rm = na_rm
-      ),
+        period = "mid", na_rm = na_rm),
+      dry_start = dry_interval(
+        x = .data$value, rain_cutoff = rain_threshold,
+        period = "start", na_rm = na_rm),
+      dry_end = dry_interval(
+        x = .data$value, rain_cutoff = rain_threshold,
+        period = "end", na_rm = na_rm),
       .groups = "drop"
     )
 
