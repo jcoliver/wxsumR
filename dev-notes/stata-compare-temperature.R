@@ -3,8 +3,124 @@
 # jcoliver@email.arizona.edu
 # 2020-04-06
 
-rm(list = ls())
+library(haven)   # to read output of wxsum (STATA) output
+library(dplyr)   # some data wrangling fun 
+library(ggplot2) # for visualizing differences
 
+devtools::load_all() # to make sure the package is loaded
+# wxsum tmp_, ini_month(11) fin_month(02) temp_data gdd_lo(8) gdd_hi(32) 
+# kdd_base(32) save(temp_stats.dta)`
+# start_month = 11
+# end_month = 2
+# growbase_low = 8
+# growbase_high = 32
+# TODO: Add kdd functionality kdd_base = 32
+# (default start_day = 1)
+# (default end_day = 1)
+
+temperature <- readRDS(file = "data/temp.rds")
+start_time <- Sys.time()
+result_wxsumr <- temp_sum(temperature = temperature, 
+                          start_month = 11, end_month = 2, 
+                          growbase_low = 8, growbase_high = 32)
+message("Completed after ", Sys.time() - start_time)
+rm(start_time)
+saveRDS(result_wxsumr, file = "dev-notes/temp_stats.rds")
+
+# Read in result from stata package
+result_wxsum <- read_dta(file = "dev-notes/temp_stats.dta")
+
+# The example includes all the original (daily) data, so remove those columns 
+# for comparison sake
+result_wxsum <- result_wxsum %>%
+  select(-starts_with("tmp_"))
+
+# A bunch of columns with __000[A-Z0-9]{3} pattern, 
+# e.g. "__0002OK" "__00036L"
+
+# Drop those oddities and do the data comparison
+result_wxsum <- result_wxsum |>
+  select(-matches("__000[A-Z0-9]{3}"))
+
+# For now, R version doesn't support KDD, so drop all those columns
+result_wxsum <- result_wxsum |>
+  select(-contains("kdd"))
+  
+# What's left?
+wxsum_extra <- setdiff(colnames(result_wxsum), 
+                       colnames(result_wxsumr))
+wxsumr_extra <- setdiff(colnames(result_wxsumr),
+                        colnames(result_wxsum))  
+sort(wxsum_extra)
+sort(wxsumr_extra)
+
+# First off, a difference in temperature bin column naming convention
+# wxsum: tempbin[0-9]{2}_YYYY
+# wxsumr: tempbin_[0-9]{2}_YYYY
+# (wxsum doesn't have the underscore before the bin number)
+
+result_wxsum <- result_wxsum |>
+  rename_with(.cols = matches("tempbin[0-9]{2}_[0-9]{4}"),
+              ~ gsub(pattern = "tempbin",
+                     replacement = "tempbin_",
+                     x = .x))
+
+wxsum_extra <- setdiff(colnames(result_wxsum), 
+                       colnames(result_wxsumr))
+wxsumr_extra <- setdiff(colnames(result_wxsumr),
+                        colnames(result_wxsum))  
+sort(wxsum_extra)
+sort(wxsumr_extra)
+
+# wxsum has mean and sd calculated for each bin:
+# [1] "binmean_01" "binmean_02" "binmean_03" "binmean_04" "binsd_01"   "binsd_02"  
+# [7] "binsd_03"   "binsd_04" 
+
+# wxsumr has some values for years that do not appear to be calculated for 
+# the wxsum package. Not sure why. All cells have values (not NA).
+
+# TODO: Figure out why these years have these columns in wxsumr but not wxsum.
+
+# For now, drop those extras so we can do numeric calculations
+# (and remove hhid, which is site id)
+samecol_wxsum <- result_wxsum |>
+  select(-all_of(wxsum_extra)) |>
+  select(-hhid)
+samecol_wxsumr <- result_wxsumr |>
+  select(-all_of(wxsumr_extra)) |>
+  select(-hhid)
+
+# Get the columns in the same order
+samecol_wxsumr <- samecol_wxsumr |>
+  select(colnames(samecol_wxsum))
+
+dif_mat <- samecol_wxsum - samecol_wxsumr
+max(dif_mat) # 0.000684
+length(which(dif_mat > 0.00005))
+# Lots of small differences (1974)
+col_means <- sqrt(colMeans(dif_mat^2))
+sort(col_means)
+
+# Want to do some summary visualization, so make a data frame of those diffs
+col_means <- as.data.frame(col_means)
+col_means$names <- rownames(col_means)
+rownames(col_means) <- NULL
+
+col_means$names <- gsub(x = col_means$names,
+                        pattern = "_[0-9]{4}",
+                        replacement = "")
+col_means$names <- gsub(x = col_means$names,
+                        pattern = "tempbin_[0-9]{2}",
+                        replacement = "tempbin")
+ggplot(data = col_means |> filter(!(names %in% c("dev_gdd", "gdd", "z_gdd"))),
+       mapping = aes(x = names, y = col_means)) +
+  geom_point()
+# Looking at the plot above, it's dev_gdd and gdd values that 
+# the most divergent (diff 1e-04 to 2e-04). z_gdd is also a little high 
+# rmse (2e-06 to 5e-06). Remaining columns all have rmse diffs less than 8e-07.
+
+
+# Old below here
 ################################################################################
 library(tidyverse)
 r_results_file <- "data/r-temperature-output.csv"
