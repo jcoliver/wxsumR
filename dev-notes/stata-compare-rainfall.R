@@ -44,9 +44,27 @@ sort(wxsumr_extra)
 # As of 2026-06-09, only wxsum includes extra columns. A bunch (168) of columns 
 # with __000[d][A-Z0-9][A-Z] pattern, e.g. "__0002OK" "__00036L"
 
+oddos <- grep(x = wxsum_extra,
+              pattern = "__000[A-Z0-9]{3}",
+              value = FALSE)
+oddo_cols <- wxsum_extra[oddos]
+
 # Drop those oddities and do the data comparison
-result_wxsum <- result_wxsum |> #Pipe inconsistency!
-  select(-all_of(wxsum_extra))
+result_wxsum <- result_wxsum |>
+  select(-all_of(oddo_cols))
+
+# As of 2026-07-08, wxsum does not include the dry_end and dry_start columns, 
+# for for comparison sake, drop those for now
+result_wxsumr <- result_wxsumr |>
+  select(-starts_with("dry_end_")) |>
+  select(-starts_with("dry_start_"))
+
+wxsum_extra <- setdiff(colnames(result_wxsum), 
+                       colnames(result_wxsumr))
+wxsumr_extra <- setdiff(colnames(result_wxsumr),
+                        colnames(result_wxsum))  
+sort(wxsum_extra)
+sort(wxsumr_extra)
 
 # Both below should be 0-length vectors
 if (length(setdiff(colnames(result_wxsum), 

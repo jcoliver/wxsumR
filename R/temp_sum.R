@@ -17,16 +17,21 @@
 #' \code{min(max(value - growbase_low, 0), growbase_high - growbase_low)}.
 #' GDD for the season is the sum of daily contributions.
 #'
+#' Killing degree days (KDD) are calculated as the cumulative sum of
+#' degrees above \code{kdd_threshold}: for each observed day, the
+#' contribution is \code{max(value - kdd_threshold, 0)}. KDD for the
+#' season is the sum of daily contributions.
+#'
 #' Temperature bins are computed from within-season percentiles. With
 #' \code{bins = 4}, the bin boundaries are at the 25th, 50th, and 75th
 #' percentiles; with \code{bins = 5}, at the 20th, 40th, 60th, and 80th
 #' percentiles, and so on. Each bin reports the share of observed days
 #' falling within its range.
 #'
-#' Deviations and z-scores for GDD are computed using a rolling window of
-#' \code{lr_years} strictly preceding seasons. If fewer than \code{lr_years}
-#' preceding seasons are available for a given year, deviations and z-scores
-#' are \code{NA} for that season.
+#' Deviations and z-scores for GDD and KDD are computed using a rolling
+#' window of \code{lr_years} strictly preceding seasons. If fewer than
+#' \code{lr_years} preceding seasons are available for a given year,
+#' deviations and z-scores are \code{NA} for that season.
 #'
 #' By default, returns data in "wide" format, with a separate column for
 #' each statistic for each year. If \code{wide = FALSE}, returns "long"
@@ -43,6 +48,9 @@
 #' days (inclusive); defaults to 10
 #' @param growbase_high numeric upper bound for calculating growing degree
 #' days (inclusive); defaults to 30
+#' @param kdd_threshold numeric threshold temperature for calculating
+#' killing degree days; for each observed day, the contribution to KDD is
+#' \code{max(value - kdd_threshold, 0)}
 #' @param bins          integer number of temperature bins to compute from
 #' within-season percentiles; must be between 4 and 10; defaults to 4
 #' @param lr_years      integer number of strictly preceding years used to
@@ -68,12 +76,18 @@
 #'   \item{gdd}{Growing degree days for the season, calculated as
 #'   the sum of min(max(value - growbase_low, 0),
 #'   growbase_high - growbase_low) across all observed days}
+#'   \item{kdd}{Killing degree days for the season, calculated as
+#'   the sum of max(value - kdd_threshold, 0) across all observed days}
 #'   \item{tempbin_XX}{Share of observed days in temperature bin XX,
 #'   where bins are defined by within-season percentiles and XX is a
 #'   zero-padded bin number (e.g. tempbin_01, tempbin_02)}
 #'   \item{dev_gdd}{Deviation of GDD from the rolling mean of the
 #'   preceding \code{lr_years} seasons}
 #'   \item{z_gdd}{Z-score of GDD relative to the preceding
+#'   \code{lr_years} seasons}
+#'   \item{dev_kdd}{Deviation of KDD from the rolling mean of the
+#'   preceding \code{lr_years} seasons}
+#'   \item{z_kdd}{Z-score of KDD relative to the preceding
 #'   \code{lr_years} seasons}
 #' }
 #'
@@ -89,7 +103,8 @@
 #' temp_summary <- temp_sum(
 #'   temperature = temperature_2yr,
 #'   start_month = 3,
-#'   end_month = 11
+#'   end_month = 11,
+#'   kdd_threshold = 30
 #' )
 #'
 #' # Same season, long format output
@@ -97,6 +112,7 @@
 #'   temperature = temperature_2yr,
 #'   start_month = 3,
 #'   end_month = 11,
+#'   kdd_threshold = 30,
 #'   wide = FALSE
 #' )
 #'
@@ -106,7 +122,8 @@
 #'   start_month = 11,
 #'   end_month = 3,
 #'   start_day = 15,
-#'   end_day = 15
+#'   end_day = 15,
+#'   kdd_threshold = 30
 #' )
 #' }
 #'
@@ -118,12 +135,16 @@
 temp_sum <- function(temperature, start_month, end_month,
                      start_day = 1, end_day = start_day,
                      growbase_low = 10, growbase_high = 30,
+                     kdd_threshold,
                      bins = 4, lr_years = 10,
                      na_rm = TRUE, wide = TRUE,
                      id_index = 1, date_sep = "_") {
   # --- Input validation ---
   if (growbase_high <= growbase_low) {
     stop("growbase_high must be greater than growbase_low")
+  }
+  if (!is.numeric(kdd_threshold) || length(kdd_threshold) != 1) {
+    stop("kdd_threshold must be a single numeric value")
   }
   if (bins != floor(bins) || bins < 4 || bins > 10) {
     stop("bins must be an integer between 4 and 10")
@@ -172,6 +193,10 @@ temp_sum <- function(temperature, start_month, end_month,
         pmin(pmax(.data$value - growbase_low, 0), gdd_range),
         na.rm = na_rm
       ),
+      kdd = sum(
+        pmax(.data$value - kdd_threshold, 0),
+        na.rm = na_rm
+      ),
       .groups = "drop"
     )
 
@@ -188,7 +213,7 @@ temp_sum <- function(temperature, start_month, end_month,
       )),
       .groups = "drop"
     ) %>%
-    tidyr::unnest_wider(.data$.bins)
+    tidyr::unnest_wider(.bins)
 
   temp_summary <- dplyr::left_join(
     temp_summary, temp_bins,
@@ -215,31 +240,59 @@ temp_sum <- function(temperature, start_month, end_month,
         .data$gdd,
         .data$season_year,
         lr_years
+      ),
+      dev_kdd = .rolling_dev(
+        .data$kdd,
+        .data$season_year,
+        lr_years
+      ),
+      z_kdd = .rolling_z(
+        .data$kdd,
+        .data$season_year,
+        lr_years
       )
     ) %>%
     dplyr::ungroup()
 
   # --- Output format ---
   if (wide) {
+    # After pivoting, we can remove deviation and skew columns for those years 
+    # with insufficient previous data. That is, given the window of lr_years, 
+    # dev_ and z_ columns of years that are < start_year + lr_years can be 
+    # dropped. But we need year information before the pivot happens.
+    first_year <- min(temp_summary$season_year)
+    dev_z_start <- first_year  + lr_years
+
     # Pivot all non-id, non-year columns to wide format
     temp_summary <- temp_summary %>%
       tidyr::pivot_longer(-c(id_column_name, "season_year")) %>%
       tidyr::pivot_wider(
         id_cols = id_column_name,
-        names_from = c(.data$name, .data$season_year),
-        values_from = .data$value,
+        names_from = c(name, season_year),
+        values_from = value,
         names_sep = "_"
       )
+
+    # Now drop those dev and z columns for years we don't have enough data for
+    # Ugly
+    drop_cols <- paste0(c("dev_", "z_"), c("gdd_", "gdd_", "kdd_", "kdd_"))
+    # Wrap output of sapply in c, because sapply is returning a matrix
+    drop_cols <- c(sapply(X = drop_cols,
+                        FUN = paste0,
+                        first_year:(dev_z_start - 1)))
+    temp_summary <- temp_summary |>
+      select(-all_of(c(drop_cols)))
+        
     # Remove columns that are all NA (deviations/z-scores for years
     # without sufficient historical data)
-    all_na <- apply(
-      X = temp_summary,
-      MARGIN = 2,
-      FUN = function(x) {
-        all(is.na(x))
-      }
-    )
-    temp_summary <- temp_summary[, !all_na]
+    # all_na <- apply(
+    #   X = temp_summary,
+    #   MARGIN = 2,
+    #   FUN = function(x) {
+    #     all(is.na(x))
+    #   }
+    # )
+    # temp_summary <- temp_summary[, !all_na]
   }
 
   return(temp_summary)
@@ -291,6 +344,5 @@ temp_sum <- function(temperature, start_month, end_month,
       ) / n_obs
     }
   }
-
-  result
+  return(result)
 }
