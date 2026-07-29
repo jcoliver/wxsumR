@@ -52,7 +52,7 @@
 #' killing degree days; for each observed day, the contribution to KDD is
 #' \code{max(value - kdd_threshold, 0)}
 #' @param bins          integer number of temperature bins to compute from
-#' within-season percentiles; must be between 4 and 10; defaults to 4
+#' within-season percentiles; must be between 1 and 42; defaults to 4
 #' @param lr_years      integer number of strictly preceding years used to
 #' calculate rolling deviations and z-scores; defaults to 10
 #' @param na_rm         logical passed to summary statistic functions
@@ -141,13 +141,15 @@ temp_sum <- function(temperature, start_month, end_month,
                      id_index = 1, date_sep = "_") {
   # --- Input validation ---
   if (growbase_high <= growbase_low) {
-    stop("growbase_high must be greater than growbase_low")
+    stop("growbase_high (", growbase_high, ") must be greater than growbase_low (", growbase_low, ")")
   }
   if (!is.numeric(kdd_threshold) || length(kdd_threshold) != 1) {
     stop("kdd_threshold must be a single numeric value")
   }
-  if (bins != floor(bins) || bins < 4 || bins > 10) {
-    stop("bins must be an integer between 4 and 10")
+  if (bins != floor(bins) || bins < 1 || bins > 42) {
+    stop("bins must be an integer between 1 and 42; bins = ", bins)
+  } else { # Make sure bins is really an integer (paranoid much?)
+    bins <- as.integer(floor(bins))
   }
 
   # Extract name of column with site id
@@ -190,7 +192,9 @@ temp_sum <- function(temperature, start_month, end_month,
         no = NA
       ),
       gdd = sum(
-        pmin(pmax(.data$value - growbase_low, 0), gdd_range),
+        # pmin(pmax(.data$value - growbase_low, 0), gdd_range),
+        pmin(pmax(.data$value - growbase_low, 0, na.rm = na_rm), 
+             gdd_range, na.rm = na_rm),
         na.rm = na_rm
       ),
       kdd = sum(
@@ -254,6 +258,22 @@ temp_sum <- function(temperature, start_month, end_month,
     ) %>%
     dplyr::ungroup()
 
+  # Do summary stats calculations for temperature bins, using join *after* the 
+  # (potential) pivot to wide format
+  bin_stats <- temp_summary %>%
+    dplyr::group_by(!!as.name(id_column_name)) %>%
+    dplyr::summarize(across(.cols = starts_with("tempbin_"),
+                            .fns = list(mean = ~ mean(.x, na.rm = na_rm),
+                                        sd = ~ sd(.x, na.rm = na_rm)),
+                            .names = "bin{.fn}_{.col}")) %>% 
+    dplyr::ungroup() %>%
+    dplyr::select(all_of(id_column_name), contains("_tempbin_")) %>%
+    # Need to rename these columns by removing "tempbin_"
+    dplyr::rename_with(.fn = ~ gsub(pattern = "_tempbin_",
+                                    replacement = "_",
+                                    x = .x),
+                       .cols = contains("_tempbin_"))
+  
   # --- Output format ---
   if (wide) {
     # After pivoting, we can remove deviation and skew columns for those years 
@@ -265,7 +285,7 @@ temp_sum <- function(temperature, start_month, end_month,
 
     # Pivot all non-id, non-year columns to wide format
     temp_summary <- temp_summary %>%
-      tidyr::pivot_longer(-c(id_column_name, "season_year")) %>%
+      tidyr::pivot_longer(-all_of(c(id_column_name, "season_year"))) %>%
       tidyr::pivot_wider(
         id_cols = id_column_name,
         names_from = c(name, season_year),
@@ -294,10 +314,14 @@ temp_sum <- function(temperature, start_month, end_month,
     # )
     # temp_summary <- temp_summary[, !all_na]
   }
+  
+  # After pivoting (or not) add in the summary stats for the bin-level summary 
+  # statistics
+  temp_summary <- temp_summary %>%
+    left_join(bin_stats, by = id_column_name)
 
   return(temp_summary)
 }
-
 
 #' Compute temperature bin shares for a single season-site group
 #'
@@ -314,7 +338,12 @@ temp_sum <- function(temperature, start_month, end_month,
 #'
 #' @keywords internal
 .compute_temp_bins <- function(values, bins, na_rm) {
-  observed <- if (na_rm) values[!is.na(values)] else values
+  # Drop missing, if appropriate
+  observed <- if (na_rm){ 
+    values[!is.na(values)] 
+    } else {
+      values
+    }
   n_obs <- length(observed)
 
   result <- stats::setNames(

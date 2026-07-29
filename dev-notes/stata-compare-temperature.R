@@ -12,6 +12,9 @@ devtools::load_all() # to make sure the package is loaded
 # TODO: sample data below has no killing degree days (all temperature values in 
 # the sample dataset are below the threshold of 32)
 
+# TODO: do some manual calculations of the binmean and binsd, based on the 
+# appropriate tempbin columns to see where the problem might lie.
+
 # wxsum tmp_, ini_month(11) fin_month(02) temp_data gdd_lo(8) gdd_hi(32) 
 # kdd_base(32) save(temp_stats.dta)`
 # start_month = 11
@@ -72,10 +75,6 @@ wxsumr_extra <- setdiff(colnames(result_wxsumr),
 sort(wxsum_extra)
 sort(wxsumr_extra)
 
-# wxsum has mean and sd calculated for each bin:
-# [1] "binmean_01" "binmean_02" "binmean_03" "binmean_04" "binsd_01"   "binsd_02"  
-# [7] "binsd_03"   "binsd_04" 
-
 # Pretty sure wxsumr shouldn't calculate values for years 1992 and 2023, as 
 # they do not have complete data.
 
@@ -107,116 +106,36 @@ samecol_wxsumr <- samecol_wxsumr |>
   select(colnames(samecol_wxsum))
 
 dif_mat <- samecol_wxsum - samecol_wxsumr
-max(dif_mat, na.rm = TRUE) # 0.000684
-length(which(dif_mat > 0.00005))
-# Lots of small differences (1974)
-col_means <- sqrt(colMeans(dif_mat^2))
-sort(col_means)
+max(dif_mat, na.rm = TRUE) # 0.00415
+# Calculate RMSEs for some plotting
+col_rmse <- sqrt(colMeans(dif_mat^2))
+# sort(col_rmse)
 
-# Want to do some summary visualization, so make a data frame of those diffs
-col_means <- as.data.frame(col_means)
-col_means$names <- rownames(col_means)
-rownames(col_means) <- NULL
+# Want to do some summary visualization, so make a data frame of those rmses
+col_rmse <- as.data.frame(col_rmse)
+col_rmse$names <- rownames(col_rmse)
+rownames(col_rmse) <- NULL
 
-col_means$names <- gsub(x = col_means$names,
+col_rmse$names <- gsub(x = col_rmse$names,
                         pattern = "_[0-9]{4}",
                         replacement = "")
-col_means$names <- gsub(x = col_means$names,
+col_rmse$names <- gsub(x = col_rmse$names,
                         pattern = "tempbin_[0-9]{2}",
                         replacement = "tempbin")
-ggplot(data = col_means,
-       mapping = aes(x = names, y = col_means)) +
+ggplot(data = col_rmse,
+       mapping = aes(x = names, y = col_rmse)) +
   geom_point()
-# Looking at the plot above, it's dev_gdd and gdd values that 
-# the most divergent (diff 1e-04 to 2e-04). z_gdd is also a little high 
-# rmse (2e-06 to 5e-06). Plotting the columns without the three gdd columns, we 
-# see the remaining columns all have rmse diffs less than 8e-07.
-ggplot(data = col_means |> filter(!(names %in% c("dev_gdd", "gdd", "z_gdd"))),
-       mapping = aes(x = names, y = col_means)) +
+# The binmean and binsd columns are the most divergent, with rmse values fairly
+# high (0.001 - 0.0018).
+
+# Next, it's dev_gdd and gdd values that the most divergent (diff 1e-04 to 
+# 2.5e-04). z_gdd is also a little high rmse (2e-06 to 5e-06).
+
+# Plotting the columns without the three gdd columns, we see the remaining 
+# columns all have rmse less than 1e-06.
+ggplot(data = col_rmse |> 
+         filter(!(names %in% c("dev_gdd", "gdd", "z_gdd"))) |>
+         filter(!grepl(pattern = "binmean", x = names)) |>
+         filter(!grepl(pattern = "binsd", x = names)),
+       mapping = aes(x = names, y = col_rmse)) +
   geom_point()
-
-
-# Old below here
-################################################################################
-library(tidyverse)
-r_results_file <- "data/r-temperature-output.csv"
-stata_results_file <- "data/stata-temp-output.csv"
-id_column <- "hhid"
-
-r_results <- read_csv(r_results_file)
-stata_results <- read_csv(stata_results_file)
-
-# R results puts out column names for bins with a space between the bin and
-# the year, e.g. tempbin20_1983, while Stata output lacks the underscore, e.g.
-# tempbin201983
-grep(pattern = "tempbin20", x = colnames(r_results), value = TRUE)
-grep(pattern = "tempbin20", x = colnames(stata_results), value = TRUE)
-
-# For now, just rename the columns in the Stata output
-tempbins <- paste0("tempbin", c(20, 40, 60, 80, 100))
-for (tempbin in tempbins) {
-  colnames(stata_results) <- gsub(pattern = tempbin,
-                                  replacement = paste0(tempbin, "_"),
-                                  x = colnames(stata_results))
-}
-# Checking substitution
-grep(pattern = "tempbin", x = colnames(stata_results), value = TRUE)
-
-# Confirming all columns are identical
-dplyr::setdiff(colnames(r_results), colnames(stata_results))
-dplyr::setdiff(colnames(stata_results), colnames(r_results))
-
-# Are columns in same order (if > 0, then no)
-sum(colnames(r_results) != colnames(stata_results))
-
-# Even though data sets have same column names, orders of columns are different
-# Rearrange columns so order is the same
-stata_results <- stata_results[, colnames(r_results)]
-# Are columns in same order (if > 0, then no)
-sum(colnames(r_results) != colnames(stata_results))
-
-########################################
-# Comparison 1, based on absolute differences in values
-delta_cutoff <- 5e-05
-
-result_diffs <- r_results[, 2:ncol(r_results)] -
-  stata_results[, 2:ncol(stata_results)]
-result_diffs <- as.matrix(result_diffs)
-rownames(result_diffs) <- unlist(r_results[, id_column])
-
-# Where are differences "large"
-big_diffs <- abs(result_diffs) > delta_cutoff
-cols_with_big_diff <- colSums(big_diffs)[colSums(big_diffs) > 0]
-
-# All the z_gdd_YYYY are returning NA for colSums
-r_results$z_gdd_1986[15:19]
-stata_results$z_gdd_1986[15:19]
-
-# Are all z_gdd values NA?
-r_z_gdd <- r_results[, c("z_gdd_1983", "z_gdd_1984", "z_gdd_1985", "z_gdd_1986")]
-summary(r_z_gdd)
-# Yes, all sd_gdd values are zero, sending a 0 to the denominator for the
-# calculation of the z-score. Same result in Stata output. Do not worry about
-# for now
-cols_with_big_diff <- cols_with_big_diff[!is.na(cols_with_big_diff)]
-
-########################################
-# Comparison 2, based on relative differences in values
-rho_cutoff <- 1e-4 #(0.0001, or 0.01%)
-
-# Will divide by sum of results, but to avoid dividing my zero, change all
-# zeros to a very small number (for dividing)
-r_denominator <- as.matrix(r_results[, 2:ncol(r_results)] +
-                             stata_results[, 2:ncol(r_results)])
-r_denominator[r_denominator == 0] <- 1e-16
-result_rhos <- abs((r_results[, 2:ncol(r_results)] -
-                  stata_results[, 2:ncol(stata_results)]) / r_denominator)
-result_rhos <- as.matrix(result_rhos)
-rownames(result_rhos) <- unlist(r_results[, id_column])
-
-big_rhos <- result_rhos > rho_cutoff
-cols_with_big_rho <- colSums(big_rhos)[colSums(big_rhos) > 0]
-cols_with_big_rho <- cols_with_big_rho[!is.na(cols_with_big_rho)]
-
-#####
-# BAM! Results identical 2020-06-01.
