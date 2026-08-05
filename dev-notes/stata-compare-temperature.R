@@ -133,51 +133,9 @@ ggplot(data = col_rmse |>
          mapping = aes(x = names, y = col_rmse)) +
   geom_point()
 
-
 # Plotting the columns without the three gdd columns, we see the remaining 
 # columns all have rmse less than 1e-06.
 ggplot(data = col_rmse |> 
          filter(!(names %in% c("dev_gdd", "gdd", "z_gdd"))),
        mapping = aes(x = names, y = col_rmse)) +
   geom_point()
-
-# We want to do a "manual" calculation of some binmean values. What columns are 
-# we going to need to work with?
-# binmean_01 is the mean value for temperature bin 1, across years. Let's pull
-# out all tempbin_01 values across all years. Work from result_wxsum/r, as 
-# those still have the id column
-wxsum_tempbin_01 <- result_wxsum |>
-  select(hhid, starts_with("tempbin_01"))
-wxsumr_tempbin_01 <- result_wxsumr |>
-  select(hhid, starts_with("tempbin_01"))
-# First of all, values in wxsumr results include 1992 & 2023, which they should 
-# not (?)
-# Start by just doing mean calculations across all the columns, and compare 
-# those values to the results of binmean_01
-wxsum_tempbin_01 <- wxsum_tempbin_01 |>
-  rowwise() |>
-  mutate(binmean_01 = mean(c_across(starts_with("tempbin_01")))) |>
-  ungroup()
-wxsumr_tempbin_01 <- wxsumr_tempbin_01 |>
-  rowwise() |>
-  mutate(binmean_01 = mean(c_across(starts_with("tempbin_01")))) |>
-  ungroup()
-
-# OK, the manual mean calculation (above) matches what we got out of the 
-# results. (differences below are zero)
-wxsum_binvar_01_d <- wxsum_tempbin_01$binmean_01 - result_wxsum$binmean_01
-wxsumr_binvar_01_d <- wxsumr_tempbin_01$binmean_01 - result_wxsumr$binmean_01
-
-# Now see what happens when we drop 1992 & 2023 from the wxsumr version
-wxsumr_tempbin_01 <- wxsumr_tempbin_01 |>
-  select(-c(tempbin_01_1992, tempbin_01_2023)) |>
-  rowwise() |>
-  mutate(binmean_01_a = mean(c_across(starts_with("tempbin_01")))) |>
-  ungroup()
-
-# Differences below show that this was the issue. Dropping 1992 and 2023 from 
-# binmean calculation (second difference below) gives same values that are 
-# coming from the Stata version calculations
-wxsumr_binvar_01_d <- wxsumr_tempbin_01$binmean_01_a - result_wxsumr$binmean_01
-wxsum_v_wxsumr_binvar_01_d <- wxsumr_tempbin_01$binmean_01_a - result_wxsum$binmean_01
-
