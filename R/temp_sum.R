@@ -63,6 +63,10 @@
 #' to 1
 #' @param date_sep      character used to delimit variable prefix from date
 #' in column names; defaults to underscore ("_")
+#' @param complete_only logical indicating whether or not to include only years 
+#' with complete data in output; defaults to \code{TRUE}. If \code{FALSE}, 
+#' resulting output may include years that did not include start and/or end of 
+#' defined season.
 #'
 #' @return tibble with temperature summary statistics.
 #' If \code{wide = FALSE}, returns values for each year for each site:
@@ -138,7 +142,7 @@ temp_sum <- function(temperature, start_month, end_month,
                      kdd_threshold,
                      bins = 4, lr_years = 10,
                      na_rm = TRUE, wide = TRUE,
-                     id_index = 1, date_sep = "_") {
+                     id_index = 1, date_sep = "_", complete_only = TRUE) {
   # --- Input validation ---
   if (growbase_high <= growbase_low) {
     stop("growbase_high (", growbase_high, ") must be greater than growbase_low (", growbase_low, ")")
@@ -174,6 +178,23 @@ temp_sum <- function(temperature, start_month, end_month,
     start_day = start_day,
     end_day = end_day
   )
+  
+  # Drop incomplete years (seasons) as appropriate
+  if (complete_only) {
+    # Find out which sites & season years have start day and end day
+    have_start_end <- temp_long %>% 
+      dplyr::group_by(season_year, !!as.name(id_column_name)) %>%
+      dplyr::filter((lubridate::month(date) == start_month & lubridate::day(date) == start_day) |
+                      (lubridate::month(date) == end_month & lubridate::day(date) == end_day)) %>%
+      dplyr::summarize(start_end_count = n(), .groups = "drop_last") %>%
+      ungroup() %>%
+      filter(start_end_count == 2) %>%
+      select(-start_end_count)
+    # Only keep site/season year combinations that have both start day and end 
+    # day
+    temp_long <- have_start_end %>%
+      left_join(temp_long, by = join_by(season_year, !!as.name(id_column_name)))
+  }
 
   # --- Daily-level statistics per season ---
   gdd_range <- growbase_high - growbase_low
