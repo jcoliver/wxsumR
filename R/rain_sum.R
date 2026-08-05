@@ -39,6 +39,10 @@
 #' @param id_index       integer column index of unique site id; defaults to 1
 #' @param date_sep       character used to delimit variable prefix from date in
 #' column names; defaults to underscore ("_")
+#' @param complete_only logical indicating whether or not to include only years 
+#' with complete data in output; defaults to \code{TRUE}. If \code{FALSE}, 
+#' resulting output may include years that did not include start and/or end of 
+#' defined season.
 #'
 #' @return tibble with rainfall summary statistics.
 #' If \code{wide = FALSE}, returns values for each year for each site:
@@ -119,7 +123,7 @@ rain_sum <- function(rain, start_month, end_month,
                      start_day = 1, end_day = start_day,
                      rain_threshold = 1, lr_years = 10,
                      na_rm = TRUE, wide = TRUE,
-                     id_index = 1, date_sep = "_") {
+                     id_index = 1, date_sep = "_", complete_only = TRUE) {
   # Extract name of column with site id
   id_column_name <- colnames(rain)[id_index]
 
@@ -144,6 +148,23 @@ rain_sum <- function(rain, start_month, end_month,
     end_day = end_day
   )
 
+  # Drop incomplete years (seasons) as appropriate
+  if (complete_only) {
+    # Find out which sites & season years have start day and end day
+    have_start_end <- rain_long %>% 
+      dplyr::group_by(season_year, !!as.name(id_column_name)) %>%
+      dplyr::filter((lubridate::month(date) == start_month & lubridate::day(date) == start_day) |
+                      (lubridate::month(date) == end_month & lubridate::day(date) == end_day)) %>%
+      dplyr::summarize(start_end_count = n(), .groups = "drop_last") %>%
+      ungroup() %>%
+      filter(start_end_count == 2) %>%
+      select(-start_end_count)
+    # Only keep site/season year combinations that have both start day and end 
+    # day
+    rain_long <- have_start_end %>%
+      left_join(rain_long, by = join_by(season_year, !!as.name(id_column_name)))
+  }
+  
   # --- Daily-level statistics per season ---
   rain_summary <- rain_long %>%
     dplyr::group_by(.data$season_year, !!as.name(id_column_name)) %>%
