@@ -107,22 +107,28 @@ dif_mat <- samecol_wxsum - samecol_wxsumr
 max(dif_mat, na.rm = TRUE) # 0.00068
 # Calculate RMSEs for some plotting
 col_rmse <- sqrt(colMeans(dif_mat^2))
-# sort(col_rmse)
 
 # Want to do some summary visualization, so make a data frame of those rmses
 col_rmse <- as.data.frame(col_rmse)
 col_rmse$names <- rownames(col_rmse)
 rownames(col_rmse) <- NULL
 
+# We don't need to look at individual bins, so we update sames to 
+# undifferentiate; e.g. binmean_01, binmean_02, binmean_03, and binmean_04 all 
+# become binmean
 col_rmse$names <- gsub(x = col_rmse$names,
-                        pattern = "_[0-9]{4}",
-                        replacement = "")
+                       pattern = "_[0-9]{4}",
+                       replacement = "")
 col_rmse$names <- gsub(x = col_rmse$names,
-                        pattern = "tempbin_[0-9]{2}",
-                        replacement = "tempbin")
+                       pattern = "tempbin_[0-9]{2}",
+                       replacement = "tempbin")
+col_rmse$names <- gsub(x = col_rmse$names,
+                       pattern = "_[0-9]{2}",
+                       replacement = "")
 ggplot(data = col_rmse,
        mapping = aes(x = names, y = col_rmse)) +
-  geom_point()
+  geom_point() + 
+  coord_flip()
 
 # It's dev_gdd and gdd values that the most divergent (diff 1e-04 to 
 # 2.5e-04). z_gdd is also a little high rmse (2e-06 to 5e-06).
@@ -131,11 +137,13 @@ ggplot(data = col_rmse,
 ggplot(data = col_rmse |> 
          filter(names %in% c("dev_gdd", "gdd", "z_gdd")),
          mapping = aes(x = names, y = col_rmse)) +
-  geom_point()
+  geom_point() + 
+  coord_flip()
 
 # Plotting the columns without the three gdd columns, we see the remaining 
 # columns all have rmse less than 1e-06.
 ggplot(data = col_rmse |> 
          filter(!(names %in% c("dev_gdd", "gdd", "z_gdd"))),
        mapping = aes(x = names, y = col_rmse)) +
-  geom_point()
+  geom_point() + 
+  coord_flip()

@@ -117,7 +117,6 @@
 #' @export
 #' @import dplyr
 #' @import tidyr
-#' @importFrom rlang .data
 #' @importFrom stats median sd
 rain_sum <- function(rain, start_month, end_month,
                      start_day = 1, end_day = start_day,
@@ -221,7 +220,7 @@ rain_sum <- function(rain, start_month, end_month,
     by = c("season_year", id_column_name)
   )
 
-  # --- Rolling deviations and z-scores ---
+  # Rolling deviations and z-scores
   # Sort by site and season year so rolling window works correctly
   rain_summary <- dplyr::arrange(rain_summary,
                                  !!as.name(id_column_name),
@@ -236,36 +235,29 @@ rain_sum <- function(rain, start_month, end_month,
                            lr_years = lr_years),
       z_raindays = .rolling_z(values = raindays,
                               years = season_year,
-                              lr_years = lr_years
-      ),
+                              lr_years = lr_years),
       z_norain = .rolling_z(values = norain,
                             years = season_year,
-                            lr_years = lr_years
-      ),
+                            lr_years = lr_years),
       z_pct_raindays = .rolling_z(values = pct_raindays,
                                   years = season_year,
-                                  lr_years = lr_years
-      ),
+                                  lr_years = lr_years),
       dev_total = .rolling_dev(values = total,
                                years = season_year,
-                               lr_years = lr_years
-      ),
+                               lr_years = lr_years),
       dev_raindays = .rolling_dev(values = raindays,
                                   years = season_year,
-                                  lr_years = lr_years
-      ),
+                                  lr_years = lr_years),
       dev_norain = .rolling_dev(values = norain,
                                 years = season_year,
-                                lr_years = lr_years
-      ),
+                                lr_years = lr_years),
       dev_pct_raindays = .rolling_dev(values = pct_raindays,
                                       years = season_year,
-                                      lr_years = lr_years
-      )
+                                      lr_years = lr_years)
     ) %>%
     dplyr::ungroup()
 
-  # --- Output format ---
+  # Output format
   if (wide) {
     # All columns are year-specific with rolling deviations, so pivot all
     # non-id, non-year columns to wide format

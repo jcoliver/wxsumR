@@ -136,7 +136,6 @@
 #' @export
 #' @import dplyr
 #' @import tidyr
-#' @importFrom rlang .data
 #' @importFrom stats median sd quantile
 temp_sum <- function(temperature, start_month, end_month,
                      start_day = 1, end_day = start_day,
@@ -145,7 +144,7 @@ temp_sum <- function(temperature, start_month, end_month,
                      bins = 4, lr_years = 10,
                      na_rm = TRUE, wide = TRUE,
                      id_index = 1, date_sep = "_", complete_only = TRUE) {
-  # --- Input validation ---
+  # Input validation
   if (growbase_high <= growbase_low) {
     stop("growbase_high (", growbase_high, ") must be greater than growbase_low (", growbase_low, ")")
   }
@@ -189,96 +188,71 @@ temp_sum <- function(temperature, start_month, end_month,
       dplyr::filter((lubridate::month(date) == start_month & lubridate::day(date) == start_day) |
                       (lubridate::month(date) == end_month & lubridate::day(date) == end_day)) %>%
       dplyr::summarize(start_end_count = n(), .groups = "drop_last") %>%
-      ungroup() %>%
-      filter(start_end_count == 2) %>%
-      select(-start_end_count)
+      dplyr::ungroup() %>%
+      dplyr::filter(start_end_count == 2) %>%
+      dplyr::select(-start_end_count)
     # Only keep site/season year combinations that have both start day and end 
     # day
     temp_long <- have_start_end %>%
-      left_join(temp_long, by = join_by(season_year, !!as.name(id_column_name)))
+      dplyr::left_join(temp_long, 
+                       by = join_by(season_year, !!as.name(id_column_name)))
   }
 
-  # --- Daily-level statistics per season ---
+  # Daily-level statistics per season
   gdd_range <- growbase_high - growbase_low
   temp_summary <- temp_long %>%
-    dplyr::group_by(.data$season_year, !!as.name(id_column_name)) %>%
+    dplyr::group_by(season_year, !!as.name(id_column_name)) %>%
     dplyr::summarize(
-      mean = mean(x = .data$value, na.rm = na_rm),
-      median = median(x = .data$value, na.rm = na_rm),
-      sd = sd(x = .data$value, na.rm = na_rm),
-      skew = (mean(x = .data$value, na.rm = na_rm) -
-        median(x = .data$value, na.rm = na_rm)) /
-        sd(x = .data$value, na.rm = na_rm),
-      max = ifelse(
-        test = !all(is.na(.data$value)),
-        yes = max(.data$value, na.rm = na_rm),
-        no = NA
-      ),
-      gdd = sum(
-        # pmin(pmax(.data$value - growbase_low, 0), gdd_range),
-        pmin(pmax(.data$value - growbase_low, 0, na.rm = na_rm), 
-             gdd_range, na.rm = na_rm),
-        na.rm = na_rm
-      ),
-      kdd = sum(
-        pmax(.data$value - kdd_threshold, 0),
-        na.rm = na_rm
-      ),
-      .groups = "drop"
-    )
+      mean = mean(x = value, na.rm = na_rm),
+      median = median(x = value, na.rm = na_rm),
+      sd = sd(x = value, na.rm = na_rm),
+      skew = (mean(x = value, na.rm = na_rm) -
+                median(x = value, na.rm = na_rm)) /
+        sd(x = value, na.rm = na_rm),
+      max = ifelse(test = !all(is.na(value)),
+                   yes = max(value, na.rm = na_rm),
+                   no = NA),
+      gdd = sum(pmin(pmax(value - growbase_low, 0, na.rm = na_rm), 
+                     gdd_range, na.rm = na_rm),
+                na.rm = na_rm),
+      kdd = sum(pmax(value - kdd_threshold, 0), na.rm = na_rm),
+      .groups = "drop")
 
-  # --- Temperature bins per season ---
-  # Compute bin shares separately and join, since the number of bin
-  # columns is dynamic based on the bins parameter
+  # Temperature bins per season
+  # Compute bin shares separately and join, since the number of bin columns is 
+  # dynamic based on the bins parameter
   temp_bins <- temp_long %>%
-    dplyr::group_by(
-      .data$season_year, !!as.name(id_column_name)
-    ) %>%
-    dplyr::summarize(
-      .bins = list(.compute_temp_bins(
-        .data$value, bins = bins, na_rm = na_rm
-      )),
-      .groups = "drop"
-    ) %>%
+    dplyr::group_by(season_year, !!as.name(id_column_name)) %>%
+    dplyr::summarize(.bins = list(.compute_temp_bins(values = value, 
+                                                     bins = bins, 
+                                                     na_rm = na_rm)),
+      .groups = "drop") %>%
     tidyr::unnest_wider(.bins)
 
-  temp_summary <- dplyr::left_join(
-    temp_summary, temp_bins,
-    by = c("season_year", id_column_name)
-  )
-
-  # --- Rolling deviations and z-scores for GDD ---
+  temp_summary <- dplyr::left_join(temp_summary, temp_bins,
+                                   by = c("season_year", id_column_name))
+  
+  # Rolling deviations and z-scores for GDD
   # Sort by site and season year so rolling window works correctly
-  temp_summary <- dplyr::arrange(
-    temp_summary,
-    !!as.name(id_column_name),
-    .data$season_year
-  )
-
+  temp_summary <- dplyr::arrange(temp_summary, 
+                                 !!as.name(id_column_name),
+                                 season_year)
+  
   temp_summary <- temp_summary %>%
     dplyr::group_by(!!as.name(id_column_name)) %>%
     dplyr::mutate(
-      dev_gdd = .rolling_dev(
-        .data$gdd,
-        .data$season_year,
-        lr_years
-      ),
-      z_gdd = .rolling_z(
-        .data$gdd,
-        .data$season_year,
-        lr_years
-      ),
-      dev_kdd = .rolling_dev(
-        .data$kdd,
-        .data$season_year,
-        lr_years
-      ),
-      z_kdd = .rolling_z(
-        .data$kdd,
-        .data$season_year,
-        lr_years
-      )
-    ) %>%
+      dev_gdd = .rolling_dev(values = gdd,
+                             years = season_year,
+                             lr_years = lr_years),
+      z_gdd = .rolling_z(values = gdd,
+                         years = season_year,
+                         lr_years = lr_years),
+      dev_kdd = .rolling_dev(values = kdd,
+                             years = season_year,
+                             lr_years = lr_years),
+      z_kdd = .rolling_z(values = kdd,
+                         years = season_year,
+                         lr_years = lr_years)) %>%
     dplyr::ungroup()
 
   # Do summary stats calculations for temperature bins, using join *after* the 
@@ -309,13 +283,11 @@ temp_sum <- function(temperature, start_month, end_month,
     # Pivot all non-id, non-year columns to wide format
     temp_summary <- temp_summary %>%
       tidyr::pivot_longer(-all_of(c(id_column_name, "season_year"))) %>%
-      tidyr::pivot_wider(
-        id_cols = id_column_name,
-        names_from = c(name, season_year),
-        values_from = value,
-        names_sep = "_"
-      )
-
+      tidyr::pivot_wider(id_cols = id_column_name,
+                         names_from = c(name, season_year),
+                         values_from = value,
+                         names_sep = "_")
+    
     # Now drop those dev and z columns for years we don't have enough data for 
     # them. 
     # Ugly
@@ -359,11 +331,9 @@ temp_sum <- function(temperature, start_month, end_month,
     }
   n_obs <- length(observed)
 
-  result <- stats::setNames(
-    as.list(rep(NA_real_, bins)),
-    sprintf("tempbin_%02d", seq_len(bins))
-  )
-
+  result <- stats::setNames(object = as.list(rep(NA_real_, bins)),
+                            nm = sprintf("tempbin_%02d", seq_len(bins)))
+  
   if (n_obs < bins) {
     return(result)
   }
