@@ -20,7 +20,7 @@ devtools::load_all() # to make sure the package is loaded
 
 rain <- readRDS(file = "data/rain.rds")
 start_time <- Sys.time()
-result_wxsumr <- rain_sum(rain = rain, start_month = 5, end_month = 10, 
+result_wxsumr <- summarize_rainfall(rain = rain, start_month = 5, end_month = 10, 
                    start_day = 15, end_day = 15)
 message("Completed after ", Sys.time() - start_time)
 rm(start_time)
@@ -121,4 +121,3 @@ ggplot(data = col_rmse |>
        mapping = aes(x = names, y = col_rmse)) +
   geom_point() +
   coord_flip()
-
