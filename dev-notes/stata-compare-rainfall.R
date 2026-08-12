@@ -75,12 +75,7 @@ if (length(setdiff(colnames(result_wxsum),
   warning("Columns not identical")
 }
 
-# Now compare data; I suspect column names are in the same order, but check
-which(colnames(result_wxsum) != colnames(result_wxsumr))
-result_wxsum[1:5, 5:10]
-result_wxsumr[1:5, 5:10]
-
-# OK different order see if we can sort
+# Now compare data; start by arranging columns to same order
 result_wxsumr <- result_wxsumr |> 
   select(all_of(colnames(result_wxsum)))
 sum(colnames(result_wxsum) != colnames(result_wxsumr))
@@ -109,17 +104,21 @@ col_rmse$names <- gsub(x = col_rmse$names,
                        replacement = "tempbin")
 ggplot(data = col_rmse,
        mapping = aes(x = names, y = col_rmse)) +
-  geom_point()
+  geom_point() + 
+  coord_flip()
 
 # Big diffs are dev_total, mean_mo_total, sd_mo_total (RMSE around 2e-05 for 
 # dev, 5e-06 for *_mo_total), look at just those three
 ggplot(data = col_rmse |> 
          filter(names %in% c("dev_total", "mean_mo_total", "sd_mo_total")),
        mapping = aes(x = names, y = col_rmse)) +
-  geom_point()
+  geom_point() +
+  coord_flip()
 
 # Without those three, highest are less than 3e-06, most are below 1e-06
 ggplot(data = col_rmse |> 
          filter(!(names %in% c("dev_total", "mean_mo_total", "sd_mo_total"))),
        mapping = aes(x = names, y = col_rmse)) +
-  geom_point()
+  geom_point() +
+  coord_flip()
+

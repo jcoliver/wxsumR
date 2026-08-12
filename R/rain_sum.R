@@ -165,66 +165,57 @@ rain_sum <- function(rain, start_month, end_month,
       left_join(rain_long, by = join_by(season_year, !!as.name(id_column_name)))
   }
   
-  # --- Daily-level statistics per season ---
+  # Daily-level statistics per season
   rain_summary <- rain_long %>%
-    dplyr::group_by(.data$season_year, !!as.name(id_column_name)) %>%
+    dplyr::group_by(season_year, !!as.name(id_column_name)) %>%
     dplyr::summarize(
-      mean = mean(x = .data$value, na.rm = na_rm),
-      median = median(x = .data$value, na.rm = na_rm),
-      sd = sd(x = .data$value, na.rm = na_rm),
-      skew = (mean(x = .data$value, na.rm = na_rm) -
-        median(x = .data$value, na.rm = na_rm)) /
-        sd(x = .data$value, na.rm = na_rm),
-      total = sum(x = .data$value, na.rm = na_rm),
-      norain = sum(x = .data$value < rain_threshold, na.rm = na_rm),
-      raindays = sum(x = .data$value >= rain_threshold, na.rm = na_rm),
-      pct_raindays = sum(x = .data$value >= rain_threshold, na.rm = na_rm) /
+      mean = mean(x = value, na.rm = na_rm),
+      median = median(x = value, na.rm = na_rm),
+      sd = sd(x = value, na.rm = na_rm),
+      skew = (mean(x = value, na.rm = na_rm) -
+        median(x = value, na.rm = na_rm)) /
+        sd(x = value, na.rm = na_rm),
+      total = sum(x = value, na.rm = na_rm),
+      norain = sum(x = value < rain_threshold, na.rm = na_rm),
+      raindays = sum(x = value >= rain_threshold, na.rm = na_rm),
+      pct_raindays = sum(x = value >= rain_threshold, na.rm = na_rm) /
         dplyr::n(),
       dry = dry_interval(
-        x = .data$value, rain_cutoff = rain_threshold,
+        x = value, rain_cutoff = rain_threshold,
         period = "mid", na_rm = na_rm),
       dry_start = dry_interval(
-        x = .data$value, rain_cutoff = rain_threshold,
+        x = value, rain_cutoff = rain_threshold,
         period = "start", na_rm = na_rm),
       dry_end = dry_interval(
-        x = .data$value, rain_cutoff = rain_threshold,
+        x = value, rain_cutoff = rain_threshold,
         period = "end", na_rm = na_rm),
       .groups = "drop"
     )
 
-  # --- Monthly-level statistics per season ---
+  # Monthly-level statistics per season
   # Extract month from date for grouping
   rain_long$obs_month <- as.integer(format(rain_long$date, "%m"))
 
   monthly_totals <- rain_long %>%
-    dplyr::group_by(
-      .data$season_year, !!as.name(id_column_name),
-      .data$obs_month
-    ) %>%
-    dplyr::summarize(
-      mo_total = sum(.data$value, na.rm = na_rm),
-      .groups = "drop"
-    )
+    dplyr::group_by(season_year, !!as.name(id_column_name),obs_month) %>%
+    dplyr::summarize(mo_total = sum(value, na.rm = na_rm), .groups = "drop")
 
   monthly_summary <- monthly_totals %>%
-    dplyr::group_by(.data$season_year, !!as.name(id_column_name)) %>%
-    dplyr::summarize(
-      mean_mo_total = mean(.data$mo_total, na.rm = na_rm),
-      median_mo_total = median(.data$mo_total, na.rm = na_rm),
-      sd_mo_total = ifelse(dplyr::n() > 1,
-        sd(.data$mo_total, na.rm = na_rm),
-        NA_real_
-      ),
-      skew_mo_total = ifelse(
-        dplyr::n() > 1,
-        (mean(.data$mo_total, na.rm = na_rm) -
-          median(.data$mo_total, na.rm = na_rm)) /
-          sd(.data$mo_total, na.rm = na_rm),
-        NA_real_
-      ),
-      .groups = "drop"
+    dplyr::group_by(season_year, !!as.name(id_column_name)) %>%
+    dplyr::summarize(mean_mo_total = mean(mo_total, na.rm = na_rm),
+                     median_mo_total = median(mo_total, na.rm = na_rm),
+                     sd_mo_total = ifelse(dplyr::n() > 1,
+                                          sd(mo_total, na.rm = na_rm),
+                                          NA_real_),
+                     skew_mo_total = ifelse(
+                       dplyr::n() > 1,
+                       (mean(mo_total, na.rm = na_rm) -
+                          median(mo_total, na.rm = na_rm)) /
+                         sd(mo_total, na.rm = na_rm),
+                       NA_real_),
+                     .groups = "drop"
     )
-
+  
   # Join monthly summary into main summary
   rain_summary <- dplyr::left_join(rain_summary, monthly_summary,
     by = c("season_year", id_column_name)
@@ -232,54 +223,44 @@ rain_sum <- function(rain, start_month, end_month,
 
   # --- Rolling deviations and z-scores ---
   # Sort by site and season year so rolling window works correctly
-  rain_summary <- dplyr::arrange(
-    rain_summary,
-    !!as.name(id_column_name),
-    .data$season_year
+  rain_summary <- dplyr::arrange(rain_summary,
+                                 !!as.name(id_column_name),
+                                 season_year
   )
-
+  
   rain_summary <- rain_summary %>%
     dplyr::group_by(!!as.name(id_column_name)) %>%
     dplyr::mutate(
-      z_total = .rolling_z(
-        .data$total,
-        .data$season_year,
-        lr_years
+      z_total = .rolling_z(values = total,
+                           years = season_year,
+                           lr_years = lr_years),
+      z_raindays = .rolling_z(values = raindays,
+                              years = season_year,
+                              lr_years = lr_years
       ),
-      z_raindays = .rolling_z(
-        .data$raindays,
-        .data$season_year,
-        lr_years
+      z_norain = .rolling_z(values = norain,
+                            years = season_year,
+                            lr_years = lr_years
       ),
-      z_norain = .rolling_z(
-        .data$norain,
-        .data$season_year,
-        lr_years
+      z_pct_raindays = .rolling_z(values = pct_raindays,
+                                  years = season_year,
+                                  lr_years = lr_years
       ),
-      z_pct_raindays = .rolling_z(
-        .data$pct_raindays,
-        .data$season_year,
-        lr_years
+      dev_total = .rolling_dev(values = total,
+                               years = season_year,
+                               lr_years = lr_years
       ),
-      dev_total = .rolling_dev(
-        .data$total,
-        .data$season_year,
-        lr_years
+      dev_raindays = .rolling_dev(values = raindays,
+                                  years = season_year,
+                                  lr_years = lr_years
       ),
-      dev_raindays = .rolling_dev(
-        .data$raindays,
-        .data$season_year,
-        lr_years
+      dev_norain = .rolling_dev(values = norain,
+                                years = season_year,
+                                lr_years = lr_years
       ),
-      dev_norain = .rolling_dev(
-        .data$norain,
-        .data$season_year,
-        lr_years
-      ),
-      dev_pct_raindays = .rolling_dev(
-        .data$pct_raindays,
-        .data$season_year,
-        lr_years
+      dev_pct_raindays = .rolling_dev(values = pct_raindays,
+                                      years = season_year,
+                                      lr_years = lr_years
       )
     ) %>%
     dplyr::ungroup()
@@ -292,8 +273,8 @@ rain_sum <- function(rain, start_month, end_month,
       tidyr::pivot_longer(-c(id_column_name, "season_year")) %>%
       tidyr::pivot_wider(
         id_cols = id_column_name,
-        names_from = c(.data$name, .data$season_year),
-        values_from = .data$value,
+        names_from = c(name, season_year),
+        values_from = value,
         names_sep = "_"
       )
     # Need to end up removing those columns that have NA values across the
@@ -312,4 +293,3 @@ rain_sum <- function(rain, start_month, end_month,
 
   return(rain_summary)
 }
-

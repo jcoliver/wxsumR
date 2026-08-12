@@ -85,6 +85,8 @@
 #'   \item{tempbin_XX}{Share of observed days in temperature bin XX,
 #'   where bins are defined by within-season percentiles and XX is a
 #'   zero-padded bin number (e.g. tempbin_01, tempbin_02)}
+#'   \item{binmean_XX}{Mean of temperature values for bin XX}
+#'   \item{binsd_XX}{Standard deviation of temperature values for bin XX}
 #'   \item{dev_gdd}{Deviation of GDD from the rolling mean of the
 #'   preceding \code{lr_years} seasons}
 #'   \item{z_gdd}{Z-score of GDD relative to the preceding
@@ -314,7 +316,8 @@ temp_sum <- function(temperature, start_month, end_month,
         names_sep = "_"
       )
 
-    # Now drop those dev and z columns for years we don't have enough data for
+    # Now drop those dev and z columns for years we don't have enough data for 
+    # them. 
     # Ugly
     drop_cols <- paste0(c("dev_", "z_"), c("gdd_", "gdd_", "kdd_", "kdd_"))
     # Wrap output of sapply in c, because sapply is returning a matrix
@@ -323,17 +326,6 @@ temp_sum <- function(temperature, start_month, end_month,
                         first_year:(dev_z_start - 1)))
     temp_summary <- temp_summary |>
       select(-all_of(c(drop_cols)))
-        
-    # Remove columns that are all NA (deviations/z-scores for years
-    # without sufficient historical data)
-    # all_na <- apply(
-    #   X = temp_summary,
-    #   MARGIN = 2,
-    #   FUN = function(x) {
-    #     all(is.na(x))
-    #   }
-    # )
-    # temp_summary <- temp_summary[, !all_na]
   }
   
   # After pivoting (or not) add in the summary stats for the bin-level summary 
