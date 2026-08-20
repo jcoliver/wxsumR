@@ -1,15 +1,15 @@
 #' Convert wide format weather data to long format
 #'
 #' @description \code{to_long} transforms wide-formatted data, where each
-#' column respresents an observation for a specific day for a specific site, to
-#' wide-formatted data, where each row corresponds to an observation for a
+#' column represents an observation for a specific day for a specific site, to
+#' long-formatted data, where each row corresponds to an observation for a
 #' single day for a specific site.
 #'
-#' @param data       wide format data
-#' @param keep_cols  columns in \code{data} to retain in long format; all other
-#' columns will be converted to key/value pairs in long format; defaults to 1.
-#' This should most likely correspond to the index of the column containing the
-#' site unique identifier
+#' @param data       data.frame of wide format data
+#' @param keep_cols  integer vector of columns in \code{data} to retain in long 
+#' format; all other columns will be converted to key/value pairs in long 
+#' format; defaults to 1. This should most likely correspond to the index of 
+#' the column containing the site unique identifier
 #' @param date_sep   character used to delimit variable prefix from date in
 #' column names; defaults to underscore ("_")
 #'
@@ -18,7 +18,7 @@
 #' measurements of a variable in question (i.e rainfall, temperature).
 #' Remaining column names are assumed to have a prefix, a separator character,
 #' and date in YYYYMMDD format. For example, rainfall data column names would
-#' be something like "rf_19830325". Character strings occuring before
+#' be something like "rf_19830325". Character strings occurring before
 #' delimiter are not used. The character string in column names corresponding
 #' to date are used to extract the date (YYYYMMDD).
 #'
@@ -39,35 +39,32 @@
 #'
 #' @import tidyr
 #' @import dplyr
-#' @importFrom stringr str_c
 #' @importFrom lubridate as_date
 to_long <- function(data, keep_cols = 1, date_sep = "_") {
   # Store names of columns to retain in output
   keep_col_names <- colnames(data)[keep_cols]
 
-  # TODO: Need to check for cases when keep_cols length !=1
-  # TODO: What if there is no date separator?
+  # TODO: Still an opportunity for defensive programming with keep_cols and 
+  # date_sep arguments
+  
   # Convert to long
   long_data <- data %>%
-    tidyr::pivot_longer(names_to = "col_name",
-                        values_to = "value",
-                        -keep_cols)
+    tidyr::pivot_longer(cols = -all_of(keep_cols),
+                        names_to = "col_name",
+                        values_to = "value")
 
-  # Parse key column into year, month, day
+  # Parse key column into date with lubridate's as_date
   long_data <- long_data %>%
-    # Start by creating a new column called "date"
-    tidyr::separate(col = .data$col_name, into = c(NA, "date"), sep = date_sep) %>%
-    # Parse out the separate parts of the date
-    dplyr::mutate(year = substr(x = .data$date, start = 1, stop = 4),
-                  month = substr(x = .data$date, start = 5, stop = 6),
-                  day = substr(x = .data$date, start = 7, stop = 8)) %>%
-    # Make a single column for Date
-    dplyr::mutate(date = lubridate::as_date(stringr::str_c(.data$year, "-",
-                                                           .data$month, "-",
-                                                           .data$day))) %>%
+    # Start by creating a new column called "datestring"
+    tidyr::separate_wider_delim(cols = col_name, 
+                                names = c(NA, "datestring"), 
+                                delim = date_sep) %>%
+    # Use as_date, specifying YYYYMMDD format
+    dplyr::mutate(date = lubridate::as_date(x = datestring,
+                                            format = "%Y%m%d")) %>%
     # Drop the year, month, day columns
-    dplyr::select(keep_col_names, date, .data$value)
-
+    dplyr::select(dplyr::all_of(keep_col_names), date, value)
+  
   # Warn users if any date funniness happens
   if (any(is.na(long_data$date))) {
     warning("Some columns could not be parsed into dates; this can occur if text parsing results in impossible dates, such as 30 February 1983")
