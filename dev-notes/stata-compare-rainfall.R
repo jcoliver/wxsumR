@@ -18,10 +18,26 @@ devtools::load_all() # to make sure the package is loaded
 # start_day = 15
 # end_day = 15
 
+# If step-through of summarize_rainfall is needed:
+# start_month <- 5 
+# end_month <- 10
+# start_day <- 15
+# end_day <- start_day
+# rain_threshold <- 1
+# lr_years <- 10
+# na_rm <- TRUE
+# wide <- TRUE
+# id_index <- 1
+# date_sep <- "_"
+# complete_only <- TRUE
+
 rain <- readRDS(file = "data/rain.rds")
 start_time <- Sys.time()
-result_wxsumr <- summarize_rainfall(rain = rain, start_month = 5, end_month = 10, 
-                   start_day = 15, end_day = 15)
+result_wxsumr <- summarize_rainfall(rain = rain, 
+                                    start_month = 5, 
+                                    end_month = 10, 
+                                    start_day = 15, 
+                                    end_day = 15)
 message("Completed after ", Sys.time() - start_time)
 rm(start_time)
 saveRDS(result_wxsumr, file = "dev-notes/rainrall_stats.rds")

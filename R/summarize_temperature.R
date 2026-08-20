@@ -159,24 +159,20 @@ summarize_temperature <- function(temperature, start_month, end_month,
   id_column_name <- colnames(temperature)[id_index]
   
   # Convert to long format and parse column names into dates
-  temp_long <- to_long(
-    data = temperature,
-    keep_cols = id_index,
-    date_sep = date_sep
-  )
+  temp_long <- to_long(data = temperature,
+                       keep_cols = id_index,
+                       date_sep = date_sep)
   
   # Exclude NA dates
   temp_long <- temp_long %>%
     tidyr::drop_na(date)
   
   # Enumerate seasons
-  temp_long <- enumerate_seasons(
-    data = temp_long,
-    start_month = start_month,
-    end_month = end_month,
-    start_day = start_day,
-    end_day = end_day
-  )
+  temp_long <- enumerate_seasons(data = temp_long,
+                                 start_month = start_month,
+                                 end_month = end_month,
+                                 start_day = start_day,
+                                 end_day = end_day)
   
   # Drop incomplete years (seasons) as appropriate
   if (complete_only) {
@@ -280,8 +276,8 @@ summarize_temperature <- function(temperature, start_month, end_month,
     
     # Pivot all non-id, non-year columns to wide format
     temp_summary <- temp_summary %>%
-      tidyr::pivot_longer(-all_of(c(id_column_name, "season_year"))) %>%
-      tidyr::pivot_wider(id_cols = id_column_name,
+      tidyr::pivot_longer(-dplyr::all_of(c(id_column_name, "season_year"))) %>%
+      tidyr::pivot_wider(id_cols = dplyr::all_of(id_column_name),
                          names_from = c(name, season_year),
                          values_from = value,
                          names_sep = "_")

@@ -125,25 +125,20 @@ summarize_rainfall <- function(rain, start_month, end_month,
   id_column_name <- colnames(rain)[id_index]
   
   # Convert to long format and parse column names into dates
-  # TODO: This is the time suck right here
-  rain_long <- to_long(
-    data = rain,
-    keep_cols = id_index,
-    date_sep = date_sep
-  )
+  rain_long <- to_long(data = rain,
+                       keep_cols = id_index,
+                       date_sep = date_sep)
   
   # Exclude NA dates
   rain_long <- rain_long %>%
     tidyr::drop_na(date)
   
   # Enumerate seasons
-  rain_long <- enumerate_seasons(
-    data = rain_long,
-    start_month = start_month,
-    end_month = end_month,
-    start_day = start_day,
-    end_day = end_day
-  )
+  rain_long <- enumerate_seasons(data = rain_long,
+                                 start_month = start_month,
+                                 end_month = end_month,
+                                 start_day = start_day,
+                                 end_day = end_day)
   
   # Drop incomplete years (seasons) as appropriate
   if (complete_only) {
@@ -186,8 +181,7 @@ summarize_rainfall <- function(rain, start_month, end_month,
       dry_end = dry_interval(
         x = value, rain_cutoff = rain_threshold,
         period = "end", na_rm = na_rm),
-      .groups = "drop"
-    )
+      .groups = "drop")
   
   # Monthly-level statistics per season
   # Extract month from date for grouping
@@ -210,20 +204,17 @@ summarize_rainfall <- function(rain, start_month, end_month,
                           median(mo_total, na.rm = na_rm)) /
                          sd(mo_total, na.rm = na_rm),
                        NA_real_),
-                     .groups = "drop"
-    )
+                     .groups = "drop")
   
   # Join monthly summary into main summary
   rain_summary <- dplyr::left_join(rain_summary, monthly_summary,
-                                   by = c("season_year", id_column_name)
-  )
+                                   by = c("season_year", id_column_name))
   
   # Rolling deviations and z-scores
   # Sort by site and season year so rolling window works correctly
   rain_summary <- dplyr::arrange(rain_summary,
                                  !!as.name(id_column_name),
-                                 season_year
-  )
+                                 season_year)
   
   rain_summary <- rain_summary %>%
     dplyr::group_by(!!as.name(id_column_name)) %>%
@@ -251,8 +242,7 @@ summarize_rainfall <- function(rain, start_month, end_month,
                                 lr_years = lr_years),
       dev_pct_raindays = .rolling_dev(values = pct_raindays,
                                       years = season_year,
-                                      lr_years = lr_years)
-    ) %>%
+                                      lr_years = lr_years)) %>%
     dplyr::ungroup()
   
   # Output format
@@ -260,13 +250,11 @@ summarize_rainfall <- function(rain, start_month, end_month,
     # All columns are year-specific with rolling deviations, so pivot all
     # non-id, non-year columns to wide format
     rain_summary <- rain_summary %>%
-      tidyr::pivot_longer(-c(id_column_name, "season_year")) %>%
-      tidyr::pivot_wider(
-        id_cols = id_column_name,
-        names_from = c(name, season_year),
-        values_from = value,
-        names_sep = "_"
-      )
+      tidyr::pivot_longer(-dplyr::all_of(c(id_column_name, "season_year"))) %>%
+      tidyr::pivot_wider(id_cols = dplyr::all_of(id_column_name),
+                         names_from = c(name, season_year),
+                         values_from = value,
+                         names_sep = "_")
     # Need to end up removing those columns that have NA values across the
     # board for the deviation and z-score columns for the years that did not
     # have sufficient historical data (i.e. they had fewer than [lr_years]

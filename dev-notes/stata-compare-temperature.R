@@ -30,10 +30,10 @@ devtools::load_all() # to make sure the package is loaded
 
 temperature <- readRDS(file = "data/temp.rds")
 start_time <- Sys.time()
-result_wxsumr <- temp_sum(temperature = temperature, 
-                          start_month = 11, end_month = 2, 
-                          growbase_low = 8, growbase_high = 32,
-                          kdd_threshold = 32)
+result_wxsumr <- summarize_temperature(temperature = temperature, 
+                                       start_month = 11, end_month = 2, 
+                                       growbase_low = 8, growbase_high = 32,
+                                       kdd_threshold = 32)
 message("Completed after ", Sys.time() - start_time)
 rm(start_time)
 saveRDS(result_wxsumr, file = "dev-notes/temp_stats.rds")

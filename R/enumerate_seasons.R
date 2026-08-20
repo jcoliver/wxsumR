@@ -110,9 +110,17 @@ season_year <- function(x, start_month, end_month, start_day = 15,
   # The year of observation in x
   obs_year <- lubridate::year(x)
 
-  # Starting and ending dates based on x's year
-  start_OBSY <- lubridate::as_date(stringr::str_c(obs_year, "-", start_month, "-", start_day))
-  end_OBSY <- lubridate::as_date(stringr::str_c(obs_year, "-", end_month, "-", end_day))
+  # Starting and ending dates based on x's year. A little funky, but sprintf 
+  # ensures two-digit month and days, and specifying YYYYMMDD format for 
+  # lubridate::as_date adds minor improvement over creating a YYYY-MM-DD string
+  start_OBSY <- lubridate::as_date(stringr::str_c(obs_year, 
+                                                  sprintf("%02d", start_month), 
+                                                  sprintf("%02d", start_day)),
+                                   format = "%Y%m%d")
+  end_OBSY <- lubridate::as_date(stringr::str_c(obs_year, 
+                                                sprintf("%02d", end_month), 
+                                                sprintf("%02d", end_day)),
+                                 format = "%Y%m%d")
 
   # Logic for extracting season year depends on whether or not season includes
   # the new year
