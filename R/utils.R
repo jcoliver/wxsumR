@@ -23,7 +23,7 @@
       dev[i] <- values[i] - mean(values[window_idx], na.rm = TRUE)
     }
   }
-  dev
+  return(dev)
 }
 
 
@@ -53,5 +53,5 @@
         sd(values[window_idx], na.rm = TRUE)
     }
   }
-  z
+  return(z)
 }
