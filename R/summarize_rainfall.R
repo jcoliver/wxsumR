@@ -130,7 +130,7 @@ summarize_rainfall <- function(rain, start_month, end_month,
                        date_sep = date_sep)
   
   # Exclude NA dates
-  rain_long <- rain_long %>%
+  rain_long <- rain_long |>
     tidyr::drop_na(date)
   
   # Enumerate seasons
@@ -143,23 +143,23 @@ summarize_rainfall <- function(rain, start_month, end_month,
   # Drop incomplete years (seasons) as appropriate
   if (complete_only) {
     # Find out which sites & season years have start day and end day
-    have_start_end <- rain_long %>% 
-      dplyr::group_by(season_year, !!as.name(id_column_name)) %>%
+    have_start_end <- rain_long |> 
+      dplyr::group_by(season_year, !!as.name(id_column_name)) |>
       dplyr::filter((lubridate::month(date) == start_month & lubridate::day(date) == start_day) |
-                      (lubridate::month(date) == end_month & lubridate::day(date) == end_day)) %>%
-      dplyr::summarize(start_end_count = n(), .groups = "drop_last") %>%
-      ungroup() %>%
-      filter(start_end_count == 2) %>%
+                      (lubridate::month(date) == end_month & lubridate::day(date) == end_day)) |>
+      dplyr::summarize(start_end_count = n(), .groups = "drop_last") |>
+      ungroup() |>
+      filter(start_end_count == 2) |>
       select(-start_end_count)
     # Only keep site/season year combinations that have both start day and end 
     # day
-    rain_long <- have_start_end %>%
+    rain_long <- have_start_end |>
       left_join(rain_long, by = join_by(season_year, !!as.name(id_column_name)))
   }
   
   # Daily-level statistics per season
-  rain_summary <- rain_long %>%
-    dplyr::group_by(season_year, !!as.name(id_column_name)) %>%
+  rain_summary <- rain_long |>
+    dplyr::group_by(season_year, !!as.name(id_column_name)) |>
     dplyr::summarize(
       mean = mean(x = value, na.rm = na_rm),
       median = median(x = value, na.rm = na_rm),
@@ -187,12 +187,12 @@ summarize_rainfall <- function(rain, start_month, end_month,
   # Extract month from date for grouping
   rain_long$obs_month <- as.integer(format(rain_long$date, "%m"))
   
-  monthly_totals <- rain_long %>%
-    dplyr::group_by(season_year, !!as.name(id_column_name),obs_month) %>%
+  monthly_totals <- rain_long |>
+    dplyr::group_by(season_year, !!as.name(id_column_name),obs_month) |>
     dplyr::summarize(mo_total = sum(value, na.rm = na_rm), .groups = "drop")
   
-  monthly_summary <- monthly_totals %>%
-    dplyr::group_by(season_year, !!as.name(id_column_name)) %>%
+  monthly_summary <- monthly_totals |>
+    dplyr::group_by(season_year, !!as.name(id_column_name)) |>
     dplyr::summarize(mean_mo_total = mean(mo_total, na.rm = na_rm),
                      median_mo_total = median(mo_total, na.rm = na_rm),
                      sd_mo_total = ifelse(dplyr::n() > 1,
@@ -216,8 +216,8 @@ summarize_rainfall <- function(rain, start_month, end_month,
                                  !!as.name(id_column_name),
                                  season_year)
   
-  rain_summary <- rain_summary %>%
-    dplyr::group_by(!!as.name(id_column_name)) %>%
+  rain_summary <- rain_summary |>
+    dplyr::group_by(!!as.name(id_column_name)) |>
     dplyr::mutate(
       z_total = .rolling_z(values = total,
                            years = season_year,
@@ -242,15 +242,15 @@ summarize_rainfall <- function(rain, start_month, end_month,
                                 lr_years = lr_years),
       dev_pct_raindays = .rolling_dev(values = pct_raindays,
                                       years = season_year,
-                                      lr_years = lr_years)) %>%
+                                      lr_years = lr_years)) |>
     dplyr::ungroup()
   
   # Output format
   if (wide) {
     # All columns are year-specific with rolling deviations, so pivot all
     # non-id, non-year columns to wide format
-    rain_summary <- rain_summary %>%
-      tidyr::pivot_longer(-dplyr::all_of(c(id_column_name, "season_year"))) %>%
+    rain_summary <- rain_summary |>
+      tidyr::pivot_longer(-dplyr::all_of(c(id_column_name, "season_year"))) |>
       tidyr::pivot_wider(id_cols = dplyr::all_of(id_column_name),
                          names_from = c(name, season_year),
                          values_from = value,

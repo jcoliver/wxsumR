@@ -164,7 +164,7 @@ summarize_temperature <- function(temperature, start_month, end_month,
                        date_sep = date_sep)
   
   # Exclude NA dates
-  temp_long <- temp_long %>%
+  temp_long <- temp_long |>
     tidyr::drop_na(date)
   
   # Enumerate seasons
@@ -177,25 +177,25 @@ summarize_temperature <- function(temperature, start_month, end_month,
   # Drop incomplete years (seasons) as appropriate
   if (complete_only) {
     # Find out which sites & season years have start day and end day
-    have_start_end <- temp_long %>% 
-      dplyr::group_by(season_year, !!as.name(id_column_name)) %>%
+    have_start_end <- temp_long |> 
+      dplyr::group_by(season_year, !!as.name(id_column_name)) |>
       dplyr::filter((lubridate::month(date) == start_month & lubridate::day(date) == start_day) |
-                      (lubridate::month(date) == end_month & lubridate::day(date) == end_day)) %>%
-      dplyr::summarize(start_end_count = n(), .groups = "drop_last") %>%
-      dplyr::ungroup() %>%
-      dplyr::filter(start_end_count == 2) %>%
+                      (lubridate::month(date) == end_month & lubridate::day(date) == end_day)) |>
+      dplyr::summarize(start_end_count = n(), .groups = "drop_last") |>
+      dplyr::ungroup() |>
+      dplyr::filter(start_end_count == 2) |>
       dplyr::select(-start_end_count)
     # Only keep site/season year combinations that have both start day and end 
     # day
-    temp_long <- have_start_end %>%
+    temp_long <- have_start_end |>
       dplyr::left_join(temp_long, 
                        by = join_by(season_year, !!as.name(id_column_name)))
   }
   
   # Daily-level statistics per season
   gdd_range <- growbase_high - growbase_low
-  temp_summary <- temp_long %>%
-    dplyr::group_by(season_year, !!as.name(id_column_name)) %>%
+  temp_summary <- temp_long |>
+    dplyr::group_by(season_year, !!as.name(id_column_name)) |>
     dplyr::summarize(
       mean = mean(x = value, na.rm = na_rm),
       median = median(x = value, na.rm = na_rm),
@@ -215,12 +215,12 @@ summarize_temperature <- function(temperature, start_month, end_month,
   # Temperature bins per season
   # Compute bin shares separately and join, since the number of bin columns is 
   # dynamic based on the bins parameter
-  temp_bins <- temp_long %>%
-    dplyr::group_by(season_year, !!as.name(id_column_name)) %>%
+  temp_bins <- temp_long |>
+    dplyr::group_by(season_year, !!as.name(id_column_name)) |>
     dplyr::summarize(.bins = list(.compute_temp_bins(values = value, 
                                                      bins = bins, 
                                                      na_rm = na_rm)),
-                     .groups = "drop") %>%
+                     .groups = "drop") |>
     tidyr::unnest_wider(.bins)
   
   temp_summary <- dplyr::left_join(temp_summary, temp_bins,
@@ -232,8 +232,8 @@ summarize_temperature <- function(temperature, start_month, end_month,
                                  !!as.name(id_column_name),
                                  season_year)
   
-  temp_summary <- temp_summary %>%
-    dplyr::group_by(!!as.name(id_column_name)) %>%
+  temp_summary <- temp_summary |>
+    dplyr::group_by(!!as.name(id_column_name)) |>
     dplyr::mutate(
       dev_gdd = .rolling_dev(values = gdd,
                              years = season_year,
@@ -246,19 +246,19 @@ summarize_temperature <- function(temperature, start_month, end_month,
                              lr_years = lr_years),
       z_kdd = .rolling_z(values = kdd,
                          years = season_year,
-                         lr_years = lr_years)) %>%
+                         lr_years = lr_years)) |>
     dplyr::ungroup()
   
   # Do summary stats calculations for temperature bins, using join *after* the 
   # (potential) pivot to wide format
-  bin_stats <- temp_summary %>%
-    dplyr::group_by(!!as.name(id_column_name)) %>%
+  bin_stats <- temp_summary |>
+    dplyr::group_by(!!as.name(id_column_name)) |>
     dplyr::summarize(across(.cols = starts_with("tempbin_"),
                             .fns = list(mean = ~ mean(.x, na.rm = na_rm),
                                         sd = ~ sd(.x, na.rm = na_rm)),
-                            .names = "bin{.fn}_{.col}")) %>% 
-    dplyr::ungroup() %>%
-    dplyr::select(all_of(id_column_name), contains("_tempbin_")) %>%
+                            .names = "bin{.fn}_{.col}")) |> 
+    dplyr::ungroup() |>
+    dplyr::select(all_of(id_column_name), contains("_tempbin_")) |>
     # Need to rename these columns by removing "tempbin_"
     dplyr::rename_with(.fn = ~ gsub(pattern = "_tempbin_",
                                     replacement = "_",
@@ -275,28 +275,30 @@ summarize_temperature <- function(temperature, start_month, end_month,
     dev_z_start <- first_year  + lr_years
     
     # Pivot all non-id, non-year columns to wide format
-    temp_summary <- temp_summary %>%
-      tidyr::pivot_longer(-dplyr::all_of(c(id_column_name, "season_year"))) %>%
+    temp_summary <- temp_summary |>
+      tidyr::pivot_longer(-dplyr::all_of(c(id_column_name, "season_year"))) |>
       tidyr::pivot_wider(id_cols = dplyr::all_of(id_column_name),
                          names_from = c(name, season_year),
                          values_from = value,
                          names_sep = "_")
-    
-    # Now drop those dev and z columns for years we don't have enough data for 
-    # them. 
-    # Ugly
-    drop_cols <- paste0(c("dev_", "z_"), c("gdd_", "gdd_", "kdd_", "kdd_"))
-    # Wrap output of sapply in c, because sapply is returning a matrix
-    drop_cols <- c(sapply(X = drop_cols,
-                          FUN = paste0,
-                          first_year:(dev_z_start - 1)))
-    temp_summary <- temp_summary |>
-      select(-all_of(c(drop_cols)))
+
+    # Need to end up removing those columns that have NA values across the
+    # board for the deviation and z-score columns for the years that did not
+    # have sufficient historical data (i.e. they had fewer than [lr_years]
+    # years' of data before them).
+    all_na <- apply(
+      X = temp_summary,
+      MARGIN = 2,
+      FUN = function(x) {
+        all(is.na(x))
+      }
+    )
+    temp_summary <- temp_summary[, !all_na]
   }
   
   # After pivoting (or not) add in the summary stats for the bin-level summary 
   # statistics
-  temp_summary <- temp_summary %>%
+  temp_summary <- temp_summary |>
     left_join(bin_stats, by = id_column_name)
   
   return(temp_summary)

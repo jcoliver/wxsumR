@@ -48,20 +48,20 @@ to_long <- function(data, keep_cols = 1, date_sep = "_") {
   # date_sep arguments
   
   # Convert to long
-  long_data <- data %>%
+  long_data <- data |>
     tidyr::pivot_longer(cols = -all_of(keep_cols),
                         names_to = "col_name",
                         values_to = "value")
 
   # Parse key column into date with lubridate's as_date
-  long_data <- long_data %>%
+  long_data <- long_data |>
     # Start by creating a new column called "datestring"
     tidyr::separate_wider_delim(cols = col_name, 
                                 names = c(NA, "datestring"), 
-                                delim = date_sep) %>%
+                                delim = date_sep) |>
     # Use as_date, specifying YYYYMMDD format
     dplyr::mutate(date = lubridate::as_date(x = datestring,
-                                            format = "%Y%m%d")) %>%
+                                            format = "%Y%m%d")) |>
     # Drop the year, month, day columns
     dplyr::select(dplyr::all_of(keep_col_names), date, value)
   
